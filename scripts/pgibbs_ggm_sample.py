@@ -2,7 +2,7 @@ import os.path
 
 import numpy as np
 
-import chordal_learning.smc as smc
+import trilearn.smc as smc
 
 
 def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, data_filename, output_directory, **args):

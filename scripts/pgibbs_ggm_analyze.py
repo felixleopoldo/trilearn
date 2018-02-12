@@ -12,10 +12,10 @@ import seaborn as sns
 from networkx.readwrite import json_graph
 from pandas.plotting import autocorrelation_plot
 
-import chordal_learning.auxiliary_functions
-import chordal_learning.graph.graph as glib
-import chordal_learning.graph.junction_tree as jtlib
-from chordal_learning.distributions import sequential_junction_tree_distributions as sjtd
+import trilearn.auxiliary_functions
+import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
+from trilearn.distributions import sequential_junction_tree_distributions as sjtd
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
@@ -215,10 +215,10 @@ def main(data_filename, n_particles, trajectory_length, radius, alphas, betas,
                         for row in ll_sorted_df.iterrows():
                             mat_tmp = nx.to_numpy_matrix(glib.tuple_to_graph(row[1]["graph_tuple"]))
                             plt.clf()
-                            chordal_learning.auxiliary_functions.plot_matrix(mat_tmp,
-                                                                             filename_prefix + "_MAP",
+                            trilearn.auxiliary_functions.plot_matrix(mat_tmp,
+                                                                     filename_prefix + "_MAP",
                                             "eps",
-                                                                             title="MAP graph")
+                                                                     title="MAP graph")
                             # print glib.tuple_to_graph(row[1]["graph_tuple"]).edges()
                             # print row[1]["log_likelihood"]
 

@@ -5,7 +5,7 @@ import json
 from networkx.readwrite import json_graph
 import numpy as np
 
-from chordal_learning.distributions import g_intra_class
+from trilearn.distributions import g_intra_class
 
 def main(graph_filename, sigma2, rho, output_directory):
     filename = os.path.basename(graph_filename)

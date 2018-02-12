@@ -7,8 +7,8 @@ import matplotlib
 import networkx as nx
 from networkx.readwrite import json_graph
 
-import chordal_learning.graph.graph as glib
-import chordal_learning.distributions.g_intra_class as gic
+import trilearn.graph.graph as glib
+import trilearn.distributions.g_intra_class as gic
 
 
 matplotlib.rcParams['text.usetex'] = True

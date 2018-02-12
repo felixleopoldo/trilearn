@@ -4,9 +4,9 @@ import numpy as np
 import json
 from networkx.readwrite import json_graph
 
-import chordal_learning.graph.graph as libg
-import chordal_learning.graph.junction_tree as libj
-from chordal_learning.distributions import discrete_dec_log_linear as loglin
+import trilearn.graph.graph as libg
+import trilearn.graph.junction_tree as libj
+from trilearn.distributions import discrete_dec_log_linear as loglin
 
 
 def main(graph_filename, n_levels, pseudo_obs, output_directory, seed, **args):

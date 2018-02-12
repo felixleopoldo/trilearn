@@ -5,9 +5,9 @@ import numpy as np
 import networkx as nx
 from networkx.readwrite import json_graph
 
-import chordal_learning.auxiliary_functions
-import chordal_learning.graph.graph as libg
-import chordal_learning.distributions.g_intra_class as gic
+import trilearn.auxiliary_functions
+import trilearn.graph.graph as libg
+import trilearn.distributions.g_intra_class as gic
 
 
 np.set_printoptions(precision=1)
@@ -25,7 +25,7 @@ def main(s2, rho, n_samples, n_dim, graph_dir, data_dir, precmat_dir, **args):
     c = gic.cov_matrix(G, rho, s2)
 
     hm_true = np.array(nx.to_numpy_matrix(G, nodelist=range(n_dim)))
-    chordal_learning.auxiliary_functions.plot_matrix(hm_true, graph_dir + "/intraclass_p_" + str(n_dim) +
+    trilearn.auxiliary_functions.plot_matrix(hm_true, graph_dir + "/intraclass_p_" + str(n_dim) +
                    "_heatmap", "eps", "True graph")
     libg.plot_graph(G, graph_dir + "/intraclass_p_" +
                     str(n_dim)+"_graph.eps")

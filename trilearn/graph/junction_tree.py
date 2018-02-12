@@ -5,7 +5,7 @@ Functions related to junction trees.
 import networkx as nx
 import numpy as np
 
-import chordal_learning.graph as glib
+import trilearn.graph as glib
 
 
 class JunctionTree(nx.Graph):

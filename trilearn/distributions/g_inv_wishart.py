@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.stats import invwishart
 
-import chordal_learning.graph.graph as glib
-from chordal_learning.distributions import matrix_multivariate_normal
+import trilearn.graph.graph as glib
+from trilearn.distributions import matrix_multivariate_normal
 
 
 def sample(G, dof, scale):

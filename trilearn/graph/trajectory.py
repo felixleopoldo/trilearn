@@ -10,8 +10,8 @@ import seaborn as sns
 from networkx.readwrite import json_graph
 from pandas.tools.plotting import autocorrelation_plot
 
-import chordal_learning.graph.empirical_graph_distribution as gdist
-from chordal_learning.distributions import sequential_junction_tree_distributions as sd
+import trilearn.graph.empirical_graph_distribution as gdist
+from trilearn.distributions import sequential_junction_tree_distributions as sd
 
 
 class Trajectory:

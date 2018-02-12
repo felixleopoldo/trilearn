@@ -10,8 +10,8 @@ import networkx as nx
 import seaborn as sns
 from scipy.special import comb
 
-import chordal_learning.auxiliary_functions
-import chordal_learning.graph.junction_tree as libj
+import trilearn.auxiliary_functions
+import trilearn.graph.junction_tree as libj
 
 
 def plot(graph, filename, layout="dot"):
@@ -198,8 +198,8 @@ def true_distribution(seqdist, filename):
                         format="eps",bbox_inches='tight', dpi=100)
             plt.clf()
 
-    chordal_learning.auxiliary_functions.plot_matrix(np.array(true_heatmap), filename, "png",
-                                                     title="Czech Autoworkers posterior heatmap, lambda=" +
+    trilearn.auxiliary_functions.plot_matrix(np.array(true_heatmap), filename, "png",
+                                             title="Czech Autoworkers posterior heatmap, lambda=" +
                    str(seqdist.cell_alpha))
     return graph_post
 

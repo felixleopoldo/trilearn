@@ -6,7 +6,7 @@ from __future__  import print_function, division
 
 import numpy as np
 
-from chordal_learning import smc as smc
+from trilearn import smc as smc
 
 
 def main(n_smc_estimates, n_particles, alpha, beta, order, seed, output_directory, **args):

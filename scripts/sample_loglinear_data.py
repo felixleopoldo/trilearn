@@ -6,8 +6,8 @@ import json
 import argparse
 from networkx.readwrite import json_graph
 
-import chordal_learning.graph.graph as libg
-from chordal_learning.distributions import discrete_dec_log_linear as loglin
+import trilearn.graph.graph as libg
+from trilearn.distributions import discrete_dec_log_linear as loglin
 
 
 def main(graph_filename, parameters_filename, data_samples, output_directory, **args):

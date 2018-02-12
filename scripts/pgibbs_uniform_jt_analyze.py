@@ -1,6 +1,6 @@
 from networkx.readwrite import json_graph
-import chordal_learning.graph.graph as glib
-import chordal_learning.graph.junction_tree as jtlib
+import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
 import json
 import argparse
 import matplotlib.pyplot as plt

@@ -7,9 +7,9 @@ the underlying decomposable graph.
 import numpy as np
 import networkx as nx
 
-import chordal_learning.auxiliary_functions as aux
-import chordal_learning.graph.junction_tree as jtlib
-import chordal_learning.graph.graph as glib
+import trilearn.auxiliary_functions as aux
+import trilearn.graph.junction_tree as jtlib
+import trilearn.graph.graph as glib
 
 
 def shrink(tree, node):

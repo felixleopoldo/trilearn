@@ -3,8 +3,8 @@ from multiprocessing import Process
 
 import numpy as np
 
-import chordal_learning.distributions.SequentialJTDistributions as seqdist
-from chordal_learning.smc import particle_gibbs_to_file
+import trilearn.distributions.SequentialJTDistributions as seqdist
+from trilearn.smc import particle_gibbs_to_file
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-T', '--trajectory_length', type=int, required=True,

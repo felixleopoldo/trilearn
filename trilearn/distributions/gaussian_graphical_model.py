@@ -4,9 +4,9 @@ Gaussian graphical model.
 
 import numpy as np
 
-from chordal_learning.distributions import wishart as wish
-import chordal_learning.graph.graph as glib
-import chordal_learning.graph.junction_tree as jtlib
+from trilearn.distributions import wishart as wish
+import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
 
 
 def log_likelihood(graph, S, n, D, delta, cache={}):

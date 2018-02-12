@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import chordal_learning.distributions.discrete_dec_log_linear as loglin
-import chordal_learning.distributions.g_inv_wishart as gwish
-import chordal_learning.graph.christmas_tree_algorithm as cta
-import chordal_learning.graph.graph as glib
-import chordal_learning.smc as smc
+import trilearn.distributions.discrete_dec_log_linear as loglin
+import trilearn.distributions.g_inv_wishart as gwish
+import trilearn.graph.christmas_tree_algorithm as cta
+import trilearn.graph.graph as glib
+import trilearn.smc as smc
 
 # Generated data
 p = 5

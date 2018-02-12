@@ -9,7 +9,7 @@ from os.path import basename
 import numpy as np
 import pandas as pd
 
-import chordal_learning.smc as smc
+import trilearn.smc as smc
 
 
 def main(data_filename, n_levels, pseudo_observations, trajectory_length, n_particles,

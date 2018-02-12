@@ -6,7 +6,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from chordal_learning.smc_functions import *
+from trilearn.smc_functions import *
 
 data = "intra_class_sigma2_1.0_rho_0.9_n_300_p_6"
 filename = data+"_smc_N_2000_alpha_0.3_beta_0.9"

@@ -5,10 +5,10 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import numpy as np
 
-import chordal_learning.auxiliary_functions
-import chordal_learning.graph.junction_tree as jtlib
-import chordal_learning.graph.christmas_tree_algorithm as jtexp
-import chordal_learning.graph.graph as glib
+import trilearn.auxiliary_functions
+import trilearn.graph.junction_tree as jtlib
+import trilearn.graph.christmas_tree_algorithm as jtexp
+import trilearn.graph.graph as glib
 
 
 def main(n_dim, alpha, beta, output_directory, seed, **args):
@@ -34,8 +34,8 @@ def main(n_dim, alpha, beta, output_directory, seed, **args):
     glib.plot(T1, output_directory+"/"+jt_name+".eps")
     
     hm_true = np.array(nx.to_numpy_matrix(G, nodelist=range(n_dim)))
-    chordal_learning.auxiliary_functions.plot_matrix(hm_true,
-                                                     output_directory +"/" + graph_name +"_heatmap",
+    trilearn.auxiliary_functions.plot_matrix(hm_true,
+                                             output_directory +"/" + graph_name +"_heatmap",
                    "eps",
                    "True graph")
     print "wrote"

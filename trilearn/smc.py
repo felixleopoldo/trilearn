@@ -7,12 +7,12 @@ from multiprocessing import Process
 import matplotlib.pyplot as plt
 import numpy as np
 
-import chordal_learning.distributions.sequential_junction_tree_distributions as seqdist
-import chordal_learning.graph.christmas_tree_algorithm as jtexp
-import chordal_learning.graph.graph as glib
-import chordal_learning.graph.junction_tree as jtlib
-import chordal_learning.graph.trajectory as mcmctraj
-import chordal_learning.set_process as sp
+import trilearn.distributions.sequential_junction_tree_distributions as seqdist
+import trilearn.graph.christmas_tree_algorithm as jtexp
+import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
+import trilearn.graph.trajectory as mcmctraj
+import trilearn.set_process as sp
 
 
 def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,

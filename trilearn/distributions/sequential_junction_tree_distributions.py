@@ -4,11 +4,11 @@ Junction tree distributions suitable for SMC sampling.
 
 import numpy as np
 
-import chordal_learning.graph.christmas_tree_algorithm as jtexp
-import chordal_learning.graph.graph as glib
-import chordal_learning.graph.junction_tree as jtlib
-from chordal_learning.distributions import gaussian_graphical_model
-from chordal_learning.distributions import discrete_dec_log_linear as loglin
+import trilearn.graph.christmas_tree_algorithm as jtexp
+import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
+from trilearn.distributions import gaussian_graphical_model
+from trilearn.distributions import discrete_dec_log_linear as loglin
 
 
 class SequentialJTDistribution(object):

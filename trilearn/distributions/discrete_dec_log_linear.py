@@ -3,10 +3,10 @@ import itertools
 import numpy as np
 import scipy.stats as stats
 
-import chordal_learning.graph.graph as libg
-import chordal_learning.graph.junction_tree as libj
-import chordal_learning.auxiliary_functions as aux
-from chordal_learning.distributions import dirichlet
+import trilearn.graph.graph as libg
+import trilearn.graph.junction_tree as libj
+import trilearn.auxiliary_functions as aux
+from trilearn.distributions import dirichlet
 
 
 def ll_complete_set_ratio(comp, alpha, counts, data, levels, cache):

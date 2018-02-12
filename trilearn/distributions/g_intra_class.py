@@ -3,8 +3,8 @@ The graph intra-class distribution.
 """
 import numpy as np
 
-import chordal_learning.graph.graph as glib
-import chordal_learning.graph.junction_tree as jtlib
+import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
 
 
 def sample(G, r, s2, n):

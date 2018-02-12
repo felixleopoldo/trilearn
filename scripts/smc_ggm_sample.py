@@ -6,7 +6,7 @@ from os.path import basename
 import numpy as np
 from networkx.readwrite import json_graph
 
-import chordal_learning.smc as smc
+import trilearn.smc as smc
 
 
 def main(data_filename, n_particles, alpha, beta, radius, output_directory, seed, **args):

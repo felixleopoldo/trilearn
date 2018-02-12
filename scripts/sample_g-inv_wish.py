@@ -4,8 +4,8 @@ import json
 from networkx.readwrite import json_graph
 import numpy as np
 
-import chordal_learning.auxiliary_functions
-from chordal_learning.distributions import g_inv_wishart
+import trilearn.auxiliary_functions
+from trilearn.distributions import g_inv_wishart
 
 
 np.set_printoptions(precision=1)
@@ -31,8 +31,8 @@ def main(graph_filename, output_directory, seed):
     D = np.matrix(np.identity(p))  # Scale parameter
     sigma = g_inv_wishart.sample(G, b, D)
     
-    chordal_learning.auxiliary_functions.plot_matrix(np.array(sigma.I),
-                                                     output_directory +"/G-invwish_G_" + basename +
+    trilearn.auxiliary_functions.plot_matrix(np.array(sigma.I),
+                                             output_directory +"/G-invwish_G_" + basename +
                          "_b_" + str(b) +"_D_I", "eps", "Sigma inverse")
     
     np.savetxt(output_directory+"/G-invwish_G_" +

@@ -3,10 +3,10 @@ import itertools
 import numpy as np
 import networkx as nx
 
-import chordal_learning.graph.junction_tree as jtlib
-import chordal_learning.graph.christmas_tree_algorithm as jtexp
-import chordal_learning.graph.junction_tree as libj
-import chordal_learning.graph.graph as glib
+import trilearn.graph.junction_tree as jtlib
+import trilearn.graph.christmas_tree_algorithm as jtexp
+import trilearn.graph.junction_tree as libj
+import trilearn.graph.graph as glib
 
 np.set_printoptions(precision=1)
 np.set_printoptions(suppress=True)

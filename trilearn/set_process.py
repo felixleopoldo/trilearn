@@ -1,6 +1,6 @@
 import numpy as np
 
-import chordal_learning.auxiliary_functions as aux
+import trilearn.auxiliary_functions as aux
 
 def backward_perm_traj_sample(p, radius):
     """ Samples a permutation tajectory with maximum p indices.

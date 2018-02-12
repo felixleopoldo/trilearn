@@ -31,7 +31,7 @@ classifiers = [
 ]
 
 setup(
-    name='chordal_learning',
+    name='trilearn',
     version=0.3,
     description='Learning decomposable graphical models using particle Gibbs.',
     long_description=readme,
@@ -40,7 +40,7 @@ setup(
     install_requires=requirements,
     author="Felix Rios",
     author_email='felix.leopoldo.rios@gmail.com',
-    url='https://github.com/felixleopoldo/chordal_learning',
+    url='https://github.com/felixleopoldo/trilearn',
     license='Apache 2.0',
     classifiers=classifiers,
 )

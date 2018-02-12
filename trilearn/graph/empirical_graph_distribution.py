@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from networkx.readwrite import json_graph
 
-import chordal_learning.graph.graph as glib
+import trilearn.graph.graph as glib
 
 
 class GraphDistribution(object):
