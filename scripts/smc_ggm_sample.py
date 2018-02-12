@@ -1,0 +1,84 @@
+import argparse
+import json
+import os
+from os.path import basename
+
+import numpy as np
+from networkx.readwrite import json_graph
+
+import chordal_learning.smc as smc
+
+
+def main(data_filename, n_particles, alpha, beta, radius, output_directory, seed, **args):
+    if seed is not None:
+        np.random.seed(seed)
+    filename = basename(data_filename)
+    filename_base = os.path.splitext(filename)[0]
+    X = np.matrix(np.loadtxt(data_filename, delimiter=','))
+    p = X.shape[1]
+    delta = 1
+    D = np.identity(p)
+    cache = {}
+    radius = None
+    if radius is None:
+        radius = [p]
+    else:
+        radius = radius
+
+    (graphs, w) = smc.smc_graphs(n_particles, alpha, beta,
+                                 radius, X, D, delta)
+    js_graphs = [json_graph.node_link_data(graph) for graph in graphs]
+
+
+
+    graphs_filename = output_directory +"/"+ filename_base+'_smc_N_'+str(n_particles)+'_alpha_'+str(alpha)+'_beta_'+str(beta)+'.txt'
+    with open(graphs_filename, 'w') as outfile:
+        json.dump(js_graphs, outfile)
+    weights_filename = output_directory +"/"+ filename_base+'_smc_N_'+str(n_particles)+'_alpha_'+str(alpha)+'_beta_'+str(beta)+'_weights.txt'
+    np.savetxt(weights_filename, w, delimiter=',')
+
+    print "wrote"
+    print graphs_filename
+    print weights_filename
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Sequential Monte Carlo "
+                                                 "approximation of the decomposable graph "
+                                                 "distribution underlying a normal data sample.")
+    parser.add_argument(
+        '-f', '--data_filename',
+        required=True,
+        help="Filename of dataset"
+    )
+    parser.add_argument(
+        '-N', '--n_particles',
+        type=int, required=True,
+        help="Number of SMC particles"
+    )
+    parser.add_argument(
+        '-a', '--alpha',
+        type=float, required=False, default=0.5,
+        help="Parameter for the Christmas tree algorithm"
+    )
+    parser.add_argument(
+        '-b', '--beta',
+        type=float, required=False, default=0.5,
+        help="Parameter for the Christmas tree algorithm"
+    )
+    parser.add_argument(
+        '-r', '--radius',
+        type=int, required=False, default=None,
+        help="The search neighborhood radius for the Gibbs sampler"
+    )
+    parser.add_argument(
+        '-s', '--seed',
+        type=int, required=False, default=None
+    )
+    parser.add_argument(
+        '-o', '--output_directory',
+        required=False, default=".",
+        help="Output directory"
+    )
+
+    args = parser.parse_args()
+    main(**args.__dict__)

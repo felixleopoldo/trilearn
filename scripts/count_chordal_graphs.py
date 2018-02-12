@@ -1,0 +1,85 @@
+"""
+Estimate the number of chordal graphs with a given number of nodes.
+"""
+
+from __future__  import print_function, division
+
+import numpy as np
+
+from chordal_learning import smc as smc
+
+
+def main(n_smc_estimates, n_particles, alpha, beta, order, seed, output_directory, **args):
+    if seed:
+        np.random.seed(seed)
+
+    log_consts = smc.est_norm_consts(order, n_particles, alpha, beta, n_smc_estimates, debug=True)
+
+    print("estimates")
+    print(np.exp(log_consts))
+    print("means")
+    print(np.exp(log_consts).mean(axis=0))
+    print("std")
+    print(np.exp(log_consts).std(axis=0))
+
+    # filename = (
+    #     "{output_directory}/num_dec_graphs_weights_"
+    #     "T_{n_smc_estimates}_N_{n_particles}_p_{order}_alpha_{alpha}_beta_{beta}_seed_{seed}.txt"
+    # ).format(
+    #     output_directory=output_directory,
+    #     n_smc_estimates=n_smc_estimates,
+    #     n_particles=n_particles,
+    #     order=order,
+    #     alpha=alpha,
+    #     beta=beta,
+    #     seed=seed,
+    # )
+
+    #np.savetxt(
+    #    filename,
+    #    np.exp(log_consts),
+    #    delimiter=',', fmt='%f',
+    #)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser("Estimate the number of decomposable graphs of a given order.")
+    parser.add_argument(
+        '-T', '--n_smc_estimates',
+        type=int, required=False, default=1,
+        help="Number of estimates samples. This is usually 1 but to estimate the variance it migth be >1."
+    )
+    parser.add_argument(
+        '-N', '--n_particles',
+        type=int, required=True,
+        help="Number of SMC particles"
+    )
+    parser.add_argument(
+        '-a', '--alpha',
+        type=float, required=False, default=0.5,
+        help="Parameter for the junction tree expander"
+    )
+    parser.add_argument(
+        '-b', '--beta',
+        type=float, required=False, default=0.5,
+        help="Parameter for the junction tree expander"
+    )
+    parser.add_argument(
+        '-p', '--order',
+        type=int, required=True,
+        help="The order of the underlying decomposable graph"
+    )
+    parser.add_argument(
+        '-s', '--seed',
+        type=int, required=False,
+        help="Random seed"
+    )
+    parser.add_argument(
+        '-o', '--output_directory',
+        required=False, default=".",
+        help="Output directory"
+    )
+
+    args = parser.parse_args()
+    main(**args.__dict__)
