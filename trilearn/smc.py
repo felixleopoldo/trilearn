@@ -272,12 +272,12 @@ def est_norm_consts(order, n_particles, alpha=0.5, beta=0.5, n_smc_estimates=1, 
     return log_consts
 
 
-def particle_gibbs_ggm(X, alpha, beta, N, traj_length, D, delta, radius):
-    """ A particle Gibbs implementation for approximating distributions over
+def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radius):
+    """ Particle Gibbs for approximating distributions over
     Gaussian graphical models.
 
     Args:
-        N (int): Number of particles in SMC in each Gibbs iteration
+        n_particles (int): Number of particles in SMC in each Gibbs iteration
         traj_length (int): Number of Gibbs iterations (samples)
         alpha (float): sparsity parameter for the Christmas tree algorithm
         beta (float): sparsity parameter for the Christmas tree algorithm
@@ -287,13 +287,13 @@ def particle_gibbs_ggm(X, alpha, beta, N, traj_length, D, delta, radius):
         delta (float): degrees of freedom for the hyper inverse wishart prior
 
     Returns:
-        mcmctraj.Trajectory: Markov chain of teh underlying graphs of the junction trees sampled by pgibbs.
+        mcmctraj.Trajectory: Markov chain of the underlying graphs of the junction trees sampled by pgibbs.
     """
 
     cache = {}
     seq_dist = seqdist.GGMJTPosterior()
     seq_dist.init_model(X, D, delta, cache)
-    mcmctraj = particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist)
+    mcmctraj = particle_gibbs(n_particles, alpha, beta, radius, traj_length, seq_dist)
     return mcmctraj
 
 def gen_pgibbs_ggm_trajectory(X, trajectory_length, n_particles,
