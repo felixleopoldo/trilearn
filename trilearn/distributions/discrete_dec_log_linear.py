@@ -17,7 +17,6 @@ def ll_complete_set_ratio(comp, alpha, counts, data, levels, cache):
         comp: Clique or separator.
         alpha: Pseudo counts for each cell.
     """
-
     if comp not in counts:
         counts[comp] = aux.get_marg_counts(data, list(comp))
     if comp not in cache:

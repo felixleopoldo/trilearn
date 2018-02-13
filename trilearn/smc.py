@@ -315,6 +315,7 @@ def gen_pgibbs_loglin_trajectory(X, levels, trajectory_length, n_particles,
     if radius is None:
         radius = p
     sd = seqdist.LogLinearJTPosterior(X, pseudo_obs, levels, cache)
+    print n_particles, alpha, beta, radius, trajectory_length, sd
     return particle_gibbs(n_particles, alpha, beta, radius, trajectory_length, sd)
 
 

@@ -12,7 +12,7 @@ import pandas as pd
 import trilearn.smc as smc
 
 
-def main(data_filename, n_levels, pseudo_observations, trajectory_length, n_particles,
+def main(data_filename, pseudo_observations, trajectory_length, n_particles,
          alphas, betas, radii, seed, parallel,
          output_directory, **args):
     if seed is not None:
@@ -20,7 +20,9 @@ def main(data_filename, n_levels, pseudo_observations, trajectory_length, n_part
 
     filename_base = os.path.splitext(basename(data_filename))[0]
 
-    X = pd.read_csv(data_filename, sep=',').values.astype(int)
+    df = pd.read_csv(data_filename, sep=',', header=[0, 1])
+    X = df.values.astype(int)
+    n_levels = [int(a[1]) for a in list(df.columns)]
     levels = np.array([range(l) for l in n_levels])
 
     if parallel is True:
@@ -35,7 +37,6 @@ def main(data_filename, n_levels, pseudo_observations, trajectory_length, n_part
             pseudo_observations=pseudo_observations,
             alphas=alphas, betas=betas, radii=radii, cache={},
             filename_prefix=output_directory + "/" + filename_base)
-
 
 if __name__ == "__main__":
     import argparse
@@ -89,10 +90,10 @@ if __name__ == "__main__":
         type=float, required=False, default=[1.0], nargs='+',
         help="Total number of pseudo observations"
     )
-    parser.add_argument('--n_levels',
-                        type=int, required=True, nargs='+',
-                        help="Number of levels for each variable"
-    )
+    # parser.add_argument('--n_levels',
+    #                     type=int, required=False, nargs='+',
+    #                     help="Number of levels for each variable"
+    # )
 
     args = parser.parse_args()
     main(**args.__dict__)

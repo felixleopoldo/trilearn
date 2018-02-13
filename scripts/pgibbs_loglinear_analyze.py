@@ -20,17 +20,18 @@ from trilearn.distributions import sequential_junction_tree_distributions as sjt
 
 np.set_printoptions(precision=2)
 
-def main(datafilename, particles, alphas, betas, trajectory_length, graphfile, radius, output_directory,
-         input_directory, pseudo_observations, n_levels, burnin_end, data_header):
+def main(data_filename, particles, alphas, betas, trajectory_length, graphfile, radius, output_directory,
+         input_directory, pseudo_observations, burnin_end):
 
-    filename = basename(datafilename)
+    filename = basename(data_filename)
     data = os.path.splitext(filename)[0]
-    tmp = pd.read_csv(datafilename, sep=',', header=data_header)
-    X = tmp.values.astype(int)
-
-    sample_size = X.shape[0]
-    p = X.shape[1]
+    df = pd.read_csv(data_filename, sep=',', header=[0, 1])
+    X = df.values.astype(int)
+    n_levels = [int(a[1]) for a in list(df.columns)]
     levels = np.array([range(l) for l in n_levels])
+    sample_size = df.shape[0]
+    p = df.shape[1]
+
     radii = None
     if radius is None:
         radii = [p]
@@ -279,7 +280,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-f', '--datafilename',
+        '-f', '--data_filename',
         required=True,
         help="Filename of dataset"
     )
@@ -333,22 +334,21 @@ if __name__ == "__main__":
         nargs='+',
         help="Total number of pseudo observations"
     )
-    parser.add_argument(
-        '--n_levels', type=int, required=True,
-        nargs='+',
-        help="Number of levels for each variable"
-    )
+    # parser.add_argument(
+    #     '--n_levels', type=int, required=True,
+    #     nargs='+',
+    #     help="Number of levels for each variable"
+    # )
     parser.add_argument(
         '--burnin_end',
         type=int, required=False, default=0,
         help="Burn-in ends here. default=0"
     )
-    parser.add_argument(
-        '--data_header',
-        type=int, default=None,
-        help="Set to 0 if the data contains a header with names of the columns"
-    )
+    # parser.add_argument(
+    #     '--data_header',
+    #     type=int, default=None,
+    #     help="Set to 0 if the data contains a header with names of the columns"
+    # )
 
     args = parser.parse_args()
     main(**args.__dict__)
-

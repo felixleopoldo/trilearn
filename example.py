@@ -34,10 +34,11 @@ graph_traj.plot_heatmap()
 plt.show()
 
 # Load data from file
-x = np.matrix(np.loadtxt("sample_data/carvalho.csv",
-                         delimiter=','))
-p = x.shape[1]
-graph_traj = smc.particle_gibbs_ggm(X=x, alpha=0.5, beta=0.5, N=50, traj_length=1000, D=np.identity(p), delta=1.0,
+data_filename = "sample_data/carvalho.csv",
+df = pd.read_csv(data_filename, sep=',', header=None)
+p = df.shape[1]
+
+graph_traj = smc.particle_gibbs_ggm(X=df.get_values(), alpha=0.5, beta=0.5, N=50, traj_length=1000, D=np.identity(p), delta=1.0,
                                     radius=p)
 graph_traj.plot_heatmap()
 plt.show()
@@ -56,13 +57,13 @@ parameters = loglin.gen_globally_markov_distribution(graph, pseudo_obs, levels) 
 
 # Load data from file
 data_filename = "sample_data/czech_autoworkers.csv"
-x = pd.read_csv(data_filename, sep=',').values.astype(int)
-p = x.shape[1]
+df = pd.read_csv(data_filename, sep=',', header=[0, 1]) # read labels and number of levels from row 0 and 1
+p = df.shape[1]
 T = 10
 N = 50
-n_levels = [2] * p
+n_levels = [int(a[1]) for a in list(df.columns)]
 levels = np.array([range(l) for l in n_levels])
-graph_traj = smc.gen_pgibbs_loglin_trajectory(X=x,
+graph_traj = smc.gen_pgibbs_loglin_trajectory(X=df.values.astype(int),
                                               levels=levels,
                                               trajectory_length=T,
                                               n_particles=N)
