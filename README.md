@@ -15,7 +15,7 @@ make tests
 ```
 
 ## Scripts
-### Continous data
+### Continuous data
 To approximate the underlying decomposable graph posterior given the dataset sample_data/carvalho.csv run
 ```
 python scripts/pgibbs_ggm_sample.py -N 50 -M 1000 -f sample_data/carvalho.csv
@@ -28,34 +28,34 @@ python scripts/pgibbs_ggm_analyze.py -N 50 -M 1000 -f sample_data/carvalho.csv
 this will produce a bunch of files in the current directory to be analyzed.
 
 ### Discrete data
-The dataset examples/data/czech_autoworkers_p6.csv contains 6 variables, each taking 2 values 0 or 1.
+The dataset examples/data/czech_autoworkers.csv contains 6 variables, each taking values in {0,1}.
 To estimate the underlying decomposable graph posterior for this dataset run
 ```
-python scripts/pgibbs_loglinear_sample.py -N 50 -M 300 -f sample_data/czech_autoworkers.csv --n_levels 2 2 2 2 2 2
+python scripts/pgibbs_loglinear_sample.py -N 50 -M 300 -f sample_data/czech_autoworkers.csv
 ```
 and analyze by running
 ```
-python scripts/pgibbs_loglinear_analyze.py -N 50 -M 300 -f sample_data/czech_autoworkers.csv --n_levels 2 2 2 2 2 2
+python scripts/pgibbs_loglinear_analyze.py -N 50 -M 300 -f sample_data/czech_autoworkers.csv
 ```
-this will produce a bunch of files in the current directory to be analyzed.
+this will produce a number of files in the current directory.
 
 ### Estimate the number of decomposable graphs
-To estimate the number of decomopsable graph with up to 15 nodes run for example
+To estimate the number of decomposable graphs with up to 15 nodes run for example
 ```
 python scripts/count_chordal_graphs.py -p 15 -N 20000
 ```
 ## Built With
 
 * [NetworkX](https://networkx.github.io/documentation/stable/index.html)
-* [NumPy] (https://docs.scipy.org/doc/)
-* [Scipy] (https://docs.scipy.org/doc/)
+* [NumPy](https://docs.scipy.org/doc/)
+* [Scipy](https://docs.scipy.org/doc/)
 ## Authors
 
 * **Felix Rios**
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
