@@ -32,7 +32,7 @@ classifiers = [
 
 setup(
     name='trilearn',
-    version=0.3,
+    version=0.1,
     description='Learning decomposable graphical models using particle Gibbs.',
     long_description=readme,
     packages=packages,
@@ -41,6 +41,7 @@ setup(
     author="Felix Rios",
     author_email='felix.leopoldo.rios@gmail.com',
     url='https://github.com/felixleopoldo/trilearn',
+    download_url = 'https://github.com/felixleopoldo/trilearn/archive/0.1.tar.gz',
     license='Apache 2.0',
     classifiers=classifiers,
 )
