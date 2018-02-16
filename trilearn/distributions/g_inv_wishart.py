@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import invwishart
 
+import trilearn.graph.decomposable
 import trilearn.graph.graph as glib
 from trilearn.distributions import matrix_multivariate_normal
 
@@ -19,7 +20,7 @@ def sample(G, dof, scale):
     Returns:
         A sample from the G-inverse wishart distribution
     """
-    (C, S, H, A, R) = glib.peo(G)
+    (C, S, H, A, R) = trilearn.graph.decomposable.peo(G)
     p = len(G.nodes())
     sigma = np.matrix(np.zeros((p, p)))
     scale_c1 = scale[np.ix_(list(C[0]), list(C[0]))]

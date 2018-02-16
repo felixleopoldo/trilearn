@@ -90,10 +90,6 @@ if __name__ == "__main__":
         type=float, required=False, default=[1.0], nargs='+',
         help="Total number of pseudo observations"
     )
-    # parser.add_argument('--n_levels',
-    #                     type=int, required=False, nargs='+',
-    #                     help="Number of levels for each variable"
-    # )
 
     args = parser.parse_args()
     main(**args.__dict__)

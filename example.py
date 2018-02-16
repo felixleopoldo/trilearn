@@ -11,6 +11,8 @@ import pandas as pd
 import trilearn.distributions.discrete_dec_log_linear as loglin
 import trilearn.distributions.g_inv_wishart as gwish
 import trilearn.graph.christmas_tree_algorithm as cta
+import trilearn.graph.decomposable
+import trilearn.graph.graph
 import trilearn.graph.graph as glib
 import trilearn.smc as smc
 
@@ -20,7 +22,7 @@ import trilearn.smc as smc
 p = 5
 n = 1000
 # sample graph
-graph = cta.sample_graph(p)
+graph = trilearn.graph.decomposable.sample_decomposable_graph(p)
 glib.plot_adjmat(graph)
 plt.show()
 # sample precision matrix
@@ -48,7 +50,7 @@ plt.show()
 p = 5
 n = 1000
 # sample graph
-graph = cta.sample_graph(p)
+graph = trilearn.graph.decomposable.sample_decomposable_graph(p)
 glib.plot_adjmat(graph)
 plt.show()
 levels = np.array([range(2) for l in range(p)])

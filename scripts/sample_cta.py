@@ -6,6 +6,7 @@ from networkx.readwrite import json_graph
 import numpy as np
 
 import trilearn.auxiliary_functions
+import trilearn.graph.junction_tree
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.christmas_tree_algorithm as jtexp
 import trilearn.graph.graph as glib
@@ -16,7 +17,7 @@ def main(n_dim, alpha, beta, output_directory, seed, **args):
         np.random.seed(seed)
     order = range(n_dim)
     np.random.shuffle(order)
-    T = jtexp.sample(order, alpha, beta)
+    T = trilearn.graph.junction_tree.sample_junction_tree(order, alpha, beta)
     G = jtlib.graph(T)
     
     graph_name = "graph_p_"+str(len(order))

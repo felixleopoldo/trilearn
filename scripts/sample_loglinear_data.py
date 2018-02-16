@@ -6,6 +6,7 @@ import json
 import argparse
 from networkx.readwrite import json_graph
 
+import trilearn.graph.decomposable
 import trilearn.graph.graph as libg
 from trilearn.distributions import discrete_dec_log_linear as loglin
 
@@ -22,7 +23,7 @@ def main(graph_filename, parameters_filename, data_samples, output_directory, **
         json_G = json.load(data_file)
 
     graph = json_graph.node_link_graph(json_G)
-    (C, S, H, A, R) = libg.peo(graph)
+    (C, S, H, A, R) = trilearn.graph.decomposable.peo(graph)
 
     with open(parameters_filename) as data_file:
         json_parameters = json.load(data_file)

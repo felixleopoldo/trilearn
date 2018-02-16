@@ -5,7 +5,9 @@ Junction tree distributions suitable for SMC sampling.
 import numpy as np
 
 import trilearn.graph.christmas_tree_algorithm as jtexp
+import trilearn.graph.decomposable
 import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree
 import trilearn.graph.junction_tree as jtlib
 from trilearn.distributions import gaussian_graphical_model
 from trilearn.distributions import discrete_dec_log_linear as loglin
@@ -64,8 +66,8 @@ class CondUniformJTDistribution(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
-        return -jtexp.mu_update_ratio(new_separators,
-                                      old_JT, new_JT)
+        return -trilearn.graph.junction_tree.mu_update_ratio(new_separators,
+                                                             old_JT, new_JT)
 
 
 class LogLinearJTPosterior(SequentialJTDistribution):
@@ -94,7 +96,7 @@ class LogLinearJTPosterior(SequentialJTDistribution):
                 "data": self.data.tolist()}
 
     def ll(self, graph):
-        tree = glib.junction_tree(graph)
+        tree = trilearn.graph.decomposable.junction_tree(graph)
         separators = jtlib.separators(tree)
         return loglin.log_likelihood_partial(tree.nodes(), separators, self.no_levels, self.cell_alpha,
                                              self.counts, self.data, self.levels, self.cache)
@@ -106,8 +108,8 @@ class LogLinearJTPosterior(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
-        log_mu_ratio = jtexp.mu_update_ratio(new_separators,
-                                             old_JT, new_JT)
+        log_mu_ratio = trilearn.graph.junction_tree.mu_update_ratio(new_separators,
+                                                                    old_JT, new_JT)
         ll_ratio = self.ll_diff(old_cliques,
                                 old_separators,
                                 new_cliques,
@@ -159,8 +161,8 @@ class GGMJTPosterior(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
-        log_mu_ratio = jtexp.mu_update_ratio(new_separators,
-                                             old_JT, new_JT)
+        log_mu_ratio = trilearn.graph.junction_tree.mu_update_ratio(new_separators,
+                                                                    old_JT, new_JT)
         log_J_ratio = self.ll_diff(old_cliques,
                                    old_separators,
                                    new_cliques,

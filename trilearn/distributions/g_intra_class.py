@@ -3,6 +3,7 @@ The graph intra-class distribution.
 """
 import numpy as np
 
+import trilearn.graph.decomposable
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
 
@@ -23,7 +24,7 @@ def sample(G, r, s2, n):
         P. J. Green and A. Thomas. Sampling decomposable graphs using a Markov chain on junction trees. Biometrika, 2013. https://doi.org/10.1093/biomet/ass052
 
     """
-    (C, S, H, A, R) = glib.peo(G)
+    (C, S, H, A, R) = trilearn.graph.decomposable.peo(G)
     p = G.order()
     I = np.matrix(np.identity(p))
     J = np.matrix(np.ones((p, p)))
@@ -61,7 +62,7 @@ def cov_matrix(G, r, s2):
         (np.matrix): a covariance matrix cov such that zeros in cov.I is determined by G.
     """
     p = G.order()
-    T = glib.junction_tree(G)
+    T = trilearn.graph.decomposable.junction_tree(G)
     cliques = T.nodes()
     seps = jtlib.separators(T)
     omega = np.matrix(np.zeros((p, p)))

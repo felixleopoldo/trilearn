@@ -1,4 +1,6 @@
 from networkx.readwrite import json_graph
+
+import trilearn.graph.decomposable
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
 import json
@@ -50,7 +52,7 @@ for N in args.particles:
                     graph_max_clique_count = np.array([0.0
                                                        for _ in range(p+1)])
                     for t in range(T):
-                        JT = glib.junction_tree(graphs[t])
+                        JT = trilearn.graph.decomposable.junction_tree(graphs[t])
                         separators = jtlib.separators(JT)
                         cliques = JT.nodes()
                         clique_sizes = [len(q) for q in JT.nodes()]

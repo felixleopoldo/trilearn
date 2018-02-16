@@ -13,6 +13,7 @@ from networkx.readwrite import json_graph
 from pandas.plotting import autocorrelation_plot
 
 import trilearn.auxiliary_functions
+import trilearn.graph.decomposable
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.trajectory as mc
@@ -98,7 +99,7 @@ def main(data_filename, particles, alphas, betas, trajectory_length, graphfile, 
                             num_eqv_trees = np.array([None for _ in range(T)])
                             junction_trees = np.array([None for _ in range(T)])
                             for t in range(T):
-                                JT = glib.junction_tree(graphs[t])
+                                JT = trilearn.graph.decomposable.junction_tree(graphs[t])
                                 cliques = JT.nodes()
                                 seps = jtlib.separators(JT)
                                 graph_log_score_traj[t] = seqdist_tmp.ll(graphs[t])

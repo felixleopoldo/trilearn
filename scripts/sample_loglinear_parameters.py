@@ -4,6 +4,7 @@ import numpy as np
 import json
 from networkx.readwrite import json_graph
 
+import trilearn.graph.decomposable
 import trilearn.graph.graph as libg
 import trilearn.graph.junction_tree as libj
 from trilearn.distributions import discrete_dec_log_linear as loglin
@@ -26,7 +27,7 @@ def main(graph_filename, n_levels, pseudo_obs, output_directory, seed, **args):
 
     graph = json_graph.node_link_graph(json_G)
     p = graph.order()
-    junctiontree = libg.junction_tree(graph)
+    junctiontree = trilearn.graph.decomposable.junction_tree(graph)
     (C, S, H, A, R) = libj.peo(junctiontree)
 
     levels = np.array([range(l) for l in n_levels])

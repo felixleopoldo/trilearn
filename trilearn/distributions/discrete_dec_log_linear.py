@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 import scipy.stats as stats
 
+import trilearn.graph.decomposable
 import trilearn.graph.graph as libg
 import trilearn.graph.junction_tree as libj
 import trilearn.auxiliary_functions as aux
@@ -64,7 +65,7 @@ def gen_hyperconsistent_counts(graph, levels, constant_alpha):
     """
     TODO
     """
-    junctiontree = libg.junction_tree(graph)
+    junctiontree = trilearn.graph.decomposable.junction_tree(graph)
     (C, S, H, A, R) = libj.peo(junctiontree)
     parameters = {}
 
@@ -96,7 +97,7 @@ def gen_hyperconsistent_counts(graph, levels, constant_alpha):
 
 
 def gen_globally_markov_distribution(graph, constant_alpha, levels):
-    junctiontree = libg.junction_tree(graph)
+    junctiontree = trilearn.graph.decomposable.junction_tree(graph)
     (C, S, H, A, R) = libj.peo(junctiontree)
     parameters = {}
 
@@ -221,7 +222,7 @@ def conditional_prob_dec(x, y, dist, cliques, separators):
 
 def get_all_counts(graph, data):
     counts = {}
-    junctiontree = libg.junction_tree(graph)
+    junctiontree = trilearn.graph.decomposable.junction_tree(graph)
     for clique in junctiontree.nodes():
         counts[clique] = aux.get_marg_counts(data, list(clique))
     return counts

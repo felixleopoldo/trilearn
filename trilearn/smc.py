@@ -3,6 +3,7 @@ Sequential Monte Carlo sampler for junction tree distributions.
 """
 import time
 from multiprocessing import Process
+from decimal import Decimal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,6 +12,8 @@ import trilearn.distributions.sequential_junction_tree_distributions as seqdist
 import trilearn.graph.christmas_tree_algorithm as jtexp
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
+import trilearn.graph.junction_tree_collapser
+import trilearn.graph.junction_tree_expander
 import trilearn.graph.trajectory as mcmctraj
 import trilearn.set_process as sp
 
@@ -44,8 +47,8 @@ def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
         else:
             # Sample backwards trajectories
             perm_traj = sp.backward_perm_traj_sample(seq_dist.p, radius)
-            T_traj = jtexp.backward_jt_traj_sample(perm_traj,
-                                                   prev_tree)
+            T_traj = trilearn.graph.junction_tree_collapser.backward_jt_traj_sample(perm_traj,
+                                                                                    prev_tree)
             (trees, log_w, Is) = smc_cond(N,
             alpha,
             beta,
@@ -63,7 +66,7 @@ def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
         prev_tree = T
         graph_traj.add_sample(jtlib.graph(T), end_time - start_time)
         print "PGibbs sample "+str(i+1)+"/"+str(traj_length) + \
-            ". Sample time: " + str(end_time-start_time) + " s. " + \
+            ". Sample time: " + str('%.2e' % Decimal(end_time-start_time)) + " s. " + \
             "Estimated time left: " + \
             str(int((end_time-start_time) * (traj_length - i - 1) / 60)) + " min."
     return graph_traj
@@ -132,9 +135,9 @@ def smc(N, alpha, beta, radius, seq_dist):
                 ind_perms[i, n] = sp.gen_order_neigh(ind_perms[I[i], n-1],
                                                      radius, total)
                 node = ind_perms[i, n][n]
-                new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = jtexp.expand(old_trees[I[i]], node, alpha, beta)
+                new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.expand(old_trees[I[i]], node, alpha, beta)
                 # Backward kernel
-                log_R = -jtexp.log_count_origins(new_trees[i], old_trees[I[i]], node)
+                log_R = -trilearn.graph.junction_tree_collapser.log_count_origins(new_trees[i], old_trees[I[i]], node)
                 log_density_ratio = seq_dist.log_ratio(old_cliques,
                                                        old_separators,
                                                        new_cliques,
@@ -196,11 +199,11 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond):
                     new_cliques = T.nodes()
                     new_separators = T.get_separators()
                     node = list(set(perm_cond[n]) - set(perm_cond[n-1]))[0]
-                    K_st = jtexp.K_star(T_old, T, alpha, beta, node)
+                    K_st = trilearn.graph.junction_tree_expander.K_star(T_old, T, alpha, beta, node)
                     log_order_pr = sp.backward_order_neigh_log_prob(perm_cond[n-1],
                                                                     perm_cond[n],
                                                                     radius, maxradius)
-                    log_R = log_order_pr - jtexp.log_count_origins(T, T_old, node)
+                    log_R = log_order_pr - trilearn.graph.junction_tree_collapser.log_count_origins(T, T_old, node)
 
                     # Set weight
                     log_w[i, n] = seq_dist.log_ratio(old_cliques,
@@ -218,12 +221,12 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond):
                                                          total)
                     node = ind_perms[i, n][n]  # the added node
                     # Expand the junction tree T
-                    new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = jtexp.expand(T_old, node, alpha, beta)
+                    new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.expand(T_old, node, alpha, beta)
                     log_order_pr = sp.backward_order_neigh_log_prob(ind_perms[I[i], n-1],
                                                                     ind_perms[i, n],
                                                                     radius, maxradius)
                     T = new_trees[i]
-                    log_R = log_order_pr - jtexp.log_count_origins(T, T_old, node)
+                    log_R = log_order_pr - trilearn.graph.junction_tree_collapser.log_count_origins(T, T_old, node)
                     log_w[i, n] = seq_dist.log_ratio(old_cliques,
                                                      old_separators,
                                                      new_cliques,

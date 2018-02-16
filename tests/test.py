@@ -3,10 +3,13 @@ import itertools
 import numpy as np
 import networkx as nx
 
+import trilearn.graph.decomposable
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.christmas_tree_algorithm as jtexp
 import trilearn.graph.junction_tree as libj
 import trilearn.graph.graph as glib
+import trilearn.graph.junction_tree_expander
+import trilearn.graph.subtree_sampler
 
 np.set_printoptions(precision=1)
 np.set_printoptions(suppress=True)
@@ -19,14 +22,14 @@ def expand(tree, node, alpha, beta, directory=None):
     nodes = tree.nodes()
     old_tree = tree.subgraph(nodes)
     (subtree, subtree_nodes, subtree_edges, subtree_adjlist,
-     old_separators, prob_subtree) = glib.random_subtree(old_tree, alpha, beta, (node, node))
+     old_separators, prob_subtree) = trilearn.graph.subtree_sampler.random_subtree(old_tree, alpha, beta, (node, node))
     (old_cliques,
     new_cliques,
     new_separators,
     P,
-    neig) = jtexp.random_christmas_tree(node, tree, subtree_nodes, subtree_edges, subtree_adjlist)
+    neig) = trilearn.graph.junction_tree_expander.random_christmas_tree(node, tree, subtree_nodes, subtree_edges, subtree_adjlist)
 
-    K_st = jtexp.K_star(old_tree, tree, alpha, beta, node)
+    K_st = trilearn.graph.junction_tree_expander.K_star(old_tree, tree, alpha, beta, node)
     return K_st
 
 
@@ -109,8 +112,8 @@ def test_logmu_monte_carlo():
             if nx.is_chordal(g):
                 if check_symmetric(adjmat):
                     # print libg.mu(g)
-                    graphs[adjmatvec] = glib.n_junction_trees(g)
-                    jt = glib.junction_tree(g)
+                    graphs[adjmatvec] = trilearn.graph.decomposable.n_junction_trees(g)
+                    jt = trilearn.graph.decomposable.junction_tree(g)
                     S = jt.get_separators()
                     graph_jtreps[adjmatvec] = {"graph": g,
                                                "jts": set(),
