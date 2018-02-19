@@ -5,7 +5,9 @@ Functions related to junction trees.
 import networkx as nx
 import numpy as np
 
+import trilearn
 import trilearn.graph as glib
+#import trilearn.graph.decomposable as dlib
 import trilearn.graph.junction_tree_expander as jte
 #from trilearn.graph.junction_tree_expander import expand
 
@@ -77,11 +79,11 @@ def n_junction_trees(p):
     Args:
         p (int): number of internal nodes
     """
-    graphs = glib.all_dec_graphs(p)
+    graphs = dlib.all_dec_graphs(p)
     num = 0
     for g in graphs:
-        seps = glib.separators(g)
-        jt = glib.junction_tree(g)
+        seps = dlib.separators(g)
+        jt = dlib.junction_tree(g)
         num += int(np.exp(log_n_junction_trees(jt, seps)))
     return num
 
@@ -367,7 +369,7 @@ def peo(tree):
     return (C, S, H, A, R)
 
 
-def mu_update(new_separators, from_tree, to_tree, log_old_mu):
+def n_junction_trees_update(new_separators, from_tree, to_tree, log_old_mu):
     """ Returns the new log mu where to_tree has been generated from from_tree2
 
     Args:
@@ -377,10 +379,10 @@ def mu_update(new_separators, from_tree, to_tree, log_old_mu):
         log_old_mu: Log of the number of junction trees of from_tree.
 
     """
-    return mu_update_ratio(new_separators, from_tree, to_tree) + log_old_mu
+    return n_junction_trees_update_ratio(new_separators, from_tree, to_tree) + log_old_mu
 
 
-def mu_update_ratio(new_separators, from_tree, to_tree):
+def n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
     """ Returns the log of the ratio of number of junction trees of from_tree and to_tree.
 
     Args:
@@ -431,7 +433,7 @@ def sample_junction_tree(order, alpha=0.5, beta=0.5):
     G = nx.Graph()
     # G = jtlib.JunctionTree()
     G.add_node(order[0], shape="circle")
-    tree = glib.junction_tree(G)
+    tree = trilearn.graph.decomposable.junction_tree(G)
     # print tree.nodes()
     # for n in tree.nodes():
     #     lab = tuple(n)

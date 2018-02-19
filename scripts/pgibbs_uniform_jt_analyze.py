@@ -24,10 +24,10 @@ parser.add_argument('-r', '--radius', type=int, required=True,
                     nargs='+', help="The search neighborhood +"
                     "+radius for the Gibbs sampler")
 parser.add_argument('-p', '--order', type=int, required=True,
-                    help="The order of the underlying decompoasble graph")
+                    help="The order of the underlying decomposable graph")
 parser.add_argument('--input_directory', required=True,
                     help="Directory of Markov chain samples")
-parser.add_argument('--output_directory', required=True,
+parser.add_argument('--output_directory', required=True, default='.',
                     help="Directory")
 args = parser.parse_args()
 

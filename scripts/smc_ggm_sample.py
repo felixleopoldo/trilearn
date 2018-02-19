@@ -25,8 +25,8 @@ def main(data_filename, n_particles, alpha, beta, radius, output_directory, seed
     else:
         radius = radius
 
-    (graphs, w) = smc.smc_graphs(n_particles, alpha, beta,
-                                 radius, X, D, delta)
+    (graphs, w) = smc.smc_ggm_graphs(n_particles, alpha, beta,
+                                     radius, X, D, delta)
     js_graphs = [json_graph.node_link_data(graph) for graph in graphs]
 
 

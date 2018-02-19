@@ -13,14 +13,14 @@ def main(n_smc_estimates, n_particles, alpha, beta, order, seed, output_director
     if seed:
         np.random.seed(seed)
 
-    log_consts = smc.est_norm_consts(order, n_particles, alpha, beta, n_smc_estimates, debug=True)
+    consts = smc.est_n_dec_graphs(order, n_particles, alpha, beta, n_smc_estimates, debug=True)
 
     print("estimates")
-    print(np.exp(log_consts))
+    print(consts)
     print("means")
-    print(np.exp(log_consts).mean(axis=0))
+    print(consts).mean(axis=0))
     print("std")
-    print(np.exp(log_consts).std(axis=0))
+    print(consts.std(axis=0))
 
     # filename = (
     #     "{output_directory}/num_dec_graphs_weights_"

@@ -8,7 +8,8 @@ import networkx as nx
 import numpy as np
 import seaborn as sns
 from networkx.readwrite import json_graph
-from pandas.tools.plotting import autocorrelation_plot
+import pandas as pd
+from pandas.plotting import autocorrelation_plot
 
 import trilearn.graph.empirical_graph_distribution as gdist
 from trilearn.distributions import sequential_junction_tree_distributions as sd
@@ -71,7 +72,7 @@ class Trajectory:
     def likelihood(self, from_index=0):
         if self.logl is None:
             self.logl = [self.seqdist.ll(g) for g in self.trajectory[from_index:]]
-        return self.logl
+        return pd.Series(self.logl)
 
     def plot_heatmap(self, from_index=0, cbar=False):
         heatmap = self.heatmap(from_index)
@@ -83,14 +84,15 @@ class Trajectory:
                         vmin=0.0, vmax=1.0, square=True,
                         cbar=cbar, xticklabels=5, yticklabels=5)
 
-    def plot_autocorrelation(self, from_index=0):
+    def autocorrelation_size(self, from_index=0):
         """ Plots the auto-correlation function of the graph size (number of edges)
         Args:
-            from_index (int): Burin-in period, default=0.
+            from_index (int): Burn-in period, default=0.
         """
         size = [g.size() for g in self.trajectory[from_index:]]
-        with sns.axes_style("white"):
-            autocorrelation_plot(size)
+        return pd.Series(size)
+        #with sns.axes_style("white"):
+        #    autocorrelation_plot(size)
 
     def write_file(self, filename, optional={}):
         """ Writes a MCMC Trajectory together with the corresponding

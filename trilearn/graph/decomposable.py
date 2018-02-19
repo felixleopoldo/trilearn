@@ -4,7 +4,6 @@ import networkx as nx
 import numpy as np
 
 from trilearn.graph import junction_tree as libj, junction_tree as jtlib
-from trilearn.graph.junction_tree import sample_junction_tree
 
 
 def separators(graph):
@@ -110,10 +109,10 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
 
 def sample_decomposable_graph(order, alpha=0.5, beta=0.5):
     if type(order) is int:
-        tree = sample_junction_tree(range(order), alpha, beta)
+        tree = libj.sample_junction_tree(range(order), alpha, beta)
         return jtlib.graph(tree)
     elif type(order) is list:
-        tree = sample_junction_tree(order, alpha, beta)
+        tree = libj.sample_junction_tree(order, alpha, beta)
         return jtlib.graph(tree)
 
 

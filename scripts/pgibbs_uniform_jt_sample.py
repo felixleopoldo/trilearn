@@ -3,27 +3,51 @@ from multiprocessing import Process
 
 import numpy as np
 
-import trilearn.distributions.SequentialJTDistributions as seqdist
+import trilearn.distributions.sequential_junction_tree_distributions as seqdist
 from trilearn.smc import particle_gibbs_to_file
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-T', '--trajectory_length', type=int, required=True,
-                    nargs='+', help="Number of Gibbs samples")
-parser.add_argument('-N', '--particles', type=int, required=True,
-                    nargs='+', help="Number of SMC particles")
-parser.add_argument('-a', '--alpha', type=float, required=True,
-                    nargs='+', help="Parameter for the junction tree expander")
-parser.add_argument('-b', '--beta', type=float, required=True,
-                    nargs='+', help="Parameter for the junction tree expander")
-parser.add_argument('-r', '--radius', type=int, required=True,
-                    nargs='+', help="The search neighborhood" +
-                    "radius for the Gibbs sampler")
-parser.add_argument('-p', '--order', type=int, required=True,
-                    help="The order of the underlying decompoasble graph")
-parser.add_argument('-s', '--seed', type=int, required=True,
-                    help="Random seed")
-parser.add_argument('-o', '--output_directory', required=True,
-                    help="Output directory")
+parser.add_argument(
+    '-T', '--trajectory_length',
+    type=int, required=True, nargs='+',
+    help="Number of Gibbs samples"
+)
+parser.add_argument(
+    '-N', '--n_particles',
+    type=int, required=True, nargs='+',
+    help="Number of SMC particles"
+)
+parser.add_argument(
+    '-a', '--alpha', default=[0.5],
+    type=float, required=False, nargs='+',
+    help="Parameter for the junction tree expander"
+)
+parser.add_argument(
+    '-b', '--beta', default=[0.5],
+    type=float, required=False, nargs='+',
+    help="Parameter for the junction tree expander"
+)
+parser.add_argument(
+    '-r', '--radius', default=[None],
+    type=int, required=False, nargs='+',
+    help="The search neighborhood" +
+         "radius for the Gibbs sampler"
+)
+parser.add_argument(
+    '-p', '--order',
+    type=int, required=True,
+    help="The order of the underlying decompoasble graph"
+)
+parser.add_argument(
+    '-s', '--seed', default=None,
+    type=int, required=False,
+    help="Random seed"
+)
+parser.add_argument(
+    '-o', '--output_directory',
+    required=False, default='.',
+    help="Output directory"
+)
 
 
 args = parser.parse_args()
@@ -33,7 +57,7 @@ p = args.order
 filename_prefix = "uniform_jt_samples_p_"+str(p)
 
 
-for N in args.particles:
+for N in args.n_particles:
     for T in args.trajectory_length:
         for radius in args.radius:
             for alpha in args.alpha:

@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
-import trilearn.graph.christmas_tree_algorithm as jtexp
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.junction_tree_collapser
@@ -19,7 +18,7 @@ import trilearn.set_process as sp
 
 
 def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
-                   jt_traj=None):
+                   jt_traj=None, debug=False):
     """ A particle Gibbs implementation for approximating distributions over
     junction trees.
 
@@ -65,14 +64,15 @@ def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
         end_time = time.time()
         prev_tree = T
         graph_traj.add_sample(jtlib.graph(T), end_time - start_time)
-        print "PGibbs sample "+str(i+1)+"/"+str(traj_length) + \
-            ". Sample time: " + str('%.2e' % Decimal(end_time-start_time)) + " s. " + \
-            "Estimated time left: " + \
-            str(int((end_time-start_time) * (traj_length - i - 1) / 60)) + " min."
+        if debug:
+            print "PGibbs sample "+str(i+1)+"/"+str(traj_length) + \
+                  ". Sample time: " + str('%.2e' % Decimal(end_time-start_time)) + " s. " + \
+                  "Estimated time left: " + \
+                  str(int((end_time-start_time) * (traj_length - i - 1) / 60)) + " min."
     return graph_traj
 
 
-def smc_graphs(N, alpha, beta, radius, X, D, delta):
+def smc_ggm_graphs(N, alpha, beta, radius, X, D, delta):
     cache = {}
     seq_dist = seqdist.GGMJTPosterior()
     seq_dist.init_model(X, D, delta, cache)
@@ -84,13 +84,13 @@ def smc_graphs(N, alpha, beta, radius, X, D, delta):
     return (graphs, norm_w)
 
 
-def smc_approximate(N, alpha, beta, radius, X, D, delta):
-    (graphs, probs) = smc_graphs(N, alpha, beta, radius, X, D, delta)
+def smc_approximate_ggm(N, alpha, beta, radius, X, D, delta):
+    (graphs, probs) = smc_ggm_graphs(N, alpha, beta, radius, X, D, delta)
     dist = {graphs[i]: probs[i] for i in range(len(graphs))}
     return dist
 
 
-def smc(N, alpha, beta, radius, seq_dist):
+def smc(N, alpha, beta, radius, seq_dist, debug=False):
     """ Sequential Monte Carlo for junction trees using the christmas
     tree algorithm as proposal kernel.
 
@@ -122,7 +122,7 @@ def smc(N, alpha, beta, radius, seq_dist):
 
         I = np.random.choice(N, size=N, p=norm_w)
         for i in range(N):
-            if i % 5000 == 0 and not i == 0:
+            if i % 5000 == 0 and not i == 0 and debug:
                 print "n: "+str(n) + ", i: "+str(i)
             if n == 0:
                 ind_perms[i, n] = sp.gen_order_neigh([], radius, total)
@@ -148,7 +148,7 @@ def smc(N, alpha, beta, radius, seq_dist):
     return (new_trees, log_w)
 
 
-def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond):
+def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
     """ SMC an junction trees conditioned on the trajectories T_cond
     and perm_cond.
     """
@@ -172,7 +172,7 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond):
 
         I = np.random.choice(N, size=N, p=norm_w)
         for i in range(N):
-            if i % 500 == 0 and not i == 0:
+            if i % 500 == 0 and not i == 0 and debug:
                 print "n: "+str(n) + ", i: "+str(i)
             if n == 0:
                 # Index permutation
@@ -236,10 +236,7 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond):
         old_trees = new_trees
     return (new_trees, log_w, Is)
 
-
-def est_norm_consts(order, n_particles, alpha=0.5, beta=0.5, n_smc_estimates=1, debug=False):
-    sd = seqdist.CondUniformJTDistribution(order)
-
+def est_log_norm_consts(order, n_particles, sequential_distribution, alpha=0.5, beta=0.5, n_smc_estimates=1, debug=False):
     log_consts = np.zeros(
         n_smc_estimates * order
     ).reshape(n_smc_estimates, order)
@@ -253,29 +250,67 @@ def est_norm_consts(order, n_particles, alpha=0.5, beta=0.5, n_smc_estimates=1, 
 
     for t in range(n_smc_estimates):
         if debug: print("Iteration: " + str(t + 1) + "/" + str(n_smc_estimates))
-        (trees, log_w) = smc(n_particles, alpha, beta, sd.p, sd)
+        (trees, log_w) = smc(n_particles, alpha, beta, sequential_distribution.p, sequential_distribution)
         w = np.exp(log_w)
-
-        unique_trees = set()
-        for tree in trees:
-            tree_alt = (frozenset(tree.nodes()), frozenset([frozenset(e) for e in tree.edges()]))
-            unique_trees.add(tree_alt)
-
-        if debug: print("Sampled unique junction trees: " + str(len(unique_trees)))
-        unique_graphs = set([glib.hash_graph(jtlib.graph(tree)) for tree in trees])
-
-        if debug: print("Sampled unique chordal graphs: {n_unique_chordal_graphs}".format(
-            n_unique_chordal_graphs=len(unique_graphs)),
-        )
-
         for n in range(1, order):
             log_consts[t, n] = log_consts[t, n - 1] + np.log(np.mean(w[:, n]))
 
-        if debug: print("Estimated number of chordal graphs: \n" + str(np.exp(log_consts[t, :])))
+        if debug:
+            unique_trees = set()
+            for tree in trees:
+                tree_alt = (frozenset(tree.nodes()), frozenset([frozenset(e) for e in tree.edges()]))
+                unique_trees.add(tree_alt)
+
+            print("Sampled unique junction trees: " + str(len(unique_trees)))
+            unique_graphs = set([glib.hash_graph(jtlib.graph(tree)) for tree in trees])
+
+            print("Sampled unique chordal graphs: {n_unique_chordal_graphs}".format(
+                n_unique_chordal_graphs=len(unique_graphs)),
+            )
+
+
     return log_consts
 
 
-def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radius):
+def est_n_dec_graphs(order, n_particles, alpha=0.5, beta=0.5, n_smc_estimates=1, debug=False):
+    sd = seqdist.CondUniformJTDistribution(order)
+    log_consts = est_log_norm_consts(order, n_particles, sd, alpha, beta, n_smc_estimates, debug)
+    return np.exp(log_consts)
+
+
+def uniform_dec_samples(order, n_particles, alpha=0.5, beta=0.5, debug=False):
+    sd = seqdist.CondUniformJTDistribution(order)
+    (trees, log_w) = smc(n_particles, alpha, beta, sd.p, sd)
+    graphs = [jtlib.graph(tree) for tree in trees]
+    return graphs
+
+
+def uniform_dec_maxl_clique_size_samples(order, n_particles, alpha=0.5, beta=0.5, debug=False):
+    sd = seqdist.CondUniformJTDistribution(order)
+    (trees, log_w) = smc(n_particles, alpha, beta, sd.p, sd)
+    w = np.exp(log_w[:, order-1])
+    norm_w = np.array(w / w.sum()).flatten()
+    max_clique_sizes = []
+    for tree in trees:
+        clique_sizes = [len(clique) for clique in tree.nodes()]
+        max_clique_sizes.append(max(clique_sizes))
+    return np.array(max_clique_sizes), norm_w
+
+
+def est_dec_max_clique_size(order, n_particles, alpha=0.5, beta=0.5, n_smc_estimates=1, debug=False):
+    expected_maxl_clique_sizes = []
+    for t in range(n_smc_estimates):
+        if debug: print("Iteration: " + str(t + 1) + "/" + str(n_smc_estimates))
+        max_clique_sizes, norm_w  = uniform_dec_maxl_clique_size_samples(order, n_particles,
+                                                                         alpha=alpha, beta=beta, debug=debug)
+        est_exp = (max_clique_sizes * norm_w).sum() # weighted expected value
+        expected_maxl_clique_sizes.append(est_exp)
+        if debug:
+            print t, est_exp
+    return expected_maxl_clique_sizes
+
+
+def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radius, debug=False):
     """ Particle Gibbs for approximating distributions over
     Gaussian graphical models.
 
@@ -296,7 +331,7 @@ def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radiu
     cache = {}
     seq_dist = seqdist.GGMJTPosterior()
     seq_dist.init_model(X, D, delta, cache)
-    mcmctraj = particle_gibbs(n_particles, alpha, beta, radius, traj_length, seq_dist)
+    mcmctraj = particle_gibbs(n_particles, alpha, beta, radius, traj_length, seq_dist, debug=debug)
     return mcmctraj
 
 def gen_pgibbs_ggm_trajectory(X, trajectory_length, n_particles,

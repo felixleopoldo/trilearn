@@ -4,9 +4,7 @@ Junction tree distributions suitable for SMC sampling.
 
 import numpy as np
 
-import trilearn.graph.christmas_tree_algorithm as jtexp
 import trilearn.graph.decomposable
-import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree
 import trilearn.graph.junction_tree as jtlib
 from trilearn.distributions import gaussian_graphical_model
@@ -66,8 +64,8 @@ class CondUniformJTDistribution(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
-        return -trilearn.graph.junction_tree.mu_update_ratio(new_separators,
-                                                             old_JT, new_JT)
+        return -trilearn.graph.junction_tree.n_junction_trees_update_ratio(new_separators,
+                                                                           old_JT, new_JT)
 
 
 class LogLinearJTPosterior(SequentialJTDistribution):
@@ -108,8 +106,8 @@ class LogLinearJTPosterior(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
-        log_mu_ratio = trilearn.graph.junction_tree.mu_update_ratio(new_separators,
-                                                                    old_JT, new_JT)
+        log_mu_ratio = trilearn.graph.junction_tree.n_junction_trees_update_ratio(new_separators,
+                                                                                  old_JT, new_JT)
         ll_ratio = self.ll_diff(old_cliques,
                                 old_separators,
                                 new_cliques,
@@ -161,8 +159,8 @@ class GGMJTPosterior(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
-        log_mu_ratio = trilearn.graph.junction_tree.mu_update_ratio(new_separators,
-                                                                    old_JT, new_JT)
+        log_mu_ratio = trilearn.graph.junction_tree.n_junction_trees_update_ratio(new_separators,
+                                                                                  old_JT, new_JT)
         log_J_ratio = self.ll_diff(old_cliques,
                                    old_separators,
                                    new_cliques,
