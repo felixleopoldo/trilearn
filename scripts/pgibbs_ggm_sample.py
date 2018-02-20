@@ -16,9 +16,8 @@ def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, d
                                                  alphas=alphas, betas=betas, radii=radii, cache={},
                                                  filename_prefix=output_directory + "/" + filename_base)
     else:
-        smc.gen_pgibbs_ggm_trajectories(X, trajectory_length, n_particles,
-                                        alphas=alphas, betas=betas, radii=radii, cache={},
-                                        filename_prefix=output_directory + "/" + filename_base)
+        smc.gen_pgibbs_ggm_trajectories(X, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
+                                        cache={}, filename_prefix=output_directory + "/" + filename_base)
 
 if __name__ == "__main__":
     import argparse

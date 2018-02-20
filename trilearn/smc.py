@@ -330,49 +330,48 @@ def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radiu
 
     cache = {}
     seq_dist = seqdist.GGMJTPosterior()
-    seq_dist.init_model(X, D, delta, cache)
+    seq_dist.init_model(np.asmatrix(X), D, delta, cache)
     mcmctraj = particle_gibbs(n_particles, alpha, beta, radius, traj_length, seq_dist, debug=debug)
     return mcmctraj
 
-def gen_pgibbs_ggm_trajectory(X, trajectory_length, n_particles,
-                              D=None, delta=1.0, cache={}, alpha=0.5, beta=0.5, radius=None, **args):
-    p = X.shape[1]
+def gen_pgibbs_ggm_trajectory(dataframe, n_particles, n_samples, D=None, delta=1.0, cache={}, alpha=0.5, beta=0.5,
+                              radius=None, **args):
+    p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
     if radius is None:
         radius = p
     sd = seqdist.GGMJTPosterior()
-    sd.init_model(X, D, delta, cache)
-    return particle_gibbs(n_particles, alpha, beta, radius, trajectory_length, sd)
+    sd.init_model(np.asmatrix(dataframe), D, delta, cache)
+    return particle_gibbs(n_particles, alpha, beta, radius, n_samples, sd)
 
 
-def gen_pgibbs_loglin_trajectory(X, levels, trajectory_length, n_particles,
-                                 pseudo_obs=1.0, cache={}, alpha=0.5, beta=0.5, radius=None, **args):
-    p = X.shape[1]
-
+def gen_pgibbs_loglin_trajectory(dataframe, n_particles, n_samples, pseudo_obs=1.0, cache={}, alpha=0.5, beta=0.5,
+                                 radius=None, **args):
+    p = dataframe.shape[1]
     if radius is None:
         radius = p
-    sd = seqdist.LogLinearJTPosterior(X, pseudo_obs, levels, cache)
-    print n_particles, alpha, beta, radius, trajectory_length, sd
-    return particle_gibbs(n_particles, alpha, beta, radius, trajectory_length, sd)
+
+    n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
+    levels = np.array([range(l) for l in n_levels])
+
+    sd = seqdist.LogLinearJTPosterior(dataframe.get_values(), pseudo_obs, levels, cache)
+    return particle_gibbs(n_particles, alpha, beta, radius, n_samples, sd)
 
 
-def gen_pgibbs_ggm_trajectories(X, trajectory_lengths, n_particles,
-                                D=None, delta=1.0, alphas=[0.5], betas=[0.5], radii=[None],
-                                cache={}, filename_prefix=None,
-                                **args):
+def gen_pgibbs_ggm_trajectories(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
+                                radii=[None], cache={}, filename_prefix=None, **args):
     graph_trajectories = []
     for N in n_particles:
-       for T in trajectory_lengths:
+       for T in n_samples:
             for rad in radii:
                 for alpha in alphas:
                     for beta in betas:
-                        graph_trajectory = gen_pgibbs_ggm_trajectory(X, T, N,
-                        D, delta, cache, alpha, beta, rad)
+                        graph_trajectory = gen_pgibbs_ggm_trajectory(dataframe, N, T, D, delta, cache, alpha, beta, rad)
                         graph_trajectories.append(graph_trajectory)
                         if filename_prefix:
                             if rad is None:
-                                rad = X.shape[1]
+                                rad = dataframe.shape[1]
                             graphs_file = filename_prefix+'_ggm_jt_post_T_'+str(T)+'_N_'+str(N)
                             graphs_file += '_alpha_'+str(alpha)+'_beta_'+str(beta)
                             graphs_file += '_radius_'+str(rad)+'_graphs.txt'
@@ -427,8 +426,8 @@ def gen_pgibbs_loglin_trajectories(X, levels, trajectory_lengths, n_particles,
                 for alpha in alphas:
                     for beta in betas:
                         for pseudo_obs in pseudo_observations:
-                            graph_trajectory = gen_pgibbs_loglin_trajectory(X, levels, T, N, pseudo_obs,
-                            cache, alpha, beta, rad)
+                            graph_trajectory = gen_pgibbs_loglin_trajectory(X, N, T, levels, pseudo_obs, cache, alpha,
+                                                                            beta, rad)
                             graph_trajectories.append(graph_trajectory)
                             if filename_prefix:
                                 if rad is None:

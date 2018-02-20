@@ -5,11 +5,7 @@ Functions related to junction trees.
 import networkx as nx
 import numpy as np
 
-import trilearn
-import trilearn.graph as glib
-#import trilearn.graph.decomposable as dlib
 import trilearn.graph.junction_tree_expander as jte
-#from trilearn.graph.junction_tree_expander import expand
 
 
 class JunctionTree(nx.Graph):
@@ -418,11 +414,11 @@ def n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
     return new_partial_mu - old_partial_mu
 
 
-def sample_junction_tree(order, alpha=0.5, beta=0.5):
+def sample_junction_tree(internal_nodes, alpha=0.5, beta=0.5):
     """ Generates a junction tree with order internal nodes with the junction tree expander.
 
     Args:
-        order (int): number of nodes in the underlying graph
+        internal_nodes (int): number of nodes in the underlying graph
         alpha (float): parameter for the subtree kernel
         beta (float): parameter for the subtree kernel
         directory (string): path to
@@ -430,10 +426,17 @@ def sample_junction_tree(order, alpha=0.5, beta=0.5):
     Returns:
         NetworkX graph: a junction tree
     """
+    import trilearn.graph.decomposable as dlib
+    nodes = None
+    if type(internal_nodes) is int:
+        nodes = range(internal_nodes)
+    else:
+        nodes = internal_nodes
+
     G = nx.Graph()
     # G = jtlib.JunctionTree()
-    G.add_node(order[0], shape="circle")
-    tree = trilearn.graph.decomposable.junction_tree(G)
+    G.add_node(nodes[0], shape="circle")
+    tree = dlib.junction_tree(G)
     # print tree.nodes()
     # for n in tree.nodes():
     #     lab = tuple(n)
@@ -441,7 +444,7 @@ def sample_junction_tree(order, alpha=0.5, beta=0.5):
     #         lab = "("+str(list(n)[0])+")"
     #     tree.node[n] = {"color": "black", "label": lab}
 
-    for j in order[1:]:
+    for j in nodes[1:]:
         (tree, _, _, _, _, _) = jte.expand(tree, j, alpha, beta)
 
     return tree

@@ -49,6 +49,7 @@ python scripts/count_chordal_graphs.py -p 15 -N 20000
 * [NetworkX](https://networkx.github.io/documentation/stable/index.html)
 * [NumPy](https://docs.scipy.org/doc/)
 * [Scipy](https://docs.scipy.org/doc/)
+* [Pandas](http://pandas.pydata.org/pandas-docs/stable/)
 ## Authors
 
 * **Felix Rios**
