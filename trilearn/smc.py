@@ -268,7 +268,8 @@ def est_log_norm_consts(order, n_particles, sequential_distribution, alpha=0.5, 
                 n_unique_chordal_graphs=len(unique_graphs)),
             )
 
-
+    if n_smc_estimates == 1:
+        log_consts = log_consts.flatten()
     return log_consts
 
 
