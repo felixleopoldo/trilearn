@@ -3,7 +3,7 @@ import numpy as np
 from trilearn.graph import junction_tree as jtlib
 
 
-def shrink(tree, node):
+def collapse(tree, node):
     """ Removes node from the underlying decomposable graph of tree.
         two cases:
         If node was isolated, any junction tree representation of g(tree)\{i} is
@@ -86,7 +86,7 @@ def backward_jt_traj_sample(perms_traj, tree):
     n = p - 2
     while n >= 0:
         to_remove = list(set(perms_traj[n + 1]) - set(perms_traj[n]))[0]
-        jts[n] = shrink(jts[n + 1], to_remove)
+        jts[n] = collapse(jts[n + 1], to_remove)
         n -= 1
     return jts
 

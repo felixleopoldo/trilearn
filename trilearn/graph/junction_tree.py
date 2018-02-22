@@ -34,6 +34,25 @@ class JunctionTree(nx.Graph):
             lm += self.log_nu(sep)
         return lm
 
+    def to_graph(self):
+        """ Returns the graph underlying the junction tree tree.
+
+        Args:
+            tree (NetworkX graph): A junction tree
+
+        Returns:
+            NetworkX graph
+        """
+
+        G = nx.Graph()
+        for c in self.nodes():
+            for n1 in set(c):
+                if len(c) == 1:
+                    G.add_node(n1)
+                for n2 in set(c) - set([n1]):
+                    G.add_edge(n1, n2)
+        return G
+
     def tuple(self):
         return (frozenset(self.nodes()), frozenset([frozenset(e) for e in self.edges()]))
 
@@ -322,7 +341,7 @@ def random_tree_from_forest(F, edge_label=""):
 
 
 def graph(tree):
-    """ Returns the graph underlying the junction tree tree.
+    """ Returns the graph underlying the junction tree.
 
     Args:
         tree (NetworkX graph): A junction tree
