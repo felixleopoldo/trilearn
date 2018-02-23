@@ -7,6 +7,7 @@ from decimal import Decimal
 
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
 import trilearn.graph.graph as glib
@@ -38,7 +39,7 @@ def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
 
     (trees, log_w) = (None, None)
     prev_tree = None
-    for i in range(traj_length):
+    for i in tqdm(range(traj_length), desc="Particle Gibbs samples"):
 
         start_time = time.time()
         if i == 0:
@@ -64,11 +65,7 @@ def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
         end_time = time.time()
         prev_tree = T
         graph_traj.add_sample(jtlib.graph(T), end_time - start_time)
-        if debug:
-            print "PGibbs sample "+str(i+1)+"/"+str(traj_length) + \
-                  ". Sample time: " + str('%.2e' % Decimal(end_time-start_time)) + " s. " + \
-                  "Estimated time left: " + \
-                  str(int((end_time-start_time) * (traj_length - i - 1) / 60)) + " min."
+
     return graph_traj
 
 
@@ -248,8 +245,7 @@ def est_log_norm_consts(order, n_particles, sequential_distribution, alpha=0.5, 
 
         return log_consts
 
-    for t in range(n_smc_estimates):
-        if debug: print("Iteration: " + str(t + 1) + "/" + str(n_smc_estimates))
+    for t in tqdm(range(n_smc_estimates), desc="Const estimates"):
         (trees, log_w) = smc(n_particles, alpha, beta, sequential_distribution.p, sequential_distribution)
         w = np.exp(log_w)
         for n in range(1, order):

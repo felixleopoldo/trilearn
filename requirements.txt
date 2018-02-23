@@ -6,3 +6,4 @@ ipywidgets
 scipy
 networkx<2
 scikit_learn
+tqdm
