@@ -21,7 +21,6 @@ from trilearn.distributions import sequential_junction_tree_distributions as seq
 
 scipy.set_printoptions(precision=2, suppress=True)
 
-
 class GraphPredictive:
     def __init__(self, x, y,
                  hyper_mu=None,
@@ -73,6 +72,14 @@ class GraphPredictive:
         self.set_training_data(x, y)
         self.graph_dists = None
         self.ggm_trajs = None
+
+        # Initiate to the complete graph, corresponding to the
+        # standard Bayesian predictive classifier
+        graph = nx.complete_graph(n_dim)
+        self.graph_dists = [None for _ in self.same_graph_groups]
+        for g, group in enumerate(self.same_graph_groups):
+            self.graph_dists[g] = gdist.GraphDistribution()
+            self.graph_dists[g].add_graph(graph, 1.0)
 
     def set_training_data(self, x, y):
         """
@@ -335,15 +342,17 @@ class GraphPredictive:
         graph_distribution: dictionary with graph distribution for each class.
         """
         p = self.p
-        graph_dists = None
-        if self.graph_dists is None:
-            graph = nx.complete_graph(p)
-            graph_dists = [None for _ in self.same_graph_groups]
-            for g, group in enumerate(self.same_graph_groups):
-                graph_dists[g] = gdist.GraphDistribution()
-                graph_dists[g].add_graph(graph, 1.0)
-        else:
-            graph_dists = self.graph_dists
+        # graph_dists = None
+        # if self.graph_dists is None:
+        #     graph = nx.complete_graph(p)
+        #     graph_dists = [None for _ in self.same_graph_groups]
+        #     for g, group in enumerate(self.same_graph_groups):
+        #         graph_dists[g] = gdist.GraphDistribution()
+        #         graph_dists[g].add_graph(graph, 1.0)
+        # else:
+        #     graph_dists = self.graph_dists
+
+        graph_dists = self.graph_dists
 
         ctg = [0] * len(self.classes)  # class to group
         for gi, g in enumerate(self.same_graph_groups):
