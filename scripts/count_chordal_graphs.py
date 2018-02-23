@@ -13,14 +13,15 @@ def main(n_smc_estimates, n_particles, alpha, beta, order, seed, output_director
     if seed:
         np.random.seed(seed)
 
-    consts = smc.est_n_dec_graphs(order, n_particles, alpha, beta, n_smc_estimates, debug=True)
+    consts = smc.est_n_dec_graphs(order, n_particles, alpha, beta, n_smc_estimates, debug=False)
 
     print("estimates")
     print(consts)
-    print("means")
-    print(consts).mean(axis=0))
-    print("std")
-    print(consts.std(axis=0))
+    if n_smc_estimates > 1:
+        print("means")
+        print(consts.mean(axis=0))
+        print("std")
+        print(consts.std(axis=0))
 
     # filename = (
     #     "{output_directory}/num_dec_graphs_weights_"
@@ -40,7 +41,6 @@ def main(n_smc_estimates, n_particles, alpha, beta, order, seed, output_director
     #    np.exp(log_consts),
     #    delimiter=',', fmt='%f',
     #)
-
 
 if __name__ == "__main__":
     import argparse
