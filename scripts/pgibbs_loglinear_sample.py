@@ -33,7 +33,7 @@ def main(data_filename, pseudo_observations, trajectory_length, n_particles,
             filename_prefix=output_directory + "/" + filename_base)
     else:
         smc.gen_pgibbs_loglin_trajectories(
-            X, levels, trajectory_length, n_particles,
+            df, trajectory_length, n_particles,
             pseudo_observations=pseudo_observations,
             alphas=alphas, betas=betas, radii=radii, cache={},
             filename_prefix=output_directory + "/" + filename_base)

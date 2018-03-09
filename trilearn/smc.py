@@ -132,7 +132,7 @@ def smc(N, alpha, beta, radius, seq_dist, debug=False):
                 ind_perms[i, n] = sp.gen_order_neigh(ind_perms[I[i], n-1],
                                                      radius, total)
                 node = ind_perms[i, n][n]
-                new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.expand(old_trees[I[i]], node, alpha, beta)
+                new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(old_trees[I[i]], node, alpha, beta)
                 # Backward kernel
                 log_R = -trilearn.graph.junction_tree_collapser.log_count_origins(new_trees[i], old_trees[I[i]], node)
                 log_density_ratio = seq_dist.log_ratio(old_cliques,
@@ -218,7 +218,7 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
                                                          total)
                     node = ind_perms[i, n][n]  # the added node
                     # Expand the junction tree T
-                    new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.expand(T_old, node, alpha, beta)
+                    new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(T_old, node, alpha, beta)
                     log_order_pr = sp.backward_order_neigh_log_prob(ind_perms[I[i], n-1],
                                                                     ind_perms[i, n],
                                                                     radius, maxradius)
@@ -235,21 +235,20 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
 
 def est_log_norm_consts(order, n_particles, sequential_distribution, alpha=0.5, beta=0.5, n_smc_estimates=1, debug=False):
     log_consts = np.zeros(
-        n_smc_estimates * order
-    ).reshape(n_smc_estimates, order)
+        n_smc_estimates * (order)
+    ).reshape(n_smc_estimates, (order))
 
-    def estimate_norm_const(order, weigths):
+    def estimate_norm_const(order, weights):
         log_consts = np.zeros(order)
         for n in range(1, order):
-            log_consts[n] = log_consts[n - 1] + np.log(np.mean(weigths[:, n]))
+            log_consts[n] = log_consts[n - 1] + np.log(np.mean(weights[:, n]))
 
         return log_consts
 
     for t in tqdm(range(n_smc_estimates), desc="Const estimates"):
         (trees, log_w) = smc(n_particles, alpha, beta, sequential_distribution.p, sequential_distribution)
         w = np.exp(log_w)
-        for n in range(1, order):
-            log_consts[t, n] = log_consts[t, n - 1] + np.log(np.mean(w[:, n]))
+        log_consts[t, :] = estimate_norm_const(order, w)
 
         if debug:
             unique_trees = set()
@@ -412,7 +411,7 @@ def gen_pgibbs_ggm_trajectories_parallel(X, trajectory_lengths, n_particles,
                                                    filename_prefix))
 
 
-def gen_pgibbs_loglin_trajectories(X, levels, trajectory_lengths, n_particles,
+def gen_pgibbs_loglin_trajectories(dataframe, trajectory_lengths, n_particles,
                                    pseudo_observations=[1.0], alphas=[0.5], betas=[0.5], radii=[None],
                                    cache={}, filename_prefix=None,
                                    **args):
@@ -423,12 +422,12 @@ def gen_pgibbs_loglin_trajectories(X, levels, trajectory_lengths, n_particles,
                 for alpha in alphas:
                     for beta in betas:
                         for pseudo_obs in pseudo_observations:
-                            graph_trajectory = gen_pgibbs_loglin_trajectory(X, N, T, levels, pseudo_obs, cache, alpha,
+                            graph_trajectory = gen_pgibbs_loglin_trajectory(dataframe, N, T, pseudo_obs, cache, alpha,
                                                                             beta, rad)
                             graph_trajectories.append(graph_trajectory)
                             if filename_prefix:
                                 if rad is None:
-                                    rad = X.shape[1]
+                                    rad = dataframe.shape[1]
                                 graphs_file = filename_prefix+'_loglin_pseudo_obs_'+str(pseudo_obs)+'_T_'+str(T)+'_N_'+str(N)
                                 graphs_file += '_alpha_'+str(alpha)+'_beta_'+str(beta)
                                 graphs_file += '_radius_'+str(rad)+'_graphs.txt'
@@ -436,9 +435,9 @@ def gen_pgibbs_loglin_trajectories(X, levels, trajectory_lengths, n_particles,
     return graph_trajectories
 
 
-def gen_pgibbs_loglin_trajectories_parallel(X, levels, trajectory_length, n_particles,
-    pseudo_observations, alphas, betas, radii, filename_prefix,
-    **args):
+def gen_pgibbs_loglin_trajectories_parallel(dataframe, trajectory_length, n_particles,
+                                            pseudo_observations, alphas, betas, radii, filename_prefix,
+                                            **args):
     cache = {}
     for N in n_particles:
         for T in trajectory_length:
@@ -446,7 +445,7 @@ def gen_pgibbs_loglin_trajectories_parallel(X, levels, trajectory_length, n_part
                 for alpha in alphas:
                     for beta in betas:
                         for pseudo_obs in pseudo_observations:
-                            sd = seqdist.LogLinearJTPosterior(X, pseudo_obs, levels, cache)
+                            sd = seqdist.LogLinearJTPosterior(dataframe, pseudo_obs, levels, cache)
                             print "Starting: " + str((N, alpha, beta, rad,
                             T, sd, filename_prefix,))
                             proc = Process(target=particle_gibbs_to_file,

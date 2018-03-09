@@ -6,7 +6,7 @@ import trilearn.graph.subtree_sampler as ss
 from trilearn import auxiliary_functions as aux
 
 
-def expand(tree, i, alpha, beta, directory=None):
+def sample(tree, i, alpha, beta, directory=None):
     """ Expands the junciton tree tree with the internal node i
 
     Args:

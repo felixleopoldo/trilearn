@@ -3,7 +3,7 @@ import numpy as np
 from trilearn.graph import junction_tree as jtlib
 
 
-def collapse(tree, node):
+def sample(tree, node):
     """ Removes node from the underlying decomposable graph of tree.
         two cases:
         If node was isolated, any junction tree representation of g(tree)\{i} is
@@ -27,7 +27,7 @@ def collapse(tree, node):
         for j in range(len(neighs) - 1):
             shrinked_tree.add_edge(neighs[j], neighs[j + 1])
         shrinked_tree.remove_node(frozenset([node]))
-        separators = shrinked_tree.get_separators()
+        separators = shrinked_tree.separators()
 
         if frozenset() in separators:
             jtlib.randomize_at_sep(shrinked_tree, set())
@@ -86,7 +86,7 @@ def backward_jt_traj_sample(perms_traj, tree):
     n = p - 2
     while n >= 0:
         to_remove = list(set(perms_traj[n + 1]) - set(perms_traj[n]))[0]
-        jts[n] = collapse(jts[n + 1], to_remove)
+        jts[n] = sample(jts[n + 1], to_remove)
         n -= 1
     return jts
 
@@ -111,6 +111,10 @@ def possible_origins(tree, node):
         origins[cp] = [c for c in tree.neighbors(cp) if c & cp == D[cp]]
 
     return origins
+
+
+def transition_prob(tree, old_tree, node=None):
+    return 1 / log_count_origins(tree, old_tree, node)
 
 
 def log_count_origins(tree, old_tree, node):

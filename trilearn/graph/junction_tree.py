@@ -464,7 +464,7 @@ def sample_junction_tree(internal_nodes, alpha=0.5, beta=0.5):
     #     tree.node[n] = {"color": "black", "label": lab}
 
     for j in nodes[1:]:
-        (tree, _, _, _, _, _) = jte.expand(tree, j, alpha, beta)
+        (tree, _, _, _, _, _) = jte.sample(tree, j, alpha, beta)
 
     return tree
 
