@@ -19,15 +19,18 @@ def sample(tree, node):
         NetworkX graph: a junction tree
     """
 
-    shrinked_tree = tree.subgraph(tree.nodes())
+    #shrinked_tree = tree.subgraph(tree.nodes()) # nx < 2.x
+    shrinked_tree = tree.copy() # nx > 2.x
+
     # If isolated node in the decomposable graph
     if frozenset([node]) in shrinked_tree.nodes():
         # Connect neighbors
-        neighs = tree.neighbors(frozenset([node]))
+        #neighs = tree.neighbors(frozenset([node])) # nx < 2.x
+        neighs = list(tree.neighbors(frozenset([node]))) # nx > 2.x
         for j in range(len(neighs) - 1):
             shrinked_tree.add_edge(neighs[j], neighs[j + 1])
         shrinked_tree.remove_node(frozenset([node]))
-        separators = shrinked_tree.separators()
+        separators = shrinked_tree.get_separators()
 
         if frozenset() in separators:
             jtlib.randomize_at_sep(shrinked_tree, set())

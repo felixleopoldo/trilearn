@@ -5,7 +5,7 @@ import networkx as nx
 
 import trilearn.graph.decomposable
 import trilearn.graph.junction_tree as jtlib
-import trilearn.graph.christmas_tree_algorithm as jtexp
+import trilearn.graph.junction_tree_expander as jtexp
 import trilearn.graph.junction_tree as libj
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree_expander
@@ -20,7 +20,8 @@ def check_symmetric(a, tol=1e-8):
 
 def expand(tree, node, alpha, beta, directory=None):
     nodes = tree.nodes()
-    old_tree = tree.subgraph(nodes)
+    #old_tree = tree.subgraph(nodes) # nx < 2.x
+    old_tree = tree.copy() # nx > 2.x
     (subtree, subtree_nodes, subtree_edges, subtree_adjlist,
      old_separators, prob_subtree) = trilearn.graph.subtree_sampler.random_subtree(old_tree, alpha, beta, (node, node))
     (old_cliques,

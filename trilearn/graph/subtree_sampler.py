@@ -36,7 +36,8 @@ def random_subtree(T, alpha, beta, subtree_mark):
     q = deque([])
     start = np.random.randint(n)  # then n means new component
     separators = {}
-    start_node = T.nodes()[start]
+    #start_node = T.nodes()[start] # nx < 2.x
+    start_node = list(T.nodes)[start] # nx > 2.x
     q.append(start_node)
     subtree_adjlist = {start_node: []}
     while len(q) > 0:

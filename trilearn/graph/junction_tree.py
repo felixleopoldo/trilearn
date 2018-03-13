@@ -23,6 +23,21 @@ class JunctionTree(nx.Graph):
             self.log_nus[sep] = log_nu(self, sep)
         return self.log_nus[sep]
 
+
+    def fresh_copy(self):
+        """Return a fresh copy graph with the same data structure.
+
+        A fresh copy has no nodes, edges or graph attributes. It is
+        the same data structure as the current graph. This method is
+        typically used to create an empty version of the graph.
+
+        Notes
+        -----
+        If you subclass the base class you should overwrite this method
+        to return your class of graph.
+        """
+        return JunctionTree()
+
     def get_separators(self):
         if self.separators is None:
             self.separators = separators(self)
@@ -111,9 +126,11 @@ def subtree_induced_by_subset(tree, s):
        s (set): Subset of the node in the underlying graph of T.
     """
     if len(s) == 0:
-        return tree.subgraph(tree.nodes())
+        #return tree.subgraph(tree.nodes()) # nx < 2.x
+        return tree.copy() # nx > 2.x
     v_prime = {c for c in tree.nodes() if s <= c}
-    return tree.subgraph(v_prime)
+    #return tree.subgraph(v_prime)  # nx < 2.x
+    return tree.subgraph(v_prime).copy() # nx > 2.x
 
 
 def induced_subtree_nodes(tree, node, visited, sep):
@@ -247,7 +264,7 @@ def randomize_at_sep(tree, s):
     Returns:
         NetworkX graph
     """
-    F = forest_induced_by_sep(tree, s) # should be junction tree
+    F = forest_induced_by_sep(tree, s)
     new_edges = random_tree_from_forest(F)
     # Remove old edges associated with s
     to_remove = []
@@ -368,7 +385,8 @@ def peo(tree):
     Returns:
        tuple: A tuple of form (C, S, H, A, R), where the elemenst are lists of Cliques, Separators, Histories, , Rests, from a perfect elimination order.
     """
-    C = list(nx.dfs_preorder_nodes(tree, tree.nodes()[0]))
+    # C = list(nx.dfs_preorder_nodes(tree, tree.nodes()[0])) # nx < 2.x
+    C = list(nx.dfs_preorder_nodes(tree, list(tree.nodes)[0])) # nx > 2.x
     S = [set() for j in range(len(C))]
     H = [set() for j in range(len(C))]
     R = [set() for j in range(len(C))]
@@ -433,7 +451,7 @@ def n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
     return new_partial_mu - old_partial_mu
 
 
-def sample_junction_tree(internal_nodes, alpha=0.5, beta=0.5):
+def sample(internal_nodes, alpha=0.5, beta=0.5):
     """ Generates a junction tree with order internal nodes with the junction tree expander.
 
     Args:

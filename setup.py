@@ -23,8 +23,8 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
     requirements = f.readlines()
 
 classifiers = [
-        'Development Status :: 1 - Beta',
-        'Intended Audience :: Researchers / Developers',
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Science/Research',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
@@ -33,7 +33,7 @@ classifiers = [
 setup(
     name='trilearn',
     version=0.1,
-    description='Learning decomposable graphical models using particle Gibbs.',
+    description='Classification and structure learning in decomposable graphical models using particle Gibbs.',
     long_description=readme,
     packages=packages,
     package_data=package_data,

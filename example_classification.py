@@ -61,7 +61,7 @@ classes = range(n_classes)
 n_dim = 4
 
 # Sample graphs
-graphs = [jtlib.sample_junction_tree(n_dim).to_graph() for _ in classes]
+graphs = [jtlib.sample(n_dim).to_graph() for _ in classes]
 for g in graphs:
     glib.plot_adjmat(g)
     #plt.show()

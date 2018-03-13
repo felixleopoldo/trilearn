@@ -26,7 +26,11 @@ def sample(tree, i, alpha, beta, directory=None):
     #         lab = "(" + str(list(n)[0]) + ")"
     #     tree.node[n] = {"color": "black", "label": lab}
     # print tree.nodes()
-    tree_new = tree.subgraph(tree.nodes())
+
+    #tree_new = tree.subgraph(tree.nodes()) # nx < 2.0
+    tree_new = tree.copy() # nx < 2.0
+
+
     #old_G = trilearn.graph.junction_tree.get_graph(tree)
     #(subtree, old_separators, probtree) = glib.random_subtree(tree, alpha, beta)
 
@@ -161,7 +165,8 @@ def random_christmas_tree(new, tree, subtree_nodes, subtree_edges, subtree_adjli
         # add random neighbor.
         c = frozenset([new])
         new_cliques.add(c)
-        c2 = tree.nodes()[0]
+        #c2 = tree.nodes()[0] # nx 1.9
+        c2 = list(tree.nodes)[0] # nx 2.1
         tree.add_node(c, label=tuple([new]), color="red")
         tree.add_edge(c, c2, label=tuple([]))
 
@@ -342,7 +347,8 @@ def get_subtree_nodes(T1, T2, new):
 
     elif T2_ind.order() == 1:
         # Look which is its neighbor
-        c = T2_ind.nodes()[0]
+        #c = T2_ind.nodes()[0] # nx < 2.x
+        c = list(T2_ind.nodes)[0] # nx > 2.x
 
         if T1.has_node(c - {new}):
             # if it was connected to everything in a clique
@@ -356,7 +362,8 @@ def get_subtree_nodes(T1, T2, new):
             # 2) 2 neighbors: Then it could be any of these.
             # 3) >2 neighbors: The emerging clique is the one that has the
             #                  others as a subset of its neighbors in T1
-            neigs = T2.neighbors(c)
+            #neigs = T2.neighbors(c) # nx < 2.x
+            neigs = list(T2.neighbors(c)) # nx > 2.x
             possible_origins = [c1 for c1 in neigs if c1 & c == c - {new}]
             g = len(possible_origins)
             if g == 1:

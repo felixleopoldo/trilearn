@@ -109,10 +109,10 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
 
 def sample_decomposable_graph(order, alpha=0.5, beta=0.5):
     if type(order) is int:
-        tree = libj.sample_junction_tree(range(order), alpha, beta)
+        tree = libj.sample(range(order), alpha, beta)
         return jtlib.graph(tree)
     elif type(order) is list:
-        tree = libj.sample_junction_tree(order, alpha, beta)
+        tree = libj.sample(order, alpha, beta)
         return jtlib.graph(tree)
 
 
