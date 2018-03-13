@@ -10,7 +10,7 @@ pip install trilearn
 ### Running the tests
 
 ```
-make tests
+make test
 ```
 
 ## Scripts
