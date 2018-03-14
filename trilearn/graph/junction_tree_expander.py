@@ -6,7 +6,7 @@ import trilearn.graph.subtree_sampler as ss
 from trilearn import auxiliary_functions as aux
 
 
-def sample(tree, i, alpha, beta, directory=None):
+def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
     """ Expands the junciton tree tree with the internal node i
 
     Args:
@@ -14,7 +14,6 @@ def sample(tree, i, alpha, beta, directory=None):
         i (int): new node to be added to the underlying graph of tree
         alpha (float): parameter for the subtree kernel
         beta (float): parameter for the subtree kernel
-        directory (string): path to
 
     Returns:
         NetworkX graph: a junction tree
@@ -51,6 +50,8 @@ def sample(tree, i, alpha, beta, directory=None):
      P,
      neig) = random_christmas_tree(i, tree_new, subtree_nodes, subtree_edges, subtree_adjlist)
 
+    if only_tree is True:
+        return tree_new
     #conn_nodes = set()
     #for clique in new_cliques:
     #    conn_nodes |= clique
