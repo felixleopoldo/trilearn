@@ -12,11 +12,13 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
+from sklearn.model_selection import train_test_split
+
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.graph as glib
 from trilearn.distributions import g_intra_class
 import trilearn.smc as smc
-import trilearn.graph_predictive as gpred
+from trilearn.graph_predictive import GraphPredictive
 
 np.random.seed(1)
 
@@ -40,7 +42,7 @@ def sample_classification_datasets(mus, covmats, n_samples):
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
          "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
-         "Naive Bayes", "LDA", "QDA"]
+         "Naive Bayes", "LDA", "QDA", "BayesPred", "BayesGraphPred"]
 
 classifiers = [
     KNeighborsClassifier(3),
@@ -53,12 +55,14 @@ classifiers = [
     AdaBoostClassifier(),
     GaussianNB(),
     LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto'),
-    QuadraticDiscriminantAnalysis()]
+    QuadraticDiscriminantAnalysis(),
+    GraphPredictive(standard_bayes=True),
+    GraphPredictive(n_particles=100, n_pgibbs_samples=5)]
 
 
 n_classes = 2
 classes = range(n_classes)
-n_dim = 4
+n_dim = 20
 
 # Sample graphs
 graphs = [jtlib.sample(n_dim).to_graph() for _ in classes]
@@ -76,44 +80,49 @@ mu_shift = 0.001
 mus = [np.matrix(np.ones(n_dim)).T * i * mu_shift for i in classes]
 
 # Sample class data
-n_samples = n_dim + 1
+n_samples = n_dim + 50
+
+x_full, y_full = sample_classification_datasets(mus, covmats, n_samples)
 x_train, y_train = sample_classification_datasets(mus, covmats, n_samples)
 x_test, y_test = sample_classification_datasets(mus, covmats, n_samples)
-data = np.column_stack((y_train, x_train))
-ys = pd.Series(np.array(y_train).flatten(), dtype=int)
-df = pd.DataFrame(x_train)
-df["y"] = ys
 
-df = df[["y"] +  range(n_dim)]
-df.to_csv("classification_dataset.csv", header=False, index=False)
 
-df = pd.read_csv("classification_dataset.csv", header=None)
+ys_full = pd.Series(np.array(y_train).flatten(), dtype=int)
+df_full = pd.DataFrame(x_train)
+df_full["y"] = ys_full
+df_full = df_full[["y"] +  range(n_dim)]
+df_full.columns = ["y"] + ["x" + str(i) for i in range(1, n_dim+1)]
+df_full.to_csv("classification_full_dataset.csv", index=False)
 
-# Comparison with other methods
+ys_train = pd.Series(np.array(y_train).flatten(), dtype=int)
+df_train = pd.DataFrame(x_train)
+df_train["y"] = ys_train
+df_train = df_train[["y"] +  range(n_dim)]
+df_train.columns = ["y"] + ["x" + str(i) for i in range(1, n_dim+1)]
+df_train.to_csv("classification_train_dataset.csv", index=False)
+
+ys_test = pd.Series(np.array(y_test).flatten(), dtype=int)
+df_test = pd.DataFrame(x_test)
+df_test["y"] = ys_test
+df_test = df_test[["y"] +  range(n_dim)]
+df_test.columns = ["y"] + ["x" + str(i) for i in range(1, n_dim+1)]
+df_test.to_csv("classification_test_dataset.csv", index=False)
+
+df_full = pd.read_csv("classification_full_dataset.csv")
+df_train = pd.read_csv("classification_train_dataset.csv")
+df_test = pd.read_csv("classification_test_dataset.csv")
+
+y_train = df_train["y"]
+x_train = df_train.drop(["y"], axis=1)
+y_test = df_test["y"]
+x_test = df_test.drop(["y"], axis=1)
+
+x_train, x_test, y_train, y_test = train_test_split(df_full.drop(["y"], axis=1), df_full["y"],
+                                                    test_size=0.3, random_state=1)
+
+# Comparison
 for name, clf in zip(names, classifiers):
-    clf.fit(np.array(x_train), np.array(y_train).flatten())
-    print str(name) + " " + str(clf.score(np.array(x_test), np.array(y_test).flatten()))
+    clf.fit(x_train.get_values(), y_train.get_values())
+    print str(name) + " " + str(clf.score(x_test.get_values(),
+                                          y_test.get_values()))
 
-# Generate MCMC chains
-
-# trajs = [None] * n_classes
-# for c in classes:
-#     x = x_train[y==c]
-#     trajs[c] = smc.gen_pgibbs_ggm_trajectories(n_particles=30, n_pgibbs_samples=300, async=False, centered=False)
-#
-# graph_distributions = [None] * n_classes
-# for c in classes:
-#     graph_distributions[c] = trajs[c].empirical_distribution()
-# predclass.fit(x_train, y_train, graph_distributions)
-
-predclass = gpred.GraphPredictive(x_train, y_train)
-print "Predictive: " +str(predclass.score(x_test, y_test))
-predclass.gen_gibbs_chains(n_particles=30, n_pgibbs_samples=30, async=False)
-predclass.set_graph_dists(set_burnins=True)
-# predclass.plot_class_heatmap(0)
-# plt.show()
-# predclass.plot_class_heatmap(1)
-# plt.show()
-#
-print "Graphical predictive: " +str(predclass.score(x_test, y_test))
-#

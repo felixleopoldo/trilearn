@@ -22,12 +22,19 @@ from trilearn.distributions import sequential_junction_tree_distributions as seq
 scipy.set_printoptions(precision=2, suppress=True)
 
 class GraphPredictive:
-    def __init__(self, x, y,
-                 hyper_mu=None,
-                 hyper_v=None,
-                 hyper_tau=None,
-                 hyper_alpha=None,
-                 same_graph_groups=None):
+    def __init__(self,
+                 n_particles=None, n_pgibbs_samples=None,
+                 prompt_burnin=False,
+                 standard_bayes=False,
+                 async=False):
+        self.n_particles = n_particles
+        self.n_pgibbs_samples = n_pgibbs_samples
+        self.prompt_burnin = prompt_burnin
+        self.standard_bayes = standard_bayes
+        self.async = async
+
+    def fit(self, x, y, hyper_mu=None, hyper_v=None, hyper_tau=None, hyper_alpha=None,
+            same_graph_groups=None):
         """ These parameters are set here in the constructor in order to avoid
         mismatch since the hyper parameters in classification has to be
         consistent with those in the structure learning procedure.
@@ -41,8 +48,14 @@ class GraphPredictive:
             hyper_tau (Numpy matrix): Precision matrix in the normal inverse Wishart density
             hyper_alpha (float): Degrees of freedom in the normal inverse Wishart density
         """
-        classes = list(set(np.array(y).flatten()))
-        n_classes = len(classes)
+        self.classes = list(set(np.array(y).flatten()))
+        classes   = self.classes
+        self.x = np.matrix(x)
+        self.y = np.matrix(y)
+        self.p = x.shape[1]
+
+#        classes = list(set(np.array(y).flatten()))
+        n_classes = len(self.classes)
         n_dim = x.shape[1]
 
         if same_graph_groups is None:
@@ -69,33 +82,35 @@ class GraphPredictive:
         else:
             self.hyper_alpha = hyper_alpha
 
-        self.set_training_data(x, y)
         self.graph_dists = None
         self.ggm_trajs = None
 
-        # Initiate to the complete graph, corresponding to the
-        # standard Bayesian predictive classifier
-        graph = nx.complete_graph(n_dim)
-        self.graph_dists = [None for _ in self.same_graph_groups]
-        for g, group in enumerate(self.same_graph_groups):
-            self.graph_dists[g] = gdist.GraphDistribution()
-            self.graph_dists[g].add_graph(graph, 1.0)
+        if self.standard_bayes is True:
+            # Initiate to the complete graph, corresponding to the
+            # standard Bayesian predictive classifier
+            graph = nx.complete_graph(n_dim)
+            self.graph_dists = [None for _ in self.same_graph_groups]
+            for g, group in enumerate(self.same_graph_groups):
+                self.graph_dists[g] = gdist.GraphDistribution()
+                self.graph_dists[g].add_graph(graph, 1.0)
 
-    def set_training_data(self, x, y):
-        """
-        Sets the training data with class belongings.
+        else:
+            self.gen_gibbs_chains(n_particles=self.n_particles,
+                                  n_pgibbs_samples=self.n_pgibbs_samples,
+                                  async=False)  # move to fit
+            self.set_graph_dists(set_burnins=self.prompt_burnin)  # move to fit
 
-        Args:
-            x (Numpy matrix): Matrix of training data
-            y (Numpy array): Array of class correspondence. Eg. [0,0,1]
-        indicates that x[0] and x[1] belongs to class 0 and x[2] belongs to
-        class 1.
-
-        """
-        self.classes = list(set(np.array(y).flatten()))
-        self.x = x
-        self.y = y
-        self.p = x.shape[1]
+    # def fit(self, x, y):
+    #     """
+    #     Sets the training data with class belongings.
+    #
+    #     Args:
+    #         x (Numpy matrix): Matrix of training data
+    #         y (Numpy array): Array of class correspondence. Eg. [0,0,1]
+    #     indicates that x[0] and x[1] belongs to class 0 and x[2] belongs to
+    #     class 1.
+    #
+    #     """
 
     def set_hyper_parameters(self,
                              hyper_mu,
