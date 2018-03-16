@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from numpy import linalg as la
 from matplotlib import pyplot as plt
 
@@ -128,3 +129,31 @@ def plot_matrix(m, filename, extension, title="Adjmat"):
     ax.invert_yaxis()
     ax.xaxis.tick_top()
     plt.savefig(filename+"."+extension, format=extension, dpi=100)
+
+
+def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
+    n_classes = len(covmats)
+    n_dim = covmats[0].shape[1]
+    # Generate training data
+    n_train = [n_samples_in_each_class] * n_classes
+    x = np.matrix(np.zeros((sum(n_train), n_dim))).reshape(sum(n_train), n_dim)
+    y = np.matrix(np.zeros((sum(n_train), 1), dtype=int)).reshape(sum(n_train), 1)
+
+    for c in range(n_classes):
+        fr = sum(n_train[:c])
+        to = sum(n_train[:c + 1])
+        x[np.ix_(range(fr, to),
+                       range(n_dim))] = np.matrix(np.random.multivariate_normal(
+                                                  np.array(mus[c]).flatten(),
+                                                  covmats[c],
+                                                  n_train[c]))
+        y[np.ix_(range(fr, to), [0])] = np.matrix(np.ones(n_train[c], dtype=int) * c).T
+
+    ys = pd.Series(np.array(y).flatten(), dtype=int)
+    df = pd.DataFrame(x)
+    df["y"] = ys
+    df = df[["y"] + range(n_dim)]
+    df.columns = ["y"] + ["x" + str(i) for i in range(1, n_dim + 1)]
+    return df
+    # return x, y
+    # return pd.DataFrame(x), pd.Series(np.array(y).flatten(), dtype=int)

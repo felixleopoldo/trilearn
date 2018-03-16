@@ -3,13 +3,22 @@ Graph related functions.
 """
 
 import itertools
+import json
 
+from networkx.readwrite import json_graph
 import networkx as nx
 import numpy as np
 import seaborn as sns
 from scipy.special import comb
 
 import trilearn.auxiliary_functions
+
+
+def from_json_file(filename):
+    with open(filename) as data_file:
+        json_G = json.load(data_file)
+
+    return json_graph.node_link_graph(json_G)
 
 
 def plot(graph, filename, layout="dot"):

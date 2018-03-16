@@ -25,6 +25,7 @@ class GraphPredictive:
     def __init__(self,
                  n_particles=None, n_pgibbs_samples=None,
                  prompt_burnin=False,
+                 only_map_graph=False,
                  standard_bayes=False,
                  async=False):
         self.n_particles = n_particles
