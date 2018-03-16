@@ -339,7 +339,7 @@ class GraphPredictive:
         pred_y = np.array(pred_y)
         return np.sum(pred_y == np.array(y_test).flatten())/float(len(x_test))
 
-    def predict(self, x_new):
+    def predict_likelihoods(self, x_new):
         """
         Model:
         x_i | M=m, R=r ~ Normal(m,r)
@@ -350,7 +350,7 @@ class GraphPredictive:
               the predictive density will be computed.
               Example 2-dim x. [[0.4, 0.5],
         [0.2, 1.4]]
-        x: row matrix with traning data
+        x: row matrix with training data
         y: vector of classes
         mu: hyper parameter for M
         v: hyper parameter for M
@@ -358,16 +358,6 @@ class GraphPredictive:
         graph_distribution: dictionary with graph distribution for each class.
         """
         p = self.p
-        # graph_dists = None
-        # if self.graph_dists is None:
-        #     graph = nx.complete_graph(p)
-        #     graph_dists = [None for _ in self.same_graph_groups]
-        #     for g, group in enumerate(self.same_graph_groups):
-        #         graph_dists[g] = gdist.GraphDistribution()
-        #         graph_dists[g].add_graph(graph, 1.0)
-        # else:
-        #     graph_dists = self.graph_dists
-
         graph_dists = self.graph_dists
 
         ctg = [0] * len(self.classes)  # class to group
@@ -375,26 +365,49 @@ class GraphPredictive:
             for c in g:
                 ctg[c] = gi
 
-        pred_dist = {}
-        pred_dist_simult = {}
-        class_space = [self.classes] * len(x_new)
-        for classification in itertools.product(*class_space):
-            pred_dist_simult[classification] = 0.0
-            for c in classification:
-                if c not in pred_dist:
-                    c_inds = (np.array(self.y).ravel() == c)
-                    xc = self.x[np.ix_(c_inds, range(p))]
+        pred_dist = np.zeros(len(self.classes))
+        for c in self.classes:
+            # Get the indices from class c
+            c_inds = (np.array(self.y).ravel() == c)
+            # Use data only from class c
+            xc = self.x[np.ix_(c_inds, range(p))]
+            pred_dist[c] = self.predictive_pdf(x_new,
+                                               xc,
+                                               self.hyper_mu[ctg[c]],
+                                               self.hyper_v[ctg[c]],
+                                               self.hyper_tau[ctg[c]],
+                                               self.hyper_alpha[ctg[c]],
+                                               graph_dists[ctg[c]])
+        #print np.log(pred_dist)
+        return pred_dist
 
-                    pred_dist[c] = self.predictive_pdf(x_new,
-                                                       xc,
-                                                       self.hyper_mu[ctg[c]],
-                                                       self.hyper_v[ctg[c]],
-                                                       self.hyper_tau[ctg[c]],
-                                                       self.hyper_alpha[ctg[c]],
-                                                       graph_dists[ctg[c]])
-                    pred_dist_simult[classification] *= pred_dist[c]
 
-        return int(max(pred_dist, key=pred_dist.get))
+    def predict(self, x_new):
+        return np.argmax(self.predict_likelihoods(x_new))
+
+
+    def predict_proba(self, X):
+        """Estimate probability.
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            Input data.
+        Returns
+        -------
+        C : array, shape (n_samples, n_classes)
+            Estimated probabilities.
+        """
+        #print X
+        pred_probs = np.zeros(X.shape[0] * len(self.classes)).reshape((X.shape[0], len(self.classes)))
+        for i, xx in enumerate(X):
+            x = np.asmatrix(xx)
+            #print x
+            prob = self.predict_likelihoods(x)
+            prob /= prob.sum()
+            pred_probs[i, :] = prob
+
+        return pred_probs
+
 
     def predictive_pdf(self, x_new, x, mu, v, tau, alpha, graph_dist):
         """
@@ -454,3 +467,4 @@ class GraphPredictive:
                 log_pred_density -= nu * cache[sep]
             pred_density += np.exp(log_pred_density) * graph_dist.prob(graph)
         return float(pred_density)
+
