@@ -7,6 +7,7 @@ import numpy as np
 import scipy
 import networkx as nx
 import matplotlib.pyplot as plt
+import sklearn
 
 import trilearn.graph.trajectory as mc
 import trilearn.graph.graph as glib
@@ -21,7 +22,7 @@ from trilearn.distributions import sequential_junction_tree_distributions as seq
 
 scipy.set_printoptions(precision=2, suppress=True)
 
-class GraphPredictive:
+class GraphPredictive(sklearn.base.BaseEstimator):
     def __init__(self,
                  n_particles=None, n_pgibbs_samples=None,
                  prompt_burnin=False,
@@ -33,6 +34,7 @@ class GraphPredictive:
         self.prompt_burnin = prompt_burnin
         self.standard_bayes = standard_bayes
         self.async = async
+
 
     def fit(self, x, y, hyper_mu=None, hyper_v=None, hyper_tau=None, hyper_alpha=None,
             same_graph_groups=None):
