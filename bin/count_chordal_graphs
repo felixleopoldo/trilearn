@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Estimate the number of chordal graphs with a given number of nodes.
 """

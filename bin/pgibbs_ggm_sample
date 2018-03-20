@@ -1,42 +1,25 @@
-"""
-Generate a Markov chain from Particle Gibbs for different
-parameter settings.
-"""
+#!/usr/bin/env python
 
 import os.path
-from os.path import basename
 
 import numpy as np
-import pandas as pd
 
 import trilearn.smc as smc
 
 
-def main(data_filename, pseudo_observations, trajectory_length, n_particles,
-         alphas, betas, radii, seed, parallel,
-         output_directory, **args):
+def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, data_filename, output_directory, **args):
     if seed is not None:
         np.random.seed(seed)
 
-    filename_base = os.path.splitext(basename(data_filename))[0]
-
-    df = pd.read_csv(data_filename, sep=',', header=[0, 1])
-    X = df.values.astype(int)
-    n_levels = [int(a[1]) for a in list(df.columns)]
-    levels = np.array([range(l) for l in n_levels])
-
+    X = np.matrix(np.loadtxt(data_filename, delimiter=','))
+    filename_base = os.path.splitext(os.path.basename(data_filename))[0]
     if parallel is True:
-        smc.gen_pgibbs_loglin_trajectories_parallel(
-            X, levels, trajectory_length, n_particles,
-            pseudo_observations=pseudo_observations,
-            alphas=alphas, betas=betas, radii=radii, cache={},
-            filename_prefix=output_directory + "/" + filename_base)
+        smc.gen_pgibbs_ggm_trajectories_parallel(X, trajectory_length, n_particles,
+                                                 alphas=alphas, betas=betas, radii=radii, cache={},
+                                                 filename_prefix=output_directory + "/" + filename_base)
     else:
-        smc.gen_pgibbs_loglin_trajectories(
-            df, trajectory_length, n_particles,
-            pseudo_observations=pseudo_observations,
-            alphas=alphas, betas=betas, radii=radii, cache={},
-            filename_prefix=output_directory + "/" + filename_base)
+        smc.gen_pgibbs_ggm_trajectories(X, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
+                                        cache={}, filename_prefix=output_directory + "/" + filename_base)
 
 if __name__ == "__main__":
     import argparse
@@ -84,11 +67,6 @@ if __name__ == "__main__":
         '-o', '--output_directory',
         required=False, default="./",
         help="Output directory"
-    )
-    parser.add_argument(
-        '--pseudo_observations',
-        type=float, required=False, default=[1.0], nargs='+',
-        help="Total number of pseudo observations"
     )
 
     args = parser.parse_args()
