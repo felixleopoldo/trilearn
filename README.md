@@ -1,5 +1,5 @@
 # Particle Gibbs for Bayesian classification and structure learning in decomposable graphical models
-A particle Gibbs sampler for Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models.
+A grapihcal predictive classifier and a particle Gibbs sampler for Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models.
 
 ### Installation
 
