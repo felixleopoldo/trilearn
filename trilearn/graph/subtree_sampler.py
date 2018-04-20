@@ -61,7 +61,8 @@ def random_subtree(T, alpha, beta, subtree_mark):
                 else:
                     w += 1
 
-    subtree = T.subgraph(subtree_nodes)
+    #subtree = T.subgraph(subtree_nodes)
+    subtree = None
     v = len(subtree_nodes)
     probtree = beta * v * np.power(alpha, v-1) / np.float(n)
     probtree *= np.power(1-alpha, w)

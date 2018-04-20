@@ -217,10 +217,9 @@ def random_christmas_tree(new, tree, subtree_nodes, subtree_edges, subtree_adjli
         new_cliques.add(C[clique])
 
     # Get the neighbor set of each c which can be moved to C[c]
-
     for clique in subtree_nodes:
         N_S[clique] = {neig for neig in tree.neighbors(clique)
-                       if neig & clique <= C[clique] and neig not in set(subtree_nodes)}
+                       if neig & clique <= C[clique] and neig not in subtree_nodes}
     # Add the new cliques
     for c in subtree_nodes:
         tree.add_node(C[c], label=str(tuple(C[c])), color="red")
@@ -290,7 +289,7 @@ def random_christmas_tree(new, tree, subtree_nodes, subtree_edges, subtree_adjli
             P[c] = 1.0
             N[c] = 1.0
             if len(RM[c]) > 1:
-                P[c] = (1.0 / len(RM[c]))
+                P[c] = 1.0 / len(RM[c])
                 P[c] *= np.power(2.0, - (len(RM[c]) - 1.0)) * len(M[c])
                 if not len(c) + 1 == len(C[c]): # c not swallowed by C[c]
                     N[c] = np.power(2.0, - len(N_S[c]))
