@@ -28,13 +28,18 @@ class GraphPredictive(sklearn.base.BaseEstimator):
                  prompt_burnin=False,
                  only_map_graph=False,
                  standard_bayes=False,
+                 cta_alpha=0.5,
+                 cta_beta=0.5,
+                 true_graphs=None,
                  async=False):
         self.n_particles = n_particles
         self.n_pgibbs_samples = n_pgibbs_samples
         self.prompt_burnin = prompt_burnin
         self.standard_bayes = standard_bayes
         self.async = async
-
+        self.cta_alpha = cta_alpha
+        self.cta_beta = cta_beta
+        self.true_graphs = true_graphs
 
     def fit(self, x, y, hyper_mu=None, hyper_v=None, hyper_tau=None, hyper_alpha=None,
             same_graph_groups=None):
@@ -52,7 +57,7 @@ class GraphPredictive(sklearn.base.BaseEstimator):
             hyper_alpha (float): Degrees of freedom in the normal inverse Wishart density
         """
         self.classes = list(set(np.array(y).flatten()))
-        classes   = self.classes
+        classes  = self.classes
         self.x = np.matrix(x)
         self.y = np.matrix(y)
         self.p = x.shape[1]
@@ -68,8 +73,11 @@ class GraphPredictive(sklearn.base.BaseEstimator):
 
         n_groups = len(self.same_graph_groups)
         if hyper_mu is None:
-            mu_shift = 0.001
-            self.hyper_mu = [np.matrix(np.ones(n_dim)).T * i * mu_shift for i in classes]
+            self.hyper_mu = range(len(self.classes))
+            for c in classes:
+                c_inds = (np.array(self.y).ravel() == c)
+                xc = self.x[np.ix_(c_inds, range(self.p))]
+                self.hyper_mu[c] = np.mean(xc, axis=0).reshape(n_dim, 1)
         else:
             self.hyper_mu = hyper_mu
         if hyper_tau is None:
@@ -77,7 +85,7 @@ class GraphPredictive(sklearn.base.BaseEstimator):
         else:
             self.hyper_tau = hyper_tau
         if hyper_v is None:
-            self.hyper_v = [1.] * n_classes
+            self.hyper_v = [n_dim] * n_classes
         else:
             self.hyper_v = hyper_v
         if hyper_alpha is None:
@@ -97,11 +105,19 @@ class GraphPredictive(sklearn.base.BaseEstimator):
                 self.graph_dists[g] = gdist.GraphDistribution()
                 self.graph_dists[g].add_graph(graph, 1.0)
 
+        elif self.true_graphs is not None:
+            self.graph_dists = [None for _ in self.same_graph_groups]
+            for g, group in enumerate(self.same_graph_groups):
+                self.graph_dists[g] = gdist.GraphDistribution()
+                self.graph_dists[g].add_graph(self.true_graphs[g], 1.0)
+
         else:
             self.gen_gibbs_chains(n_particles=self.n_particles,
                                   n_pgibbs_samples=self.n_pgibbs_samples,
-                                  async=False)  # move to fit
-            self.set_graph_dists(set_burnins=self.prompt_burnin)  # move to fit
+                                  cta_alpha=self.cta_alpha,
+                                  cta_beta=self.cta_beta,
+                                  async=False)
+            self.set_graph_dists(set_burnins=self.prompt_burnin)
 
     # def fit(self, x, y):
     #     """
@@ -434,15 +450,16 @@ class GraphPredictive(sklearn.base.BaseEstimator):
             mu_star = (v*mu + n*x_bar) / (v + n)
             tau_star = tau + s + (n*v / (v + n)) * (mu - x_bar)*(mu - x_bar).T
             v_star = v + n
+            #print "v_star: " + str(v_star)
             for c in cliques:
                 if c not in cache:
                     node_list = list(c)
                     x_new_c = x_new[np.ix_(range(k), node_list)].T
-                    t_d = len(c)
+                    t_d = len(c) #TODO: Bug?  q in paper
                     t_mu = mu_star[node_list]
                     t_tau_star = (tau_star[np.ix_(node_list, node_list)] *
                                   (v_star + 1) / (v_star * (v_star + 1 - t_d))).I
-                    t_df = v_star - t_d + 1
+                    t_df = v_star - t_d + 1 # what is this?
                     cache[c] = tdist.log_pdf(x_new_c,
                                              t_mu,
                                              t_tau_star,
