@@ -3,12 +3,13 @@ A grapihcal predictive classifier and a particle Gibbs sampler for Bayesian stru
 
 ### Installation
 
-```
-$ pip install trilearn
-```
 If you don't have graphviz on you machine, you can install it from brew / aptitude / pacman for example
 ```
 $ brew install graphviz
+```
+Then run
+```
+$ pip install trilearn
 ```
 
 ### Running the tests
@@ -57,6 +58,12 @@ $ count_chordal_graphs -p 15 -N 20000
 ## Authors
 
 * **Felix Rios**
+
+## References
+* [Jimmy Olsson, Tetyana Pavlenko, Felix L. Rios, Sequential sampling of junction trees for decomposable graphs,
+ ArXiv 2018](https://arxiv.org/abs/1806.00584)
+* [Jimmy Olsson, Tetyana Pavlenko, Felix L. Rios, Bayesian inference in decomposable graphical models using sequential Monte Carlo methods, ArXiv 2018](https://arxiv.org/abs/1805.12571)
+* [Tetyana Pavlenko, Felix L. Rios, Graphical posterior predictive classifier: Bayesian model averaging with particle Gibbs, ArXiv 2018](https://arxiv.org/abs/1707.06792)
 
 ## License
 
