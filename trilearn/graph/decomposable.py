@@ -95,7 +95,7 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
     """ Generates a random decomposable graph using the Christmas tree algotihm.
 
     Args:
-        internal_nodes (list): list of inernal nodes in the generated graph.
+        internal_nodes (list): list of internal nodes in the generated graph.
         alpha (float): Subtree kernel parameter
         beta (float): Subtree kernel parameter
         directory (string): Path to where the plots should be saved.

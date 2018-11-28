@@ -6,9 +6,9 @@ from trilearn.graph import junction_tree as jtlib
 def sample(tree, node):
     """ Removes node from the underlying decomposable graph of tree.
         two cases:
-        If node was isolated, any junction tree representation of g(tree)\{i} is
-        chosen at random.
-        Otherwise, the origin node of each clique containing node is choosed
+        If node was isolated, any junction tree representation of g(tree)\{node} is
+        randomized at the empty separator.
+        Otherwise, the origin node of each clique containing node is chosen
         deterministically.
 
     Args:
@@ -19,14 +19,13 @@ def sample(tree, node):
         NetworkX graph: a junction tree
     """
 
-    #shrinked_tree = tree.subgraph(tree.nodes()) # nx < 2.x
-    shrinked_tree = tree.copy() # nx > 2.x
-
+    #  shrinked_tree = tree.subgraph(tree.nodes()) # nx < 2.x
+    shrinked_tree = tree.copy()  # nx > 2.x
     # If isolated node in the decomposable graph
     if frozenset([node]) in shrinked_tree.nodes():
         # Connect neighbors
-        #neighs = tree.neighbors(frozenset([node])) # nx < 2.x
-        neighs = list(tree.neighbors(frozenset([node]))) # nx > 2.x
+        # neighs = tree.neighbors(frozenset([node])) # nx < 2.x
+        neighs = list(tree.neighbors(frozenset([node])))  # nx > 2.x
         for j in range(len(neighs) - 1):
             shrinked_tree.add_edge(neighs[j], neighs[j + 1])
         shrinked_tree.remove_node(frozenset([node]))
@@ -116,17 +115,13 @@ def possible_origins(tree, node):
     return origins
 
 
-def transition_prob(tree, old_tree, node=None):
-    return 1 / log_count_origins(tree, old_tree, node)
-
-
 def log_count_origins(tree, old_tree, node):
-    """ This is the (log) number of possible junction trees with the internal
-    node p removed that tree could have been built from using the CTA.
+    """ The (log) number of possible junction trees with the internal
+    node, node removed that tree could have been built from using the CTA.
 
     Args:
         tree (nx graph): junction tree
-        old_tree (nx graph): junction tree
+        old_tree (nx graph): junction tree, where node is removed from tree
         node (int): Node in underlying graph
 
     Returns:
@@ -140,3 +135,13 @@ def log_count_origins(tree, old_tree, node):
     # For the other cases
     Ncp = possible_origins(tree, node)
     return np.sum([np.log(max(len(Ncp[c]), 1)) for c in Ncp])
+
+
+def log_trans_prob(tree, old_tree, node=None):
+    """
+    Args:
+        tree (nx graph): junction tree
+        old_tree (nx graph): junction tree, where node is removed from tree
+        node (int): Node in underlying graph
+    """
+    return -log_count_origins(tree, old_tree, node)

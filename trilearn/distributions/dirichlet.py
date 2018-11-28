@@ -61,8 +61,6 @@ def pdf_multidim(x, alpha, beta, levels):
 def log_norm_constant_multidim(alpha, beta, levels):
     """
     The normalizing constant in a multidimensional multinomial distribution.
-    This makes it easier when e.g. computing the normalizing constaing in a
-    posterior for th parameters.
 
     Args:
         levels (list): A list of the number of level for each random variable. e.g. [2, 2, 3].

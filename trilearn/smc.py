@@ -132,8 +132,7 @@ def smc(N, alpha, beta, radius, seq_dist, debug=False):
                 ind_perms[i, n] = sp.gen_order_neigh(ind_perms[I[i], n - 1],
                                                      radius, total)
                 node = ind_perms[i, n][n]
-                new_trees[
-                    i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
+                new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
                     old_trees[I[i]], node, alpha, beta, only_tree=False)
                 # Backward kernel
                 log_R = -trilearn.graph.junction_tree_collapser.log_count_origins(new_trees[i], old_trees[I[i]], node)

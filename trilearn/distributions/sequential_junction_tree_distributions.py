@@ -57,6 +57,9 @@ class CondUniformJTDistribution(SequentialJTDistribution):
     def __init__(self, p):
         self.p = p
 
+    def ll(self, graph):
+        pass
+
     def log_ratio(self,
                   old_cliques,
                   old_separators,
