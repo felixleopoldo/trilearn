@@ -6,7 +6,6 @@ import json
 
 import networkx as nx
 import numpy as np
-import seaborn as sns
 from networkx.readwrite import json_graph
 import pandas as pd
 from pandas.plotting import autocorrelation_plot
@@ -74,17 +73,7 @@ class Trajectory:
             self.logl = [self.seqdist.ll(g) for g in self.trajectory[from_index:]]
         return pd.Series(self.logl)
 
-    def plot_heatmap(self, from_index=0, cbar=False):
-        heatmap = self.heatmap(from_index)
-        mask = np.zeros_like(heatmap)
-        mask[np.triu_indices_from(mask)] = True
-        with sns.axes_style("white"):
-            sns.heatmap(heatmap, mask=mask, annot=False,
-                        cmap="Blues",
-                        vmin=0.0, vmax=1.0, square=True,
-                        cbar=cbar, xticklabels=5, yticklabels=5)
-
-    def autocorrelation_size(self, from_index=0):
+    def size(self, from_index=0):
         """ Plots the auto-correlation function of the graph size (number of edges)
         Args:
             from_index (int): Burn-in period, default=0.

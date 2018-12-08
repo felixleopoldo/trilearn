@@ -2,6 +2,17 @@ import numpy as np
 import pandas as pd
 from numpy import linalg as la
 from matplotlib import pyplot as plt
+import seaborn as sns
+
+
+def plot_heatmap(heatmap, cbar=False):
+    mask = np.zeros_like(heatmap)
+    mask[np.triu_indices_from(mask)] = True
+    with sns.axes_style("white"):
+        sns.heatmap(heatmap, mask=mask, annot=False,
+                    cmap="Blues",
+                    vmin=0.0, vmax=1.0, square=True,
+                    cbar=cbar, xticklabels=5, yticklabels=5)
 
 
 def random_subset(A):

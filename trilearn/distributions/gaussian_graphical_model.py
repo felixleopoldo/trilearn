@@ -39,6 +39,7 @@ def gaussian_marginal_log_likelihood(S, n, D, delta):
     c2 = wish.log_norm_constant(D, delta)
     return c1 - c2
 
+
 def log_likelihood_partial(S, n, D, delta, cliques, separators, cache={}, idmatrices=None):
     """ Partial log-likelihood of the given cliques and separators.
     If every clique an separator is found in a graph, this is

@@ -102,12 +102,12 @@ def log_prop_ratio(from_tree, reduced_tree, to_tree, moved_node, alpha, beta):
 
 
 def log_post_ratio(from_tree, to_tree, seqdist):
-    log_post1 = seqdist.ll(jtlib.graph(from_tree))  # TODO: Extremely slow, it is converted to tre again.
     from_tree_seps = jtlib.separators(from_tree)
+    log_post1 = seqdist.ll_partial(from_tree.nodes(), from_tree_seps)
     log_post1 -= jtlib.log_n_junction_trees(from_tree, from_tree_seps)
 
-    log_post2 = seqdist.ll(jtlib.graph(to_tree))
     to_tree_seps = jtlib.separators(to_tree)
+    log_post2 = seqdist.ll_partial(to_tree.nodes(), to_tree_seps)
     log_post2 -= jtlib.log_n_junction_trees(to_tree, to_tree_seps)
 
     return log_post2 - log_post1

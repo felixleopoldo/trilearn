@@ -203,5 +203,11 @@ class GGMJTPosterior(SequentialJTDistribution):
                                                        self.parameters["delta"],
                                                        self.cache)
 
+    def ll_partial(self, cliques, separators):
+        return gaussian_graphical_model.log_likelihood_partial(self.SS, self.n,
+                                                               self.parameters["D"],
+                                                               self.parameters["delta"],
+                                                               cliques, separators, self.cache)
+
     def __str__(self):
         return "ggm_jt_post"
