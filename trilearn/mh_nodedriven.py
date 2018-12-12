@@ -85,9 +85,14 @@ def proposal_sample(from_tree, alpha, beta, n_nodes, **args):
 
 
 def log_prop_pdf(from_tree, reduced_tree, to_tree, moved_node, alpha, beta):
-    log_prob1 = trilearn.graph.junction_tree_collapser.log_trans_prob(from_tree, reduced_tree, node=moved_node)
-    log_prob2 = trilearn.graph.junction_tree_expander.K_star(reduced_tree, to_tree, alpha, beta, moved_node)
-    return log_prob1 + log_prob2
+    # Sum over R(to_tree, tree)K(tree, from_tree) for tree in Supp(R(to_tree, .)) = Supp(K(., to_tree))
+
+    #log_prob = 0
+    #for origin in trilearn.graph.junction_tree_collapser.possible_origins(from_tree, moved_node):
+    #    log_prob += -np.log(sum(origin))
+    log_prob = trilearn.graph.junction_tree_collapser.log_pdf(from_tree, reduced_tree, node=moved_node)
+    log_prob += np.log(trilearn.graph.junction_tree_expander.pdf(reduced_tree, to_tree, alpha, beta, moved_node))
+    return log_prob
 
 
 def log_prop_ratio(from_tree, reduced_tree, to_tree, moved_node, alpha, beta):
