@@ -1,4 +1,5 @@
 import itertools
+import json
 
 import numpy as np
 import scipy.stats as stats
@@ -61,7 +62,7 @@ def log_likelihood_partial(cliques, separators, no_levels, cell_alpha, counts, d
     return cliques_constants - seps_constants
 
 
-def gen_hyperconsistent_counts(graph, levels, constant_alpha):
+def sample_hyper_consistent_counts(graph, levels, constant_alpha):
     """
     TODO
     """
@@ -96,7 +97,7 @@ def gen_hyperconsistent_counts(graph, levels, constant_alpha):
     return parameters
 
 
-def gen_globally_markov_distribution(graph, constant_alpha, levels):
+def sample_hyper_consistent_parameters(graph, constant_alpha, levels):
     junctiontree = trilearn.graph.decomposable.junction_tree(graph)
     (C, S, H, A, R) = libj.peo(junctiontree)
     parameters = {}
@@ -131,7 +132,7 @@ def gen_globally_markov_distribution(graph, constant_alpha, levels):
 def hyperconsistent_cliques(clique1, clique1_dist, clique2,
                             levels, constant_alpha):
     """ Returns a distribution for clique2 that is hyper-consistent
-    with clique1_dist, a  distribution for clique1.
+    with clique1_dist.
 
     Args:
         clique1 (set): A clique
@@ -142,8 +143,15 @@ def hyperconsistent_cliques(clique1, clique1_dist, clique2,
     sep = list(clique1 & clique2)
     no_levels = np.array([len(l) for l in levels])
     clique2_dist_shape = tuple(no_levels[list(clique2)])
+
+    if sep == set([]):
+        alphas = [constant_alpha / np.prod(shape)] * np.prod(shape)
+        clique2_dist = np.random.dirichlet(alphas).reshape()
+
+
+
     sep_dist_shape = tuple(no_levels[sep])
-    clique2_dist = np.zeros(np.prod(no_levels[list(clique2)]),
+    clique2_dist = np.zeros(np.prod(no_levels[tuple(clique2)]),
                             dtype=np.float_).reshape(clique2_dist_shape)
 
     sep_dist = np.zeros(np.prod(no_levels[sep]),
@@ -152,32 +160,38 @@ def hyperconsistent_cliques(clique1, clique1_dist, clique2,
     for sepcells in itertools.product(*levels[sep]):
         # Set the indexing for clique2
         indexing_clique2 = [None]*len(clique2)
-        for i, j in enumerate(clique2):
-            if j in sep:
+        for ind, node in enumerate(clique2):
+            if node in sep:
                 # Get index in separator set
-                k = sep.index(j)
-                indexing_clique2[i] = sepcells[k]
+                k = sep.index(node)
+                indexing_clique2[ind] = sepcells[k]
             else:
-                indexing_clique2[i] = Ellipsis
+                indexing_clique2[ind] = Ellipsis
 
         # Set the indexing for clique1
         indexing_clique1 = [None]*len(clique1)
-        for i, j in enumerate(clique1):
-            if j in sep:
+        for ind, node in enumerate(clique1):
+            print ind, node
+            if node in sep:  # error if empty separator?
                 # Get index in separator set
-                k = sep.index(j)
-                indexing_clique1[i] = sepcells[k]
+                k = sep.index(node)
+                indexing_clique1[ind] = sepcells[k]
             else:
-                indexing_clique1[i] = Ellipsis
+                indexing_clique1[ind] = Ellipsis
 
-        shape = clique2_dist[indexing_clique2].shape
-        print "Bug"
-        sep_marg = np.sum(clique1_dist[indexing_clique1])
+        print sep
+        print clique1
+        print clique1_dist
+        print indexing_clique1
+        print clique2
+        shape = clique2_dist[tuple(indexing_clique2)].shape
+        print "Bug?"  # TODO: Fix this bug, whatever it is...
+        sep_marg = np.sum(clique1_dist[tuple(list(indexing_clique1))])
         sep_dist[sepcells] = sep_marg
         alphas = [constant_alpha / np.prod(shape)] * np.prod(shape)
         # alphas = [constant_alpha] * np.prod(shape)  # TODO
         d = np.random.dirichlet(alphas).reshape(shape)
-        clique2_dist[indexing_clique2] = d * sep_marg
+        clique2_dist[tuple(indexing_clique2)] = d * sep_marg
     return (clique2_dist, sep_dist)
     # return clique2_dist
 
@@ -187,12 +201,12 @@ def prob_dec(x, parameters, cliques, separators):
     """
     log_prob = 0.0
     for c in cliques:
-        index = tuple(x[list(c)])
+        index = tuple(x[tuple(c)])
         log_prob += np.log(parameters[c].item(index))
 
     for s in separators:
         if len(s) > 0:
-            index = tuple(x[list(s)])
+            index = tuple(x[tuple(s)])
             log_prob -= np.log(parameters[s].item(index))
 
     return np.exp(log_prob)
@@ -250,15 +264,32 @@ def est_parameters(graph, data, levels, const_alpha):
     return parameters
 
 
-def full_prob_table(dist, levels, cliques, separators):
+#def joint_prob_table(dist, levels, cliques, separators):
+def joint_prob_table(graph, parameters, levels):
+    (cliques, separators, _, _, _) = trilearn.graph.decomposable.peo(graph)
+
+    if len(separators) > 1:
+        separators = separators[1:]  # separators are counted from the second index
+#        table = joint_prob_table(parameters, levels, C, S[1:])
+#    else:
+#        table = joint_prob_table(parameters, levels, C, [])
+
+
     no_levels = [len(l) for l in levels]
     table = np.zeros(np.prod(no_levels)).reshape(tuple(no_levels))
     for cell in itertools.product(*levels):
-        table[cell] = prob_dec(np.array(cell), dist, cliques, separators)
+        table[cell] = prob_dec(np.array(cell), parameters, cliques, separators)
     return table
 
 
-def gen_multidim_data(table, n=1):
+def sample_joint_prob_table(graph, levels, total_counts):
+    local_tables = sample_hyper_consistent_parameters(graph, total_counts,
+                                                      levels)
+    table = joint_prob_table(graph, local_tables, levels)
+    return table
+
+
+def sample(table, n=1):
     p = len(table.shape)
     data = []
     for _ in range(n):
@@ -274,3 +305,21 @@ def gen_multidim_data(table, n=1):
             x += [val]
         data.append(x)
     return np.array(data).reshape(n, p)
+
+
+def read_local_hyper_consistent_parameters_from_json_file(filename):
+    with open(filename) as data_file:
+        json_parameters = json.load(data_file)
+
+    no_levels = np.array(json_parameters["no_levels"])
+    levels = [range(l) for l in no_levels]
+    parameters = {}
+    for clique_string, props in json_parameters.iteritems():
+        if clique_string == "no_levels":
+            continue
+        clique = frozenset(props["clique_nodes"])
+        clique_no_levels = tuple(no_levels[props["clique_nodes"]])
+        distr = np.array(props["parameters"]).reshape(clique_no_levels)
+        parameters[frozenset(props["clique_nodes"])] = distr
+
+    return parameters

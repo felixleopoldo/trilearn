@@ -1,9 +1,6 @@
 """
 Sequential Monte Carlo sampler for junction tree distributions.
 """
-import time
-from multiprocessing import Process
-from decimal import Decimal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,66 +11,14 @@ import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.junction_tree_collapser
 import trilearn.graph.junction_tree_expander
-import trilearn.graph.trajectory as mcmctraj
 import trilearn.set_process as sp
-
-
-def particle_gibbs(N, alpha, beta, radius, traj_length, seq_dist,
-                   jt_traj=None, debug=False):
-    """ A particle Gibbs implementation for approximating distributions over
-    junction trees.
-
-    Args:
-        N (int): Number of particles in SMC in each Gibbs iteration
-        traj_length (int): Number of Gibbs iterations (samples)
-        alpha (float): sparsity parameter for the Christmas tree algorithm
-        beta (float): sparsity parameter for the Christmas tree algorithm
-        radius (float): defines the radius within which ned nodes are selected
-        seq_dist (SequentialJTDistributions): the distribution to be sampled from
-
-    Returns:
-        mcmctraj.Trajectory: Markov chain of teh underlying graphs of the junction trees sampled by pgibbs.
-    """
-    graph_traj = mcmctraj.Trajectory()
-    graph_traj.set_sequential_distribution(seq_dist)
-
-    (trees, log_w) = (None, None)
-    prev_tree = None
-    for i in tqdm(range(traj_length), desc="Particle Gibbs samples"):
-
-        start_time = time.time()
-        if i == 0:
-            (trees, log_w) = smc(N, alpha, beta, radius, seq_dist)
-        else:
-            # Sample backwards trajectories
-            perm_traj = sp.backward_perm_traj_sample(seq_dist.p, radius)
-            T_traj = trilearn.graph.junction_tree_collapser.backward_jt_traj_sample(perm_traj,
-                                                                                    prev_tree)
-            (trees, log_w, Is) = smc_cond(N,
-                                          alpha,
-                                          beta,
-                                          radius,
-                                          seq_dist,
-                                          T_traj,
-                                          perm_traj)
-
-        # Sample T from T_1..p
-        log_w_rescaled = np.array(log_w.T)[seq_dist.p - 1] - max(np.array(log_w.T)[seq_dist.p - 1])
-        norm_w = np.exp(log_w_rescaled) / sum(np.exp(log_w_rescaled))
-        I = np.random.choice(N, size=1, p=norm_w)[0]
-        T = trees[I]
-        end_time = time.time()
-        prev_tree = T
-        graph_traj.add_sample(jtlib.graph(T), end_time - start_time)
-
-    return graph_traj
 
 
 def smc_ggm_graphs(N, alpha, beta, radius, X, D, delta):
     cache = {}
     seq_dist = seqdist.GGMJTPosterior()
     seq_dist.init_model(X, D, delta, cache)
-    (trees, log_w) = smc(N, alpha, beta, radius, seq_dist)
+    (trees, log_w) = approximate(N, alpha, beta, radius, seq_dist)
     log_w_rescaled = np.array(log_w.T)[seq_dist.p - 1] - \
                      max(np.array(log_w.T)[seq_dist.p - 1])
     norm_w = np.exp(log_w_rescaled) / sum(np.exp(log_w_rescaled))
@@ -87,7 +32,7 @@ def smc_approximate_ggm(N, alpha, beta, radius, X, D, delta):
     return dist
 
 
-def smc(N, alpha, beta, radius, seq_dist, debug=False):
+def approximate(N, alpha, beta, radius, seq_dist, debug=False):
     """ Sequential Monte Carlo for junction trees using the christmas
     tree algorithm as proposal kernel.
 
@@ -135,7 +80,7 @@ def smc(N, alpha, beta, radius, seq_dist, debug=False):
                 new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
                     old_trees[I[i]], node, alpha, beta, only_tree=False)
                 # Backward kernel
-                log_R = -trilearn.graph.junction_tree_collapser.log_count_origins(new_trees[i], old_trees[I[i]], node)
+                log_R = trilearn.graph.junction_tree_collapser.log_pdf(new_trees[i], old_trees[I[i]], node)
                 log_density_ratio = seq_dist.log_ratio(old_cliques,
                                                        old_separators,
                                                        new_cliques,
@@ -146,7 +91,7 @@ def smc(N, alpha, beta, radius, seq_dist, debug=False):
     return (new_trees, log_w)
 
 
-def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
+def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
     """ SMC an junction trees conditioned on the trajectories T_cond
     and perm_cond.
     """
@@ -197,11 +142,11 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
                     new_cliques = T.nodes()
                     new_separators = T.get_separators()
                     node = list(set(perm_cond[n]) - set(perm_cond[n - 1]))[0]
-                    K_st = trilearn.graph.junction_tree_expander.K_star(T_old, T, alpha, beta, node)
-                    log_order_pr = sp.backward_order_neigh_log_prob(perm_cond[n - 1],
-                                                                    perm_cond[n],
-                                                                    radius, maxradius)
-                    log_R = log_order_pr - trilearn.graph.junction_tree_collapser.log_count_origins(T, T_old, node)
+                    K_st = trilearn.graph.junction_tree_expander.pdf(T_old, T, alpha, beta, node)
+                    log_order_pdf = sp.backward_order_neigh_log_prob(perm_cond[n - 1],
+                                                                     perm_cond[n],
+                                                                     radius, maxradius)
+                    log_R = log_order_pdf + trilearn.graph.junction_tree_collapser.log_pdf(T, T_old, node)
 
                     # Set weight
                     log_w[i, n] = seq_dist.log_ratio(old_cliques,
@@ -226,7 +171,7 @@ def smc_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
                                                                     ind_perms[i, n],
                                                                     radius, maxradius)
                     T = new_trees[i]
-                    log_R = log_order_pr - trilearn.graph.junction_tree_collapser.log_count_origins(T, T_old, node)
+                    log_R = log_order_pr + trilearn.graph.junction_tree_collapser.log_pdf(T, T_old, node)
                     log_w[i, n] = seq_dist.log_ratio(old_cliques,
                                                      old_separators,
                                                      new_cliques,
@@ -251,7 +196,7 @@ def est_log_norm_consts(order, n_particles, sequential_distribution, alpha=0.5, 
         return log_consts
 
     for t in tqdm(range(n_smc_estimates), desc="Const estimates"):
-        (trees, log_w) = smc(n_particles, alpha, beta, sequential_distribution.p, sequential_distribution)
+        (trees, log_w) = approximate(n_particles, alpha, beta, sequential_distribution.p, sequential_distribution)
         w = np.exp(log_w)
         log_consts[t, :] = estimate_norm_const(order, w)
 
@@ -281,14 +226,14 @@ def est_n_dec_graphs(order, n_particles, alpha=0.5, beta=0.5, n_smc_estimates=1,
 
 def uniform_dec_samples(order, n_particles, alpha=0.5, beta=0.5, debug=False):
     sd = seqdist.CondUniformJTDistribution(order)
-    (trees, log_w) = smc(n_particles, alpha, beta, sd.p, sd)
+    (trees, log_w) = approximate(n_particles, alpha, beta, sd.p, sd)
     graphs = [jtlib.graph(tree) for tree in trees]
     return graphs
 
 
 def uniform_dec_maxl_clique_size_samples(order, n_particles, alpha=0.5, beta=0.5, debug=False):
     sd = seqdist.CondUniformJTDistribution(order)
-    (trees, log_w) = smc(n_particles, alpha, beta, sd.p, sd)
+    (trees, log_w) = approximate(n_particles, alpha, beta, sd.p, sd)
     w = np.exp(log_w[:, order - 1])
     norm_w = np.array(w / w.sum()).flatten()
     max_clique_sizes = []
@@ -309,192 +254,6 @@ def est_dec_max_clique_size(order, n_particles, alpha=0.5, beta=0.5, n_smc_estim
         if debug:
             print t, est_exp
     return expected_maxl_clique_sizes
-
-
-def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radius, debug=False):
-    """ Particle Gibbs for approximating distributions over
-    Gaussian graphical models.
-
-    Args:
-        n_particles (int): Number of particles in SMC in each Gibbs iteration
-        traj_length (int): Number of Gibbs iterations (samples)
-        alpha (float): sparsity parameter for the Christmas tree algorithm
-        beta (float): sparsity parameter for the Christmas tree algorithm
-        radius (float): defines the radius within which ned nodes are selected
-        X (np.matrix): row matrix of data
-        D (np.matrix): matrix parameter for the hyper inverse wishart prior
-        delta (float): degrees of freedom for the hyper inverse wishart prior
-
-    Returns:
-        mcmctraj.Trajectory: Markov chain of the underlying graphs of the junction trees sampled by pgibbs.
-    """
-
-    cache = {}
-    seq_dist = seqdist.GGMJTPosterior()
-    seq_dist.init_model(np.asmatrix(X), D, delta, cache)
-    mcmctraj = particle_gibbs(n_particles, alpha, beta, radius, traj_length, seq_dist, debug=debug)
-    return mcmctraj
-
-
-def gen_pgibbs_ggm_trajectory(dataframe, n_particles, n_samples, D=None, delta=1.0, cache={}, alpha=0.5, beta=0.5,
-                              radius=None, **args):
-    p = dataframe.shape[1]
-    if D is None:
-        D = np.identity(p)
-    if radius is None:
-        radius = p
-    sd = seqdist.GGMJTPosterior()
-    sd.init_model(np.asmatrix(dataframe), D, delta, cache)
-    return particle_gibbs(n_particles, alpha, beta, radius, n_samples, sd)
-
-
-def gen_pgibbs_loglin_trajectory(dataframe, n_particles, n_samples, pseudo_obs=1.0, cache={}, alpha=0.5, beta=0.5,
-                                 radius=None, **args):
-    p = dataframe.shape[1]
-    if radius is None:
-        radius = p
-
-    n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
-    levels = np.array([range(l) for l in n_levels])
-
-    sd = seqdist.LogLinearJTPosterior(dataframe.get_values(), pseudo_obs, levels, cache)
-    return particle_gibbs(n_particles, alpha, beta, radius, n_samples, sd)
-
-
-def gen_pgibbs_ggm_trajectories(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
-                                radii=[None], cache={}, filename_prefix=None, **args):
-    graph_trajectories = []
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        graph_trajectory = gen_pgibbs_ggm_trajectory(dataframe, N, T, D, delta, cache, alpha, beta, rad)
-                        graph_trajectories.append(graph_trajectory)
-                        if filename_prefix:
-                            if rad is None:
-                                rad = dataframe.shape[1]
-                            graphs_file = filename_prefix + '_ggm_jt_post_T_' + str(T) + '_N_' + str(N)
-                            graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-                            graphs_file += '_radius_' + str(rad) + '_graphs.txt'
-                            graph_trajectory.write_file(graphs_file)
-    return graph_trajectories
-
-
-def gen_pgibbs_ggm_trajectories_parallel(X, trajectory_lengths, n_particles,
-                                         D=None, delta=1.0, alphas=[0.5], betas=[0.5], radii=[None],
-                                         cache={}, filename_prefix=None,
-                                         **args):
-    p = X.shape[1]
-    if D is None:
-        D = np.identity(p)
-    if radii == [None]:
-        radii = [p]
-    cache = {}
-    for N in n_particles:
-        for T in trajectory_lengths:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        sd = seqdist.GGMJTPosterior()
-                        sd.init_model(X, D, delta, cache)
-                        print "Starting: " + str((N, alpha, beta, rad,
-                                                  T, sd, filename_prefix))
-
-                        proc = Process(target=particle_gibbs_to_file,
-                                       args=(N, alpha, beta, rad,
-                                             T, sd, filename_prefix))
-                        proc.start()
-
-    for N in n_particles:
-        for T in trajectory_lengths:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        proc.join()
-                        print "Completed: " + str((N, alpha, beta,
-                                                   rad, T,
-                                                   filename_prefix))
-
-
-def gen_pgibbs_loglin_trajectories(dataframe, trajectory_lengths, n_particles,
-                                   pseudo_observations=[1.0], alphas=[0.5], betas=[0.5], radii=[None],
-                                   cache={}, filename_prefix=None,
-                                   **args):
-    graph_trajectories = []
-    for N in n_particles:
-        for T in trajectory_lengths:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        for pseudo_obs in pseudo_observations:
-                            graph_trajectory = gen_pgibbs_loglin_trajectory(dataframe, N, T, pseudo_obs, cache, alpha,
-                                                                            beta, rad)
-                            graph_trajectories.append(graph_trajectory)
-                            if filename_prefix:
-                                if rad is None:
-                                    rad = dataframe.shape[1]
-                                graphs_file = filename_prefix + '_loglin_pseudo_obs_' + str(pseudo_obs) + '_T_' + str(
-                                    T) + '_N_' + str(N)
-                                graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-                                graphs_file += '_radius_' + str(rad) + '_graphs.txt'
-                                graph_trajectory.write_file(graphs_file)
-    return graph_trajectories
-
-
-def gen_pgibbs_loglin_trajectories_parallel(dataframe, trajectory_length, n_particles,
-                                            pseudo_observations, alphas, betas, radii, filename_prefix,
-                                            **args):
-    cache = {}
-    for N in n_particles:
-        for T in trajectory_length:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        for pseudo_obs in pseudo_observations:
-                            sd = seqdist.LogLinearJTPosterior(dataframe, pseudo_obs, levels, cache)
-                            print "Starting: " + str((N, alpha, beta, rad,
-                                                      T, sd, filename_prefix,))
-                            proc = Process(target=particle_gibbs_to_file,
-                                           args=(N, alpha, beta, rad,
-                                                 T, sd, filename_prefix,))
-                            proc.start()
-
-    for N in n_particles:
-        for T in trajectory_length:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        for pseudo_obs in pseudo_observations:
-                            proc.join()
-                            print "Completed: " + str((N, alpha, beta,
-                                                       rad, T,
-                                                       filename_prefix))
-
-
-def particle_gibbs_to_file(N, alpha, beta, radius, T,
-                           seqdist, filename_prefix):
-    """ Writes the trajectory of graphs generated by particle Gibbs to file.
-
-    Args:
-        N (int): Number of particles in SMC in each Gibbs iteration
-        T (int): Number of Gibbs iterations (samples)
-        alpha (float): sparsity parameter for the Christmas tree algorithm
-        beta (float): sparsity parameter for the Christmas tree algorithm
-        radius (float): defines the radius within which ned nodes are selected
-        seq_dist (SequentialJTDistributions): the distribution to be sampled from
-        filename_prefix (string): prefix to the filename
-
-    Returns:
-        mcmctraj.Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
-
-    """
-    graphtraj = particle_gibbs(N, alpha, beta, radius, T, seqdist)
-    graphs_file = filename_prefix + '_' + str(seqdist) + '_T_' + str(T) + '_N_' + str(N)
-    graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-    graphs_file += '_radius_' + str(radius) + '_graphs.txt'
-    graphtraj.write_file(graphs_file)
-    return graphtraj
 
 
 def get_smc_trajs(Is):

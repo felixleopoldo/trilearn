@@ -23,7 +23,6 @@ class JunctionTree(nx.Graph):
             self.log_nus[sep] = log_nu(self, sep)
         return self.log_nus[sep]
 
-
     def fresh_copy(self):
         """Return a fresh copy graph with the same data structure.
 
@@ -234,6 +233,7 @@ def n_subtrees(tree, sep):
         prev_visited = len(visited)
 
     return counts
+
 
 def log_n_junction_trees(tree, S):
     """ Returns the number of junction trees equivalent to tree where trees

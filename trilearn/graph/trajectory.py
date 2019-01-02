@@ -8,7 +8,6 @@ import networkx as nx
 import numpy as np
 from networkx.readwrite import json_graph
 import pandas as pd
-from pandas.plotting import autocorrelation_plot
 
 import trilearn.graph.empirical_graph_distribution as gdist
 from trilearn.distributions import sequential_junction_tree_distributions as sd
@@ -68,7 +67,7 @@ class Trajectory:
             graph_dist.add_graph(g, 1./length)
         return graph_dist
 
-    def likelihood(self, from_index=0):
+    def log_likelihood(self, from_index=0):
         if self.logl is None:
             self.logl = [self.seqdist.ll(g) for g in self.trajectory[from_index:]]
         return pd.Series(self.logl)
@@ -122,21 +121,16 @@ class Trajectory:
         self.optional = mcmc_json["optional"]
         if mcmc_json["model"]["name"] == "ggm_jt_post":
             self.seqdist = sd.GGMJTPosterior()
-            self.seqdist.init_model_from_json(mcmc_json["model"])
+        self.seqdist.init_model_from_json(mcmc_json["model"])
 
     def read_file(self, filename):
         """ Reads a trajectory from json-file.
         """
         with open(filename) as mcmc_file:
             mcmc_json = json.load(mcmc_file)
-            graphs = [json_graph.node_link_graph(js_graph)
-                      for js_graph in mcmc_json["trajectory"]]
-            self.set_trajectory(graphs)
-            self.set_time(mcmc_json["run_time"])
-            self.optional = mcmc_json["optional"]
-            if mcmc_json["model"]["name"] == "ggm_jt_post":
-                self.seqdist = sd.GGMJTPosterior()
-                self.seqdist.init_model_from_json(mcmc_json["model"])
+
+        print mcmc_json.keys()
+        self.from_json(mcmc_json)
 
     def __str__(self):
         ret = "times: " + str(self.time) + \

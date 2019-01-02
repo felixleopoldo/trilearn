@@ -28,14 +28,11 @@ def main(graph_filename, n_levels, pseudo_obs, output_directory, seed, **args):
         json_G = json.load(data_file)
 
     graph = json_graph.node_link_graph(json_G)
-    p = graph.order()
-    junctiontree = trilearn.graph.decomposable.junction_tree(graph)
-    (C, S, H, A, R) = libj.peo(junctiontree)
 
     levels = np.array([range(l) for l in n_levels])
 
-    parameters = loglin.gen_globally_markov_distribution(graph, pseudo_obs,
-                                                         levels)
+    parameters = loglin.sample_hyper_consistent_parameters(graph, pseudo_obs,
+                                                           levels)
 
     parameters_flattened = {}
     parameters_flattened["no_levels"] = n_levels
@@ -53,6 +50,7 @@ def main(graph_filename, n_levels, pseudo_obs, output_directory, seed, **args):
 
     print "wrote"
     print parameters_filename
+
 
 if __name__ == '__main__':
     import argparse

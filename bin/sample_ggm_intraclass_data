@@ -10,26 +10,21 @@ from networkx.readwrite import json_graph
 import trilearn.auxiliary_functions
 import trilearn.graph.graph as libg
 import trilearn.distributions.g_intra_class as gic
-
+from trilearn.graph.decomposable import gen_AR2_graph
 
 np.set_printoptions(precision=1)
 # G-Intra class (AR(2))
 
 
 def main(s2, rho, n_samples, n_dim, graph_dir, data_dir, precmat_dir, **args):
-    G = nx.Graph()
-    for i in range(n_dim):
-        G.add_node(i, label=str(i+1))
-    for i in range(n_dim-2):
-        G.add_edges_from([(i, i+1), (i, i+2)])
-    G.add_edge(n_dim-2, n_dim-1)
-    X = gic.sample(G, rho, s2, n_samples).T
-    c = gic.cov_matrix(G, rho, s2)
+    graph = gen_AR2_graph(n_dim)
+    X = gic.sample(graph, rho, s2, n_samples).T
+    c = gic.cov_matrix(graph, rho, s2)
 
-    hm_true = np.array(nx.to_numpy_matrix(G, nodelist=range(n_dim)))
+    hm_true = np.array(nx.to_numpy_matrix(graph, nodelist=range(n_dim)))
     trilearn.auxiliary_functions.plot_matrix(hm_true, graph_dir + "/intraclass_p_" + str(n_dim) +
                    "_heatmap", "eps", "True graph")
-    libg.plot_graph(G, graph_dir + "/intraclass_p_" +
+    libg.plot_graph(graph, graph_dir + "/intraclass_p_" +
                     str(n_dim)+"_graph.eps")
     np.savetxt(data_dir + "/intraclass_p_"+str(n_dim)+"_sigma2_"+str(s2) +
                "_rho_"+str(rho)+"_n_"+str(n_samples)+".csv", X, delimiter=',')
@@ -38,7 +33,7 @@ def main(s2, rho, n_samples, n_dim, graph_dir, data_dir, precmat_dir, **args):
 
     with open(graph_dir +
               "/intraclass_p_"+str(n_dim)+".json", 'w') as outfile:
-        js_graph = json_graph.node_link_data(G)
+        js_graph = json_graph.node_link_data(graph)
         json.dump(js_graph, outfile)
 
     print "Generated files:"

@@ -2,22 +2,16 @@
 Metropolis-Hastings sampler for junction tree distributions.
 """
 import time
-import random
-from multiprocessing import Process
-from decimal import Decimal
 
-import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
-import trilearn.distributions.gaussian_graphical_model as ggm
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.junction_tree_collapser
 import trilearn.graph.junction_tree_expander
 import trilearn.graph.trajectory as mcmctraj
-import trilearn.set_process as sp
 
 
 def gen_ggm_trajectory(dataframe, n_samples, D=None, delta=1.0, cache={}, alpha=0.5, beta=0.5, **args):

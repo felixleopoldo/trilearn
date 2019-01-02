@@ -9,6 +9,7 @@ import trilearn.graph.junction_tree_expander as jtexp
 import trilearn.graph.junction_tree as libj
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree_expander
+import trilearn.graph.junction_tree_collapser as jtcol
 import trilearn.graph.subtree_sampler
 
 np.set_printoptions(precision=1)
@@ -16,7 +17,6 @@ np.set_printoptions(suppress=True)
 
 def check_symmetric(a, tol=1e-8):
     return np.allclose(a, a.T, atol=tol)
-
 
 def expand(tree, node, alpha, beta, directory=None):
     nodes = tree.nodes()
@@ -28,10 +28,17 @@ def expand(tree, node, alpha, beta, directory=None):
     new_cliques,
     new_separators,
     P,
-    neig) = trilearn.graph.junction_tree_expander.random_christmas_tree(node, tree, subtree_nodes, subtree_edges, subtree_adjlist)
+    neig) = trilearn.graph.junction_tree_expander.sample_cond_on_subtree_nodes(node, tree, subtree_nodes, subtree_edges, subtree_adjlist)
 
-    K_st = trilearn.graph.junction_tree_expander.K_star(old_tree, tree, alpha, beta, node)
+    K_st = trilearn.graph.junction_tree_expander.pdf(old_tree, tree, alpha, beta, node)
     return K_st
+
+
+def ttest_collapser_support():
+    tree = jtlib.sample(5)
+    supp = jtcol.support(tree, 4)
+    tree2 = jtcol.sample(4)
+    assert tree2 in supp
 
 
 def test_logmu():

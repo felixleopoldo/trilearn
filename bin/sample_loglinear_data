@@ -25,31 +25,17 @@ def main(graph_filename, parameters_filename, data_samples, output_directory, **
         json_G = json.load(data_file)
 
     graph = json_graph.node_link_graph(json_G)
-    (C, S, H, A, R) = trilearn.graph.decomposable.peo(graph)
 
-    with open(parameters_filename) as data_file:
+    parameters = loglin.read_local_hyper_consistent_parameters_from_json_file(param_filename)
+
+    with open(filename) as data_file:
         json_parameters = json.load(data_file)
 
     no_levels = np.array(json_parameters["no_levels"])
     levels = [range(l) for l in no_levels]
-    parameters = {}
-    for clique_string, props in json_parameters.iteritems():
-        if clique_string == "no_levels":
-            continue
-        clique = frozenset(props["clique_nodes"])
-        clique_no_levels = tuple(no_levels[props["clique_nodes"]])
-        distr = np.array(props["parameters"]).reshape(clique_no_levels)
-        parameters[frozenset(props["clique_nodes"])] = distr
 
-    tot_prob = 0.0
-    table = None
-
-    if len(S) > 1:
-        table = loglin.full_prob_table(parameters, levels, C, S[1:])
-    else:
-        table = loglin.full_prob_table(parameters, levels, C, [])
-
-    data = loglin.gen_multidim_data(table, 1000)
+    table = loglin.joint_prob_table(graph, parameters, levels)
+    data = loglin.sample(table, 1000)
 
     print data.shape
     np.savetxt(output_directory+"/"+param_basename +
@@ -83,5 +69,5 @@ if __name__ == '__main__':
         '-s', '--seed',
         type=int, required=True
     )
-
-   main(**args.__dict__)
+    args = parser.parse_args()
+    main(**args.__dict__)

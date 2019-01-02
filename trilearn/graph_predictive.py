@@ -14,6 +14,7 @@ import trilearn.graph.graph as glib
 import trilearn.graph.decomposable as dlib
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.empirical_graph_distribution as gdist
+import trilearn.pgibbs
 import trilearn.smc as smc
 
 from trilearn.distributions import multivariate_students_t as tdist
@@ -190,17 +191,17 @@ class GraphPredictive(sklearn.base.BaseEstimator):
             seq_dist.init_model(x_centered, self.hyper_tau[g],
                                 self.hyper_alpha[g], cache)
             if async is True:
-                async_results[g] = pool.apply_async(smc.particle_gibbs,
+                async_results[g] = pool.apply_async(trilearn.pgibbs.sample_trajectory,
                                                     (n_particles, cta_alpha,
                                                      cta_beta,
                                                      self.smc_radius, n_pgibbs_samples,
                                                      seq_dist))
             else:
-                self.ggm_trajs[g] = smc.particle_gibbs(n_particles, cta_alpha,
-                                                       cta_beta,
-                                                       self.smc_radius,
-                                                       n_pgibbs_samples,
-                                                       seq_dist)
+                self.ggm_trajs[g] = trilearn.pgibbs.sample_trajectory(n_particles, cta_alpha,
+                                                                      cta_beta,
+                                                                      self.smc_radius,
+                                                                      n_pgibbs_samples,
+                                                                      seq_dist)
         if async is True:
             for g in range(len(self.same_graph_groups)):
                 self.ggm_trajs[g] = async_results[g].get()

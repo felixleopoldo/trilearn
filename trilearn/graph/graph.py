@@ -21,6 +21,22 @@ def from_json_file(filename):
     return json_graph.node_link_graph(json_G)
 
 
+def contract(graph, node1, node2, node):
+    """
+    Contracts the edge (node1, node2) on to node, where node is either node1 or node2.
+    :param node1:
+    :param node2:
+    :param node:
+    :return:
+    """
+
+
+def replace_node(graph, node, new_node):
+    graph.add_node(new_node)
+    graph.add_edges_from([(new_node, n) for n in graph.neighbors(node)])
+    graph.remove_node(node)
+
+
 def plot(graph, filename, layout="dot"):
     """ Plots a networkx graph and saves it to filename.
 

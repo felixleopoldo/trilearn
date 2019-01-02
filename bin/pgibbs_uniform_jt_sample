@@ -6,7 +6,7 @@ from multiprocessing import Process
 import numpy as np
 
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
-from trilearn.smc import particle_gibbs_to_file
+from trilearn.pgibbs import trajectory_to_file
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -69,7 +69,7 @@ for N in args.n_particles:
                                             T, sd, args.output_directory+"/" +
                                             filename_prefix,))
 
-                    proc = Process(target=particle_gibbs_to_file,
+                    proc = Process(target=trajectory_to_file,
                                    args=(N, alpha, beta, radius,
                                          T, sd, args.output_directory + "/" +
                                          filename_prefix,))

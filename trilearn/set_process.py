@@ -37,7 +37,7 @@ def order_neigh_set(current_order, radius, total_set):
 
 
 def order_neigh_log_prob(from_order, to_order, radius, total_set):
-    """ Since the perm trajectory is Markovian so the ratio
+    """ Since the perm trajectory is Markovian, the ratio
     becomes only the probability.
     """
     new = list(set(to_order) - set(from_order))[0]
@@ -56,7 +56,7 @@ def gen_order_neigh(from_order, radius, total_set):
     Args:
         from_order (list): list of elements
         radius (int): specifies the radius within which the new element can be taken
-        totol_set (list): the full set of elements 
+        total_set (list): the full set of elements
 
     Returns:
         numpy array
@@ -93,7 +93,7 @@ def backward_order_neigh_set(from_order, radius, maxradius):
 
 def backward_order_neigh_log_prob(from_order, to_order, radius, maxradius):
     """ Probability of generating order from_order from the larger order to_order
-    under the restrictiuon that no hole greater than radius is created.
+    under the restriction that no hole greater than radius is created.
     """
     removed = list(set(to_order) - set(from_order))[0]
 

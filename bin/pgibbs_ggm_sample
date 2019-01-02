@@ -4,6 +4,7 @@ import os.path
 
 import numpy as np
 
+import trilearn.pgibbs
 import trilearn.smc as smc
 
 
@@ -14,12 +15,12 @@ def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, d
     X = np.matrix(np.loadtxt(data_filename, delimiter=','))
     filename_base = os.path.splitext(os.path.basename(data_filename))[0]
     if parallel is True:
-        smc.gen_pgibbs_ggm_trajectories_parallel(X, trajectory_length, n_particles,
-                                                 alphas=alphas, betas=betas, radii=radii, cache={},
-                                                 filename_prefix=output_directory + "/" + filename_base)
+        trilearn.pgibbs.sample_trajectories_ggm_parallel(X, trajectory_length, n_particles,
+                                                         alphas=alphas, betas=betas, radii=radii, cache={},
+                                                         filename_prefix=output_directory + "/" + filename_base)
     else:
-        smc.gen_pgibbs_ggm_trajectories(X, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
-                                        cache={}, filename_prefix=output_directory + "/" + filename_base)
+        trilearn.pgibbs.sample_trajectories_ggm(X, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
+                                                cache={}, filename_prefix=output_directory + "/" + filename_base)
 
 if __name__ == "__main__":
     import argparse

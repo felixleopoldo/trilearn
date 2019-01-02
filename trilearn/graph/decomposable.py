@@ -141,3 +141,31 @@ def junction_tree(graph):
     jt.add_nodes_from(T.nodes())
     jt.add_edges_from(T.edges())
     return jt
+
+
+def gen_AR2_graph(n_dim):
+    graph = nx.Graph()
+    for i in range(n_dim):
+        graph.add_node(i, label=str(i+1))
+    for i in range(n_dim-2):
+        graph.add_edges_from([(i, i+1), (i, i+2)])
+    graph.add_edge(n_dim-2, n_dim-1)
+    return graph
+
+
+def sample_random_AR_graph(n_dim, max_bandwidth):
+    adjmat = np.zeros(n_dim*n_dim, dtype=int).reshape((n_dim, n_dim))
+    bandwidth = 1
+    for i in range(n_dim):
+        b = np.random.choice([-1, 0, 1], 1, p=np.array([1, 1, 1])/3.0)[0]
+        bandwidth = max(bandwidth + b, 1)
+        bandwidth = min(bandwidth, n_dim - i - 1)
+        bandwidth = min(bandwidth, max_bandwidth)
+
+        for j in range(bandwidth):
+            adjmat[i, i + j + 1] = 1
+            adjmat[i + j + 1, i] = 1
+
+    graph = nx.from_numpy_matrix(adjmat)
+
+    return graph

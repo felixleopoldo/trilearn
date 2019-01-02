@@ -148,6 +148,12 @@ class GGMJTPosterior(SequentialJTDistribution):
         self.p = X.shape[1]
         self.idmatrices = [np.identity(i) for i in range(self.p+1)]
 
+    def init_model_from_json(self, sd_json):
+        self.init_model(np.asmatrix(sd_json["data"]),
+                        np.asmatrix(sd_json["parameters"]["D"]),
+                        sd_json["parameters"]["delta"],
+                        {})
+
     def get_json_model(self):
 
         return {"name": self.__str__(),

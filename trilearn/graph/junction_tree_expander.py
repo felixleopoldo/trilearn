@@ -48,7 +48,7 @@ def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
      new_cliques,
      new_separators,
      P,
-     neig) = random_christmas_tree(i, tree_new, subtree_nodes, subtree_edges, subtree_adjlist)
+     neig) = sample_cond_on_subtree_nodes(i, tree_new, subtree_nodes, subtree_edges, subtree_adjlist)
 
     if only_tree is True:
         return tree_new
@@ -79,7 +79,7 @@ def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
     if len(subtree_nodes) == 1:
         # There might be two possible subtrees so
         # we calculate the probabilities for these explicitly
-        K_st = K_star(tree, tree_new, alpha, beta, i)
+        K_st = pdf(tree, tree_new, alpha, beta, i)
     else:
         K_st = prob_subtree
         for c in P:
@@ -87,7 +87,7 @@ def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
     return tree_new, K_st, old_cliques, old_separators, new_cliques, new_separators
 
 
-def prob_christmas_tree(tree1, tree2, tree2_subtree_nodes, new):
+def subtree_cond_pdf(tree1, tree2, tree2_subtree_nodes, new):
     """ Returns the probability of generating tree2 from tree1 where the subtree is defined by tree2_subtree_nodes.
 
     Args:
@@ -110,17 +110,21 @@ def prob_christmas_tree(tree1, tree2, tree2_subtree_nodes, new):
     tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in
                                     tree2_subtree_nodes.iteritems()])
 
+
     # Get the separating sets
+    # S = sepsets_in_subgraph(tree2_subtree_nodes, tree1_subtree)
     S = {c: set() for c_t2, c in tree2_subtree_nodes.iteritems()}
     for c_tree2, c in tree2_subtree_nodes.iteritems():
         for neig in tree1_subtree.neighbors(c):
             S[c] = S[c] | (c & neig)
 
+    # P, N get_subset_probabilities(tree2_)
     # Get the chosen internal nodes
     M = {}
     for c_tree2, c in tree2_subtree_nodes.iteritems():
         M[c] = c_tree2 - {new} - S[c]
 
+    # Calculate probabilities corresponding to each clique
     P = {}
     N = {}
     for c_tree2, c in tree2_subtree_nodes.iteritems():
@@ -145,7 +149,7 @@ def prob_christmas_tree(tree1, tree2, tree2_subtree_nodes, new):
     return (P, N)
 
 
-def random_christmas_tree(new, tree, subtree_nodes, subtree_edges, subtree_adjlist):
+def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtree_adjlist):
     """ Returns a random CT from tree given subtree.
 
     Args:
@@ -299,7 +303,7 @@ def random_christmas_tree(new, tree, subtree_nodes, subtree_edges, subtree_adjli
     return (old_cliques, new_cliques, new_separators, P, N)
 
 
-def K_star(tree1, tree2, alpha, beta, new):
+def pdf(tree1, tree2, alpha, beta, new):
     """ CT kernel probability K(tree1, tree2)
 
     Args:
@@ -309,33 +313,37 @@ def K_star(tree1, tree2, alpha, beta, new):
         beta (float): Parameter for the subtree kernel
 
     Returns:
-       float: probability of generatin tree2 from tree1
+       float: probability of generating tree2 from tree1
     """
+
+    # TODO: Refactor so it can be used in M-H.
     prob = 0.0
     tree2_tree1_subtree_nodes = get_subtree_nodes(tree1, tree2, new)
     for tree2_subtree_nodes in tree2_tree1_subtree_nodes:
-        tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in
-                                        tree2_subtree_nodes.iteritems() if c_t1 is not None])
+        tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in tree2_subtree_nodes.iteritems() if c_t1 is not None])
+        tree1_subtree_prob = ss.pdf(tree1_subtree, tree1, alpha, beta)
 
-        tree1_subtree_prob = ss.prob_subtree(tree1_subtree, tree1,
-                                               alpha, beta)
-        (P, N) = prob_christmas_tree(tree1, tree2, tree2_subtree_nodes, new)
+        (P, N) = subtree_cond_pdf(tree1, tree2, tree2_subtree_nodes, new)
         christtree_prob = np.prod([P[c] * N[c] for c in P])
         prob += tree1_subtree_prob * christtree_prob
     return prob
 
 
 def get_subtree_nodes(T1, T2, new):
-    """ If the junction tree T1 is expanded to T2 by one internal node n, then the subtree choosed in T1
-    is (almost) unique. Also, the subtree of T2 containing n is unique.
-    This returns a dictionary of the cliques in the induced subtree of T2 as keys and the emerging cliques in T1 as values.
+    """ If the junction tree T1 is expanded to T2 by one internal node new,
+    then the subtree chosen in T1 is (almost) unique. Also, the subtree
+    of T2 containing new is unique.
+    This returns a dictionary of the cliques in the induced
+    subtree of T2 as keys and the emerging cliques in T1 as values.
 
     Args:
         T1 (NetworkX graph): a junction tree
         T2 (NetworkX graph): a junction tree
+        new (int): the new node
 
     Returns:
-        dict: a dictionary of the cliques in the induced subtree of T2 as keys and the emerging cliques in T1 as values.
+        dict: a dictionary of the cliques in the induced subtree
+        of T2 as keys and the emerging cliques in T1 as values.
     """
     # Get subtree of T2 induced by the new node
     T2_ind = trilearn.graph.junction_tree.subtree_induced_by_subset(T2, {new})
@@ -403,8 +411,8 @@ def get_subtree_nodes(T1, T2, new):
             # Replicate the structure in T2
             for neig1 in Ncp1:
                 for neig2 in Ncp2:
-                    if T1.has_edge(neig1, neig2): # Know that this edge is unique
+                    if T1.has_edge(neig1, neig2):  # Know that this edge is unique
                         tmp[e[0]] = neig1
                         tmp[e[1]] = neig2
-            T2_subtree_nodes = [tmp] # TODO: Bug? Too indented?
+        T2_subtree_nodes = [tmp]
     return T2_subtree_nodes

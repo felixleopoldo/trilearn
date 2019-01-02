@@ -1,5 +1,6 @@
 import numpy as np
 import networkx as nx
+from tqdm import tqdm
 
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
 import trilearn.graph.trajectory as mcmctraj
@@ -30,7 +31,7 @@ def mh(n_mh_samples, randomize, sd):
 
     MAP_graph = (graphs[0], log_prob_traj[0])
 
-    for i in range(1, n_mh_samples):
+    for i in tqdm(range(1, n_mh_samples), desc="Metropolis-Hastings samples"):
         if log_prob_traj[i-1] > MAP_graph[1]:
             MAP_graph = (graphs[i-1], log_prob_traj[i-1])
 
@@ -68,7 +69,7 @@ def mh(n_mh_samples, randomize, sd):
                     accept_traj[i] = 1
                     log_prob_traj[i] = log_p2
                     # jt_traj[i] = jt.copy()  # TODO: Improve.
-                    graphs[i] = jtlib.graph(jt) # TODO: Improve.
+                    graphs[i] = jtlib.graph(jt)  # TODO: Improve.
                 else:
                     #print "Reject"
                     aglib.disconnect_a(jt, C_disconn, X, Y, CX_disconn, CY_disconn, XSneig, YSneig)
