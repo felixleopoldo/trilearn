@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 import networkx as nx
 import numpy as np
 from networkx.readwrite import json_graph
@@ -71,17 +73,6 @@ class GraphDistribution(object):
         return str(tmp)
 
     def mode(self, number=1):
-        probs = [val["prob"] for
-                 _, val in self.distribution.iteritems()]
-        graphs = [val["graph"] for
-                  _, val in self.distribution.iteritems()]
-
-        graphs_probs = [(val["graph"], val["prob"]) for
-                  _, val in self.distribution.iteritems()]
-
-        graphs_probs.sort(key=1)
-        graphs_probs[-number:]
-        mode_idx = np.argmax(probs)
-        sorted_idx = np.argsort(probs)
-        graphs[sorted_idx][-number:]
-        return graphs[mode_idx]
+        graphs_probs = [(val["graph"], val["prob"]) for _, val in self.distribution.iteritems()]
+        graphs_probs.sort(key=itemgetter(1), reverse=True)
+        return graphs_probs[:number]
