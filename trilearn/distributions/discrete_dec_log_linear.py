@@ -106,19 +106,21 @@ def sample_hyper_consistent_parameters(graph, constant_alpha, levels):
 
     for i, clique in enumerate(C):
         if i == 0:
-            nodes = list(clique)
+            nodes = sorted(list(clique))
             no_cells = np.prod(no_levels[nodes])
             alphas = [constant_alpha/no_cells] * no_cells
-            x = stats.dirichlet.rvs(alphas)
+            x = stats.dirichlet.rvs(alphas)  # assume that the corresponding variables are ordered
             x.shape = tuple(no_levels[nodes])
             parameters[clique] = x
         else:
-            # Find clique that contains S[i]
+            # Find a clique that contains S[i]
             cont_clique = None
             for j in range(i):
-                if S[i] <= C[j]:
+                if S[i] < C[j]:
                     cont_clique = C[j]
                     break
+
+            #print str(clique) + " neighbor of " + str(cont_clique)
             (parameters[clique],
             parameters[S[i]]) = hyperconsistent_cliques(cont_clique,
                                                         parameters[cont_clique],
@@ -140,58 +142,54 @@ def hyperconsistent_cliques(clique1, clique1_dist, clique2,
         clique2 (set): A clique
         levels (np.array of lists): levels for all nodes in the full graph
     """
-    sep = list(clique1 & clique2)
+
+    sep_list = sorted(list(clique1 & clique2))  # TODO: Bug, does not work if sorting this for some reason
+    clique1_list = sorted(list(clique1))
+    clique2_list = sorted(list(clique2))
     no_levels = np.array([len(l) for l in levels])
-    clique2_dist_shape = tuple(no_levels[list(clique2)])
+    clique2_dist_shape = tuple(no_levels[clique2_list])
 
-    if sep == set([]):
-        alphas = [constant_alpha / np.prod(shape)] * np.prod(shape)
-        clique2_dist = np.random.dirichlet(alphas).reshape()
-
-
-
-    sep_dist_shape = tuple(no_levels[sep])
-    clique2_dist = np.zeros(np.prod(no_levels[tuple(clique2)]),
+    sep_dist_shape = tuple(no_levels[sep_list])
+    clique2_dist = np.zeros(np.prod(no_levels[clique2_list]),
                             dtype=np.float_).reshape(clique2_dist_shape)
 
-    sep_dist = np.zeros(np.prod(no_levels[sep]),
+    sep_dist = np.zeros(np.prod(no_levels[sep_list]),
                         dtype=np.float_).reshape(sep_dist_shape)
+    # we iterate through cell settings in the separators so we need
+    # 1. to match the settings to clique settings.
+    # 2. set Ellipsis the a node is not in a separator.
 
-    for sepcells in itertools.product(*levels[sep]):
-        # Set the indexing for clique2
-        indexing_clique2 = [None]*len(clique2)
-        for ind, node in enumerate(clique2):
-            if node in sep:
-                # Get index in separator set
-                k = sep.index(node)
-                indexing_clique2[ind] = sepcells[k]
+    for sepcells in itertools.product(*levels[sep_list]):
+        # Set the indexing for the contingency/parameter table for clique2.
+        # Since we iterate over the separators, we need to find it like this.
+        indexing_clique2 = [None]*len(clique2) # Nodes are assumed to be in the same order as clique2
+        for ind, node in enumerate(clique2_list):
+            if node in sep_list:
+                indexing_clique2[ind] = sepcells[sep_list.index(node)]
             else:
-                indexing_clique2[ind] = Ellipsis
+                indexing_clique2[ind] = slice(no_levels[node])
 
         # Set the indexing for clique1
         indexing_clique1 = [None]*len(clique1)
-        for ind, node in enumerate(clique1):
-            print ind, node
-            if node in sep:  # error if empty separator?
+        for ind, node in enumerate(clique1_list):
+            if node in sep_list:
                 # Get index in separator set
-                k = sep.index(node)
-                indexing_clique1[ind] = sepcells[k]
+                indexing_clique1[ind] = sepcells[sep_list.index(node)]
             else:
-                indexing_clique1[ind] = Ellipsis
+                indexing_clique1[ind] = slice(no_levels[node])
 
-        print sep
-        print clique1
-        print clique1_dist
-        print indexing_clique1
-        print clique2
-        shape = clique2_dist[tuple(indexing_clique2)].shape
-        print "Bug?"  # TODO: Fix this bug, whatever it is...
-        sep_marg = np.sum(clique1_dist[tuple(list(indexing_clique1))])
+        # Calculate marginal distribution for the spe setting sepcells in clique1
+        # this should then be the same in clique2.
+        sep_marg = np.sum(clique1_dist[indexing_clique1])
         sep_dist[sepcells] = sep_marg
-        alphas = [constant_alpha / np.prod(shape)] * np.prod(shape)
+
+        # Set the shape of clique2 dist
+        shape_clique2_dist = clique2_dist[indexing_clique2].shape
+        alphas = [constant_alpha / np.prod(shape_clique2_dist)] * np.prod(shape_clique2_dist)
         # alphas = [constant_alpha] * np.prod(shape)  # TODO
-        d = np.random.dirichlet(alphas).reshape(shape)
-        clique2_dist[tuple(indexing_clique2)] = d * sep_marg
+        # Generate distribution of clique1 for the sep setting sepcell
+        d = np.random.dirichlet(alphas).reshape(shape_clique2_dist)
+        clique2_dist[indexing_clique2] = d * sep_marg
     return (clique2_dist, sep_dist)
     # return clique2_dist
 
@@ -201,12 +199,14 @@ def prob_dec(x, parameters, cliques, separators):
     """
     log_prob = 0.0
     for c in cliques:
-        index = tuple(x[tuple(c)])
+        # pick the values of x at the correct indices
+        # Special case for cliques with only one node
+        index = tuple(x[sorted(list(c))]) # the value of x is used as index in cont table for c.
         log_prob += np.log(parameters[c].item(index))
 
     for s in separators:
         if len(s) > 0:
-            index = tuple(x[tuple(s)])
+            index = tuple(x[sorted(list(s))])
             log_prob -= np.log(parameters[s].item(index))
 
     return np.exp(log_prob)
@@ -265,27 +265,30 @@ def est_parameters(graph, data, levels, const_alpha):
 
 
 #def joint_prob_table(dist, levels, cliques, separators):
-def joint_prob_table(graph, parameters, levels):
+def locals_to_joint_prob_table(graph, parameters, levels):
     (cliques, separators, _, _, _) = trilearn.graph.decomposable.peo(graph)
 
-    if len(separators) > 1:
+    if len(cliques) == 1:
+        separators = []
+    elif len(cliques) > 1:
         separators = separators[1:]  # separators are counted from the second index
-#        table = joint_prob_table(parameters, levels, C, S[1:])
-#    else:
-#        table = joint_prob_table(parameters, levels, C, [])
-
 
     no_levels = [len(l) for l in levels]
     table = np.zeros(np.prod(no_levels)).reshape(tuple(no_levels))
+    # Iterate through al cells and set probabilities
     for cell in itertools.product(*levels):
         table[cell] = prob_dec(np.array(cell), parameters, cliques, separators)
     return table
+
+def sample_prob_table(graph, levels, total_counts=1.0):
+    local_tables = sample_hyper_consistent_parameters(graph, total_counts, levels)
+    return locals_to_joint_prob_table(graph, local_tables, levels)
 
 
 def sample_joint_prob_table(graph, levels, total_counts):
     local_tables = sample_hyper_consistent_parameters(graph, total_counts,
                                                       levels)
-    table = joint_prob_table(graph, local_tables, levels)
+    table = locals_to_joint_prob_table(graph, local_tables, levels)
     return table
 
 

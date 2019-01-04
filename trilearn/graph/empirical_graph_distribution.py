@@ -70,10 +70,18 @@ class GraphDistribution(object):
                key, val in self.distribution.iteritems()]
         return str(tmp)
 
-    def mode(self):
+    def mode(self, number=1):
         probs = [val["prob"] for
                  _, val in self.distribution.iteritems()]
         graphs = [val["graph"] for
                   _, val in self.distribution.iteritems()]
+
+        graphs_probs = [(val["graph"], val["prob"]) for
+                  _, val in self.distribution.iteritems()]
+
+        graphs_probs.sort(key=1)
+        graphs_probs[-number:]
         mode_idx = np.argmax(probs)
+        sorted_idx = np.argsort(probs)
+        graphs[sorted_idx][-number:]
         return graphs[mode_idx]

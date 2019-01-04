@@ -92,7 +92,7 @@ def naive_decomposable_graph(n):
 
 
 def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
-    """ Generates a random decomposable graph using the Christmas tree algotihm.
+    """ Generates a random decomposable graph using the Christmas tree algorithm.
 
     Args:
         internal_nodes (list): list of internal nodes in the generated graph.

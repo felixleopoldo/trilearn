@@ -34,7 +34,7 @@ def main(graph_filename, parameters_filename, data_samples, output_directory, **
     no_levels = np.array(json_parameters["no_levels"])
     levels = [range(l) for l in no_levels]
 
-    table = loglin.joint_prob_table(graph, parameters, levels)
+    table = loglin.locals_to_joint_prob_table(graph, parameters, levels)
     data = loglin.sample(table, 1000)
 
     print data.shape
