@@ -32,7 +32,7 @@ class GraphDistribution(object):
         return dist_json
 
     def heatmap(self):
-        graphprobs = [(self.distribution[d]["graph"], self.distribution[d]["prob"]) for d in self.distribution]
+        graphprobs = [(self.distribution[g]["graph"], self.distribution[g]["prob"]) for g in self.distribution]
         p = graphprobs[0][0].order()
         heatmap = np.matrix(np.zeros(p*p).reshape(p, p))
         for graph, prob in graphprobs:
@@ -46,7 +46,7 @@ class GraphDistribution(object):
 
     def read_from_dict(self, dict_distr):
         """
-        Format: {nx.Graph(): probabilty,...}
+        Format: {nx.Graph(): probability,...}
         """
         for graph, prob in dict_distr:
             self.add_graph(graph, prob)
@@ -55,7 +55,7 @@ class GraphDistribution(object):
         """
         Adds graph to the distribution. It graph does not exists,then
         graph gets probability prob, otherwise prob is added to the
-        esisting probability.
+        existing probability.
         """
         if glib.hash_graph(graph) not in self.distribution:
             self.distribution[glib.hash_graph(graph)] = {"graph": graph,
@@ -64,7 +64,7 @@ class GraphDistribution(object):
         else:
             self.distribution[glib.hash_graph(graph)]["prob"] += prob
 
-    def prob(self, graph):
+    def pdf(self, graph):
         return self.distribution[glib.hash_graph(graph)]["prob"]
 
     def __str__(self):

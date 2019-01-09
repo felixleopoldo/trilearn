@@ -104,7 +104,7 @@ def main(data_filename, particles, alphas, betas, trajectory_length, graphfile, 
                                 JT = trilearn.graph.decomposable.junction_tree(graphs[t])
                                 cliques = JT.nodes()
                                 seps = jtlib.separators(JT)
-                                graph_log_score_traj[t] = seqdist_tmp.ll(graphs[t])
+                                graph_log_score_traj[t] = seqdist_tmp.log_likelihood(graphs[t])
                                 num_eqv_trees[t] = jtlib.log_n_junction_trees(JT, seps)
                                 junction_trees[t] = JT
 
@@ -128,7 +128,7 @@ def main(data_filename, particles, alphas, betas, trajectory_length, graphfile, 
                                                      for g1 in graphs]
                             tmp["log_no_junction_trees"] = num_eqv_trees
                             if graphfile:
-                                tmp["log_likelihood_true"] = seqdist_tmp.ll(graph_true)
+                                tmp["log_likelihood_true"] = seqdist_tmp.log_likelihood(graph_true)
                             tmp_df = pd.DataFrame(tmp)
                             df = df.append(tmp_df)
 

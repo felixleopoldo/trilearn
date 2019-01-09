@@ -9,8 +9,8 @@ import trilearn.graph.junction_tree_expander as jte
 
 
 class JunctionTree(nx.Graph):
-    ids = {}
-    sepdict = {}
+    #ids = {}
+    #sepdict = {}
 
     def __init__(self, data=None, **attr):
         nx.Graph.__init__(self, data, **attr)
@@ -21,6 +21,9 @@ class JunctionTree(nx.Graph):
     def log_nu(self, sep):
         if sep not in self.log_nus:
             self.log_nus[sep] = log_nu(self, sep)
+        #else:
+        #    print "sep " + str(sep) + " already calculated"
+        #    assert self.log_nus[sep] == log_nu(self, sep)
         return self.log_nus[sep]
 
     def fresh_copy(self):
@@ -425,7 +428,7 @@ def n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
         log_old_mu (float): Log of the number of junction trees of from_tree.
 
     Returns:
-        float: log(mu(to_tree/from_tree))
+        float: log(mu(to_tree)/mu(from_tree))
     """
 
     old_full_S = from_tree.get_separators()

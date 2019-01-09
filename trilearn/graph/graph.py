@@ -123,7 +123,7 @@ def true_distribution(seqdist, filename):
 
         if nx.is_chordal(graph1):
             no_chordal += 1
-            logl = seqdist.ll(graph1)
+            logl = seqdist.log_likelihood(graph1)
             if logl > max_ll:
                 max_ll = logl
             graph_ll[tuple(vec_mat)] = logl

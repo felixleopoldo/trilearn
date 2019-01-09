@@ -24,7 +24,7 @@ def mh(n_mh_samples, randomize, sd):
     gtraj.set_sequential_distribution(sd)
 
     log_prob_traj[0] = 0.0
-    log_prob_traj[0] = sd.ll(jtlib.graph(jt_traj[0]))
+    log_prob_traj[0] = sd.log_likelihood(jtlib.graph(jt_traj[0]))
     log_prob_traj[0] += -jtlib.log_n_junction_trees(jt_traj[0], jtlib.separators(jt_traj[0]))
 
     accept_traj = [0] * n_mh_samples
@@ -40,7 +40,7 @@ def mh(n_mh_samples, randomize, sd):
             print "SHUFFLE"
             jtlib.randomize(jt)
             graphs[i] = jtlib.graph(jt)  # TODO: Improve.
-            log_prob_traj[i] = sd.ll(graphs[i]) - jtlib.log_n_junction_trees(jt, jtlib.separators(jt))
+            log_prob_traj[i] = sd.log_likelihood(graphs[i]) - jtlib.log_n_junction_trees(jt, jtlib.separators(jt))
 
         r = np.random.randint(2)  # Connect / disconnect move
         #assert(jtlib.is_junction_tree(jt))
@@ -53,7 +53,7 @@ def mh(n_mh_samples, randomize, sd):
 
             #assert(jtlib.is_junction_tree(jt))
             seps_prop = jtlib.separators(jt)
-            log_p2 = sd.ll(jtlib.graph(jt)) - jtlib.log_n_junction_trees(jt, seps_prop)
+            log_p2 = sd.log_likelihood(jtlib.graph(jt)) - jtlib.log_n_junction_trees(jt, seps_prop)
 
             C_disconn = conn[2] | conn[3] | conn[4]
             if conn[0] == "a":
@@ -140,7 +140,7 @@ def mh(n_mh_samples, randomize, sd):
             # Disconnect move
             disconnect = aglib.disconnect_move(jt)  # need to move to calculate posterior
             seps_prop = jtlib.separators(jt)
-            log_p2 = sd.ll(jtlib.graph(jt)) - jtlib.log_n_junction_trees(jt, seps_prop)
+            log_p2 = sd.log_likelihood(jtlib.graph(jt)) - jtlib.log_n_junction_trees(jt, seps_prop)
 
             #assert(jtlib.is_junction_tree(jt))
             #print "disconnect"

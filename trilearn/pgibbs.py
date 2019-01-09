@@ -1,8 +1,10 @@
 import time
 from multiprocessing.process import Process
+import copy
 
 import numpy as np
 from tqdm import tqdm
+#from memory_profiler import profile
 
 import trilearn.graph
 from trilearn import set_process as sp
@@ -11,14 +13,14 @@ from trilearn.graph import trajectory as mcmctraj, junction_tree as jtlib
 from trilearn.smc import approximate, approximate_cond
 
 
-def sample_trajectory(N, alpha, beta, radius, traj_length, seq_dist,
-                      jt_traj=None, debug=False):
+def sample_trajectory(N, alpha, beta, radius, n_samples, seq_dist,
+                      jt_traj=None, debug=False, reset_cache=True):
     """ A particle Gibbs implementation for approximating distributions over
     junction trees.
 
     Args:
         N (int): Number of particles in SMC in each Gibbs iteration
-        traj_length (int): Number of Gibbs iterations (samples)
+        n_samples (int): Number of Gibbs iterations (samples)
         alpha (float): sparsity parameter for the Christmas tree algorithm
         beta (float): sparsity parameter for the Christmas tree algorithm
         radius (float): defines the radius within which ned nodes are selected
@@ -32,7 +34,9 @@ def sample_trajectory(N, alpha, beta, radius, traj_length, seq_dist,
 
     (trees, log_w) = (None, None)
     prev_tree = None
-    for i in tqdm(range(traj_length), desc="Particle Gibbs samples"):
+    for i in tqdm(range(n_samples), desc="Particle Gibbs samples"):
+        if reset_cache is True:
+            seq_dist.cache = {}
 
         start_time = time.time()
         if i == 0:
@@ -49,7 +53,6 @@ def sample_trajectory(N, alpha, beta, radius, traj_length, seq_dist,
                                                   seq_dist,
                                                   T_traj,
                                                   perm_traj)
-
         # Sample T from T_1..p
         log_w_rescaled = np.array(log_w.T)[seq_dist.p - 1] - max(np.array(log_w.T)[seq_dist.p - 1])
         norm_w = np.exp(log_w_rescaled) / sum(np.exp(log_w_rescaled))
@@ -62,8 +65,8 @@ def sample_trajectory(N, alpha, beta, radius, traj_length, seq_dist,
     return graph_traj
 
 
-def sample_trajectory_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, cache={}, alpha=0.5, beta=0.5,
-                          radius=None, **args):
+def sample_trajectory_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, alpha=0.5, beta=0.5,
+                          radius=None, reset_cache=True, **args):
 
     """ Particle Gibbs for approximating distributions over
     Gaussian graphical models.
@@ -89,23 +92,26 @@ def sample_trajectory_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, 
     if radius is None:
         radius = p
     sd = seqdist.GGMJTPosterior()
-    sd.init_model(np.asmatrix(dataframe), D, delta, cache)
-    return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd)
+    sd.init_model(np.asmatrix(dataframe), D, delta, {})
+    return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd, reset_cache=reset_cache)
 
 
 def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
-                            radii=[None], cache={}, filename_prefix=None, **args):
+                            radii=[None], reset_cache=True, filename_prefix=None, **args):
     graph_trajectories = []
     for N in n_particles:
         for T in n_samples:
             for rad in radii:
                 for alpha in alphas:
                     for beta in betas:
-                        graph_trajectory = sample_trajectory_ggm(dataframe, N, T, D, delta, cache, alpha, beta, rad)
+                        if rad is None:
+                            rad = dataframe.shape[1]
+                        graph_trajectory = sample_trajectory_ggm(dataframe, n_particles=N,
+                                                                 n_samples=T, D=D, delta=delta,
+                                                                 alpha=alpha, beta=beta,
+                                                                 radius=rad, reset_cache=reset_cache)
                         graph_trajectories.append(graph_trajectory)
                         if filename_prefix:
-                            if rad is None:
-                                rad = dataframe.shape[1]
                             graphs_file = filename_prefix + '_ggm_jt_post_T_' + str(T) + '_N_' + str(N)
                             graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
                             graphs_file += '_radius_' + str(rad) + '_graphs.txt'
@@ -149,7 +155,7 @@ def sample_trajectories_ggm_parallel(X, trajectory_lengths, n_particles,
                                                    filename_prefix))
 
 
-def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, cache={}, alpha=0.5, beta=0.5,
+def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, reset_cache=False, alpha=0.5, beta=0.5,
                              radius=None, **args):
     p = dataframe.shape[1]
     if radius is None:
@@ -158,8 +164,8 @@ def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
     levels = np.array([range(l) for l in n_levels])
 
-    sd = seqdist.LogLinearJTPosterior(dataframe.get_values(), pseudo_obs, levels, cache)
-    return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd)
+    sd = seqdist.LogLinearJTPosterior(dataframe.get_values(), pseudo_obs, levels, {})
+    return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd, reset_cache=reset_cache)
 
 
 def sample_trajectories_loglin(dataframe, trajectory_lengths, n_particles,

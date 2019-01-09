@@ -267,7 +267,7 @@ class GraphPredictive(sklearn.base.BaseEstimator):
             #plt.plot([self.ggm_trajs[c].seqdist.ll(saturated_model)] *
             #         chain_length, 'red')
             if true_graphs is not None:
-                plt.plot([self.ggm_trajs[c].seqdist.ll(true_graphs[c])] *
+                plt.plot([self.ggm_trajs[c].seqdist.log_likelihood(true_graphs[c])] *
                          chain_length, 'green')
             # fig = plt.gcf()
             # fig.savefig(directory +
@@ -485,6 +485,6 @@ class GraphPredictive(sklearn.base.BaseEstimator):
                                                t_tau_star,
                                                t_df)
                 log_pred_density -= nu * cache[sep]
-            pred_density += np.exp(log_pred_density) * graph_dist.prob(graph)
+            pred_density += np.exp(log_pred_density) * graph_dist.pdf(graph)
         return float(pred_density)
 

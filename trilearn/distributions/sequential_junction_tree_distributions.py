@@ -76,7 +76,8 @@ class LogLinearJTPosterior(SequentialJTDistribution):
     Posterior for a log-linear model.
     """
 
-    def __init__(self, X, cell_alpha, levels, cache, counts={}):
+    def __init__(self, X, cell_alpha, levels, cache_complete_set_prob={},
+                 counts={}):
         """
         Args:
             cell_alpha: the constant number of pseudo counts for each cell
@@ -84,7 +85,7 @@ class LogLinearJTPosterior(SequentialJTDistribution):
         """
         self.p = len(levels)
         self.levels = levels
-        self.cache = cache
+        self.cache_complete_set_prob = cache_complete_set_prob
         self.cell_alpha = cell_alpha
         self.data = X
         self.no_levels = np.array([len(l) for l in levels])
@@ -96,11 +97,11 @@ class LogLinearJTPosterior(SequentialJTDistribution):
                                "levels": [list(l) for l in self.levels]},
                 "data": self.data.tolist()}
 
-    def ll(self, graph):
+    def log_likelihood(self, graph):
         tree = trilearn.graph.decomposable.junction_tree(graph)
         separators = jtlib.separators(tree)
         return loglin.log_likelihood_partial(tree.nodes(), separators, self.no_levels, self.cell_alpha,
-                                             self.counts, self.data, self.levels, self.cache)
+                                             self.counts, self.data, self.levels, self.cache_complete_set_prob)
 
     def log_ratio(self,
                   old_cliques,
@@ -111,25 +112,24 @@ class LogLinearJTPosterior(SequentialJTDistribution):
                   new_JT):
         log_mu_ratio = trilearn.graph.junction_tree.n_junction_trees_update_ratio(new_separators,
                                                                                   old_JT, new_JT)
-        ll_ratio = self.ll_diff(old_cliques,
-                                old_separators,
-                                new_cliques,
-                                new_separators,
-                                old_JT,
-                                new_JT)
+        ll_ratio = self.log_likelihood_diff(old_cliques,
+                                            old_separators,
+                                            new_cliques,
+                                            new_separators,
+                                            old_JT,
+                                            new_JT)
         return ll_ratio - log_mu_ratio
 
-    def ll_diff(self, old_cliques, old_separators,
-                new_cliques, new_separators, old_JT, new_JT):
+    def log_likelihood_diff(self, old_cliques, old_separators,
+                            new_cliques, new_separators, old_JT, new_JT):
         """ Log-likelihood difference when cliques and separators are added and
             removed.
         """
         old = loglin.log_likelihood_partial(old_cliques, old_separators, self.no_levels, self.cell_alpha,
-                                            self.counts, self.data, self.levels, self.cache)
+                                            self.counts, self.data, self.levels, self.cache_complete_set_prob)
         new = loglin.log_likelihood_partial(new_cliques, new_separators, self.no_levels, self.cell_alpha,
-                                            self.counts, self.data, self.levels, self.cache)
+                                            self.counts, self.data, self.levels, self.cache_complete_set_prob)
         return new - old
-
 
     def __str__(self):
         return "loglin_pseudo_obs_"+str(self.cell_alpha)
@@ -138,12 +138,13 @@ class LogLinearJTPosterior(SequentialJTDistribution):
 class GGMJTPosterior(SequentialJTDistribution):
     """ Posterior of Junction tree for a GGM.
     """
-    def init_model(self, X, D, delta, cache):
+    def init_model(self, X, D, delta, cache={}):
         self.parameters = {"delta": delta,
                            "D": D}
         self.SS = X.T * X
         self.X = X
         self.cache = cache
+
         self.n = X.shape[0]
         self.p = X.shape[1]
         self.idmatrices = [np.identity(i) for i in range(self.p+1)]
@@ -203,13 +204,13 @@ class GGMJTPosterior(SequentialJTDistribution):
 
         return new - old
 
-    def ll(self, graph):
+    def log_likelihood(self, graph):
         return gaussian_graphical_model.log_likelihood(graph, self.SS, self.n,
                                                        self.parameters["D"],
                                                        self.parameters["delta"],
                                                        self.cache)
 
-    def ll_partial(self, cliques, separators):
+    def log_likelihood_partial(self, cliques, separators):
         return gaussian_graphical_model.log_likelihood_partial(self.SS, self.n,
                                                                self.parameters["D"],
                                                                self.parameters["delta"],

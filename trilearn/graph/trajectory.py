@@ -53,12 +53,12 @@ class Trajectory:
         self.trajectory.append(graph)
         self.time.append(time)
 
-    def heatmap(self, from_index=0):
-        """ Returns a heatmap of the adjancency matrices in the trajectory.
-        """
-        length = len(self.trajectory) - from_index
-        return np.sum(nx.to_numpy_matrix(g)
-                      for g in self.trajectory[from_index:]) / length
+    # def heatmap(self, from_index=0):
+    #     """ Returns a heatmap of the adjancency matrices in the trajectory.
+    #     """
+    #     length = len(self.trajectory) - from_index
+    #     return np.sum(nx.to_numpy_matrix(g)
+    #                   for g in self.trajectory[from_index:]) / length
 
     def empirical_distribution(self, from_index=0):
         length = len(self.trajectory) - from_index
@@ -69,8 +69,8 @@ class Trajectory:
 
     def log_likelihood(self, from_index=0):
         if self.logl is None:
-            self.logl = [self.seqdist.ll(g) for g in self.trajectory[from_index:]]
-        return pd.Series(self.logl)
+            self.logl = [self.seqdist.log_likelihood(g) for g in self.trajectory]
+        return pd.Series(self.logl[from_index:])
 
     def size(self, from_index=0):
         """ Plots the auto-correlation function of the graph size (number of edges)
@@ -129,7 +129,6 @@ class Trajectory:
         with open(filename) as mcmc_file:
             mcmc_json = json.load(mcmc_file)
 
-        print mcmc_json.keys()
         self.from_json(mcmc_json)
 
     def __str__(self):

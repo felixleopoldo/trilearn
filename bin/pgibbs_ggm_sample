@@ -20,7 +20,7 @@ def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, d
                                                          filename_prefix=output_directory + "/" + filename_base)
     else:
         trilearn.pgibbs.sample_trajectories_ggm(X, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
-                                                cache={}, filename_prefix=output_directory + "/" + filename_base)
+                                                reset_cache={}, filename_prefix=output_directory + "/" + filename_base)
 
 if __name__ == "__main__":
     import argparse

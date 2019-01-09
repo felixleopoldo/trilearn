@@ -261,6 +261,7 @@ def get_smc_trajs(Is):
     """
     p = Is.shape[1]
     N = Is.shape[0]
+
     for i in reversed(range(N)):
         t = get_traj(p - 1, i, Is) + [i]
         if i == 0:

@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 import trilearn.auxiliary_functions as aux
@@ -27,12 +29,19 @@ def order_neigh_set(current_order, radius, total_set):
         return total_set
     available = set(total_set) - set(current_order)
 
-    a = [{neig for neig in available if np.abs(neig - s) <= radius}
-         for s in current_order]
-    b = set()
-    for s in a:
-        for e in s:
-            b.add(e)
+    # we first clean away some of the unreachable
+    # remove all those in available where >= max(current_order)  + radius
+
+    lower_bound = max(0, min(current_order) - radius)
+    upper_bound = min(len(total_set)-1, max(current_order) + radius)
+    remove_from_below = set(range(0, lower_bound))
+    remove_from_above = set(range(upper_bound+1, len(total_set)))
+
+    available = available - remove_from_below - remove_from_above
+    a = [{neig for neig in available if np.abs(neig - s) <= radius} for s in current_order]
+
+    b = set.union(*a)
+
     return b
 
 

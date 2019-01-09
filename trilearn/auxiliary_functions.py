@@ -5,14 +5,15 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 
-def plot_heatmap(heatmap, cbar=False, annot=False):
+def plot_heatmap(heatmap, cbar=False, annot=False, xticklabels=1, yticklabels=1):
     mask = np.zeros_like(heatmap)
     mask[np.triu_indices_from(mask)] = True
     with sns.axes_style("white"):
         sns.heatmap(heatmap, mask=mask, annot=annot,
                     cmap="Blues",
                     vmin=0.0, vmax=1.0, square=True,
-                    cbar=cbar, xticklabels=5, yticklabels=5)
+                    cbar=cbar,
+                    xticklabels=xticklabels, yticklabels=yticklabels)
 
 
 def random_subset(A):
