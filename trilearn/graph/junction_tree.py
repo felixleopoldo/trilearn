@@ -6,7 +6,6 @@ import networkx as nx
 import numpy as np
 
 import trilearn.graph.junction_tree_expander as jte
-import trilearn.graph.decomposable as dlib
 
 
 class JunctionTree(nx.Graph):
@@ -103,6 +102,7 @@ def n_junction_trees(p):
     Args:
         p (int): number of internal nodes
     """
+    import trilearn.graph.decomposable as dlib
     graphs = dlib.all_dec_graphs(p)
     num = 0
     for g in graphs:
