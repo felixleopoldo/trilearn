@@ -6,11 +6,10 @@ import networkx as nx
 import numpy as np
 
 import trilearn.graph.junction_tree_expander as jte
+import trilearn.graph.decomposable as dlib
 
 
 class JunctionTree(nx.Graph):
-    #ids = {}
-    #sepdict = {}
 
     def __init__(self, data=None, **attr):
         nx.Graph.__init__(self, data, **attr)
@@ -19,12 +18,7 @@ class JunctionTree(nx.Graph):
         self.altered = True
 
     def log_nu(self, sep):
-        if sep not in self.log_nus:
-            self.log_nus[sep] = log_nu(self, sep)
-        #else:
-        #    print "sep " + str(sep) + " already calculated"
-        #    assert self.log_nus[sep] == log_nu(self, sep)
-        return self.log_nus[sep]
+        return log_nu(self, sep)
 
     def fresh_copy(self):
         """Return a fresh copy graph with the same data structure.
@@ -41,9 +35,7 @@ class JunctionTree(nx.Graph):
         return JunctionTree()
 
     def get_separators(self):
-        if self.separators is None:
-            self.separators = separators(self)
-        return self.separators
+        return separators(self)
 
     def log_n_junction_trees(self, seps):
         lm = 0.0
@@ -71,7 +63,7 @@ class JunctionTree(nx.Graph):
         return G
 
     def tuple(self):
-        return (frozenset(self.nodes()), frozenset([frozenset(e) for e in self.edges()]))
+        return(frozenset(self.nodes()), frozenset([frozenset(e) for e in self.edges()]))
 
     def __hash__(self):
         return hash(self.tuple())
@@ -140,7 +132,7 @@ def induced_subtree_nodes(tree, node, visited, sep):
              if sep <= node and n not in visited]
     visited.add(node)
     if len(neigs) > 0:
-        neig = neigs.pop()
+        neigs.pop()
         for neig in neigs:
             induced_subtree_nodes(tree, neig, visited, sep)
     return visited
