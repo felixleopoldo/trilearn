@@ -132,9 +132,4 @@ class Trajectory:
         self.from_json(mcmc_json)
 
     def __str__(self):
-        ret = "times: " + str(self.time) + \
-              "\ngraphs: " + str(self.trajectory) + \
-              "\nsequential distribution: " + str(self.seqdist)
-        if self.optional:
-            ret += "\noptional: " + str(self.optional)
-        return ret
+        return "graph_trajectory_"+str(self.seqdist) + "_length_"+str(len(self.trajectory))
