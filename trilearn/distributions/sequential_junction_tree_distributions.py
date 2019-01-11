@@ -132,7 +132,7 @@ class LogLinearJTPosterior(SequentialJTDistribution):
         return new - old
 
     def __str__(self):
-        return "loglin_pseudo_obs_"+str(self.cell_alpha)
+        return "loglin_posterior_n_"+str(self.data.shape[1])+"_p_"+str(self.p)+"_pseudo_obs_"+str(self.cell_alpha)
 
 
 class GGMJTPosterior(SequentialJTDistribution):
@@ -157,7 +157,7 @@ class GGMJTPosterior(SequentialJTDistribution):
 
     def get_json_model(self):
 
-        return {"name": self.__str__(),
+        return {"name": "ggm_jt_post",
                 "parameters": {"delta": self.parameters["delta"],
                                "D": self.parameters["D"].tolist()},
                 "data": self.X.tolist()}
@@ -216,5 +216,6 @@ class GGMJTPosterior(SequentialJTDistribution):
                                                                self.parameters["delta"],
                                                                cliques, separators, self.cache)
 
-        def __str__(self):
-        return "ggm_posterior_n_"+str(self.n)+"_p_"+str(self.p)+"_prior_scale_"+str(self.parameters["delta"]) + "_shape_x"
+    def __str__(self):
+        return "ggm_posterior_n_" + str(self.n) + "_p_" + str(self.p) + "_prior_scale_" + str(
+            self.parameters["delta"]) + "_shape_x"

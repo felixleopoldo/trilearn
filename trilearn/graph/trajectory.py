@@ -24,6 +24,9 @@ class Trajectory:
         self.burnin = 0
         self.logl = None
 
+    def set_sampling_method(self, method):
+        self.sampling_method = method
+
     def set_sequential_distribution(self, seqdist):
         """ Set the SequentialJTDistribution for the graphs in the trajectory
 
@@ -86,14 +89,8 @@ class Trajectory:
         """ Writes a MCMC Trajectory together with the corresponding
         sequential distribution to a json-file.
         """
-        js_graphs = [json_graph.node_link_data(graph) for
-                     graph in self.trajectory]
-        mcmc_traj = {"model": self.seqdist.get_json_model(),
-                     "run_time": self.time,
-                     "optional": optional,
-                     "trajectory": js_graphs}
         with open(filename, 'w') as outfile:
-            json.dump(mcmc_traj, outfile)
+            json.dump(self.to_json(optional=optional), outfile)
 
     def to_json(self, optional={}):
         js_graphs = [json_graph.node_link_data(graph) for
@@ -101,17 +98,12 @@ class Trajectory:
         mcmc_traj = {"model": self.seqdist.get_json_model(),
                      "run_time": self.time,
                      "optional": optional,
+                     "sampling_method": self.sampling_method,
                      "trajectory": js_graphs}
         return mcmc_traj
 
     def save_to_db(self, db, optional={}):
-        js_graphs = [json_graph.node_link_data(graph) for
-                     graph in self.trajectory]
-        mcmc_traj = {"model": self.seqdist.get_json_model(),
-                     "run_time": self.time,
-                     "optional": optional,
-                     "trajectory": js_graphs}
-        db.insert_one(mcmc_traj)
+        db.insert_one(self.to_json(optional=optional))
 
     def from_json(self, mcmc_json):
         graphs = [json_graph.node_link_graph(js_graph)
@@ -119,6 +111,7 @@ class Trajectory:
         self.set_trajectory(graphs)
         self.set_time(mcmc_json["run_time"])
         self.optional = mcmc_json["optional"]
+        self.sampling_method = mcmc_json["sampling_method"]
         if mcmc_json["model"]["name"] == "ggm_jt_post":
             self.seqdist = sd.GGMJTPosterior()
         self.seqdist.init_model_from_json(mcmc_json["model"])
@@ -132,4 +125,11 @@ class Trajectory:
         self.from_json(mcmc_json)
 
     def __str__(self):
-        return "graph_trajectory_"+str(self.seqdist) + "_length_"+str(len(self.trajectory))
+        if self.sampling_method["method"] == "pgibbs":
+            return "pgibbs_graph_trajectory_" + str(self.seqdist) + "_length_" + str(len(self.trajectory)) + \
+            "_N_" + str(self.sampling_method["params"]["N"]) + \
+            "_alpha_" + str(self.sampling_method["params"]["alpha"]) + \
+            "_beta_" + str(self.sampling_method["params"]["beta"]) + \
+            "_radius_" + str(self.sampling_method["params"]["radius"])
+        else:
+            return "graph_trajectory_" + str(self.seqdist) + "_length_" + str(len(self.trajectory))

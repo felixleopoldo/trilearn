@@ -28,6 +28,11 @@ def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
         mcmctraj.Trajectory: Markov chain of teh underlying graphs of the junction trees sampled by pgibbs.
     """
     graph_traj = mcmctraj.Trajectory()
+    graph_traj.set_sampling_method({"method": "pgibbs",
+                                    "params": {"N": smc_N,
+                                               "alpha": alpha,
+                                               "beta": beta,
+                                               "radius": radius}})
     graph_traj.set_sequential_distribution(seq_dist)
     neig_set_cache = {}
     (trees, log_w) = (None, None)
@@ -118,10 +123,8 @@ def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0
     return graph_trajectories
 
 
-def sample_trajectories_ggm_parallel(dataframe, trajectory_lengths, n_particles,
-                                     D=None, delta=1.0, alphas=[0.5], betas=[0.5], radii=[None],
-                                     reset_cache=True,
-                                     **args):
+def sample_trajectories_ggm_parallel(dataframe, n_particles, trajectory_lengths, D=None, delta=1.0, alphas=[0.5],
+                                     betas=[0.5], radii=[None], reset_cache=True, **args):
     p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
@@ -135,11 +138,11 @@ def sample_trajectories_ggm_parallel(dataframe, trajectory_lengths, n_particles,
                         sd = seqdist.GGMJTPosterior()
                         sd.init_model(np.asmatrix(dataframe), D, delta, {})
                         print "Starting: " + str((N, alpha, beta, rad,
-                                                  T, str(sd)))
+                                                  T, str(sd), reset_cache))
 
                         proc = Process(target=trajectory_to_file,
                                        args=(N, alpha, beta, rad,
-                                             T, sd))
+                                             T, sd, reset_cache))
                         proc.start()
 
     for N in n_particles:
@@ -238,11 +241,8 @@ def trajectory_to_file(smc_N, alpha, beta, radius, n_samples,
 
     """
     graphtraj = sample_trajectory(smc_N, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
-
-    graphs_file =  str(graphtraj) + '_N_' + str(smc_N)
-    graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-    graphs_file += '_radius_' + str(radius) + '.json'
-    graphtraj.write_file(graphs_file)
+    print "wrote file: " + str(graphtraj) + '.json'
+    graphtraj.write_file(str(graphtraj) + '.json')
     return graphtraj
 
 
