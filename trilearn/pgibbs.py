@@ -1,10 +1,8 @@
 import time
 from multiprocessing.process import Process
-import copy
 
 import numpy as np
 from tqdm import tqdm
-#from memory_profiler import profile
 
 import trilearn.graph
 from trilearn import set_process as sp
@@ -13,13 +11,13 @@ from trilearn.graph import trajectory as mcmctraj, junction_tree as jtlib
 from trilearn.smc import approximate, approximate_cond
 
 
-def sample_trajectory(N, alpha, beta, radius, n_samples, seq_dist,
+def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
                       jt_traj=None, debug=False, reset_cache=True):
     """ A particle Gibbs implementation for approximating distributions over
     junction trees.
 
     Args:
-        N (int): Number of particles in SMC in each Gibbs iteration
+        smc_N (int): Number of particles in SMC in each Gibbs iteration
         n_samples (int): Number of Gibbs iterations (samples)
         alpha (float): sparsity parameter for the Christmas tree algorithm
         beta (float): sparsity parameter for the Christmas tree algorithm
@@ -31,32 +29,33 @@ def sample_trajectory(N, alpha, beta, radius, n_samples, seq_dist,
     """
     graph_traj = mcmctraj.Trajectory()
     graph_traj.set_sequential_distribution(seq_dist)
-
+    neig_set_cache = {}
     (trees, log_w) = (None, None)
     prev_tree = None
     for i in tqdm(range(n_samples), desc="Particle Gibbs samples"):
+
         if reset_cache is True:
             seq_dist.cache = {}
 
         start_time = time.time()
         if i == 0:
-            (trees, log_w) = approximate(N, alpha, beta, radius, seq_dist)
+            (trees, log_w) = approximate(smc_N, alpha, beta, radius, seq_dist, neig_set_cache=neig_set_cache)
         else:
             # Sample backwards trajectories
             perm_traj = sp.backward_perm_traj_sample(seq_dist.p, radius)
             T_traj = trilearn.graph.junction_tree_collapser.backward_jt_traj_sample(perm_traj,
                                                                                     prev_tree)
-            (trees, log_w, Is) = approximate_cond(N,
+            (trees, log_w, Is) = approximate_cond(smc_N,
                                                   alpha,
                                                   beta,
                                                   radius,
                                                   seq_dist,
                                                   T_traj,
-                                                  perm_traj)
+                                                  perm_traj, neig_set_cache=neig_set_cache)
         # Sample T from T_1..p
         log_w_rescaled = np.array(log_w.T)[seq_dist.p - 1] - max(np.array(log_w.T)[seq_dist.p - 1])
         norm_w = np.exp(log_w_rescaled) / sum(np.exp(log_w_rescaled))
-        I = np.random.choice(N, size=1, p=norm_w)[0]
+        I = np.random.choice(smc_N, size=1, p=norm_w)[0]
         T = trees[I]
         end_time = time.time()
         prev_tree = T
@@ -112,36 +111,35 @@ def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0
                                                                  radius=rad, reset_cache=reset_cache)
                         graph_trajectories.append(graph_trajectory)
                         if filename_prefix:
-                            graphs_file = filename_prefix + '_ggm_jt_post_T_' + str(T) + '_N_' + str(N)
+                            graphs_file = filename_prefix + str(graph_trajectory) + '_N_' + str(N)
                             graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-                            graphs_file += '_radius_' + str(rad) + '_graphs.txt'
+                            graphs_file += '_radius_' + str(rad) + '.txt'
                             graph_trajectory.write_file(graphs_file)
     return graph_trajectories
 
 
-def sample_trajectories_ggm_parallel(X, trajectory_lengths, n_particles,
+def sample_trajectories_ggm_parallel(dataframe, trajectory_lengths, n_particles,
                                      D=None, delta=1.0, alphas=[0.5], betas=[0.5], radii=[None],
-                                     cache={}, filename_prefix=None,
+                                     reset_cache=True,
                                      **args):
-    p = X.shape[1]
+    p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
     if radii == [None]:
         radii = [p]
-    cache = {}
     for N in n_particles:
         for T in trajectory_lengths:
             for rad in radii:
                 for alpha in alphas:
                     for beta in betas:
                         sd = seqdist.GGMJTPosterior()
-                        sd.init_model(X, D, delta, cache)
+                        sd.init_model(np.asmatrix(dataframe), D, delta, {})
                         print "Starting: " + str((N, alpha, beta, rad,
-                                                  T, sd, filename_prefix))
+                                                  T, str(sd)))
 
                         proc = Process(target=trajectory_to_file,
                                        args=(N, alpha, beta, rad,
-                                             T, sd, filename_prefix))
+                                             T, sd))
                         proc.start()
 
     for N in n_particles:
@@ -151,8 +149,7 @@ def sample_trajectories_ggm_parallel(X, trajectory_lengths, n_particles,
                     for beta in betas:
                         proc.join()
                         print "Completed: " + str((N, alpha, beta,
-                                                   rad, T,
-                                                   filename_prefix))
+                                                   rad, T))
 
 
 def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, reset_cache=False, alpha=0.5, beta=0.5,
@@ -223,13 +220,13 @@ def sample_trajectories_loglin_parallel(dataframe, trajectory_length, n_particle
                                                        filename_prefix))
 
 
-def trajectory_to_file(N, alpha, beta, radius, T,
-                       seqdist, filename_prefix):
+def trajectory_to_file(smc_N, alpha, beta, radius, n_samples,
+                       seqdist, reset_cache=True):
     """ Writes the trajectory of graphs generated by particle Gibbs to file.
 
     Args:
-        N (int): Number of particles in SMC in each Gibbs iteration
-        T (int): Number of Gibbs iterations (samples)
+        smc_N (int): Number of particles in SMC in each Gibbs iteration
+        n_samples (int): Number of Gibbs iterations (samples)
         alpha (float): sparsity parameter for the Christmas tree algorithm
         beta (float): sparsity parameter for the Christmas tree algorithm
         radius (float): defines the radius within which ned nodes are selected
@@ -240,10 +237,11 @@ def trajectory_to_file(N, alpha, beta, radius, T,
         mcmctraj.Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
 
     """
-    graphtraj = sample_trajectory(N, alpha, beta, radius, T, seqdist)
-    graphs_file = filename_prefix + '_' + str(seqdist) + '_T_' + str(T) + '_N_' + str(N)
+    graphtraj = sample_trajectory(smc_N, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
+
+    graphs_file =  str(graphtraj) + '_N_' + str(smc_N)
     graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-    graphs_file += '_radius_' + str(radius) + '_graphs.txt'
+    graphs_file += '_radius_' + str(radius) + '.json'
     graphtraj.write_file(graphs_file)
     return graphtraj
 

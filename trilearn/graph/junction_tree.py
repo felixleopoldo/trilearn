@@ -14,10 +14,11 @@ class JunctionTree(nx.Graph):
         nx.Graph.__init__(self, data, **attr)
         self.log_nus = {}
         self.separators = None
-        self.altered = True
 
     def log_nu(self, sep):
-        return log_nu(self, sep)
+        if sep not in self.log_nus:
+            self.log_nus[sep] = log_nu(self, sep)
+        return self.log_nus[sep]
 
     def fresh_copy(self):
         """Return a fresh copy graph with the same data structure.
@@ -33,8 +34,30 @@ class JunctionTree(nx.Graph):
         """
         return JunctionTree()
 
+    def add_edge(self, u_of_edge, v_of_edge, **attr):
+        self.separators = None
+        self.log_nus = {}
+        return super(JunctionTree, self).add_edge(u_of_edge, v_of_edge, **attr)
+
+    def add_edges_from(self, ebunch_to_add, **attr):
+        self.separators = None
+        self.log_nus = {}
+        return super(JunctionTree, self).add_edges_from(ebunch_to_add, **attr)
+
+    def remove_edge(self, u, v):
+        self.separators = None
+        self.log_nus = {}
+        return super(JunctionTree, self).remove_edge(u, v)
+
+    def remove_edges_from(self, ebunch):
+        self.separators = None
+        self.log_nus = {}
+        return super(JunctionTree, self).remove_edges_from(ebunch)
+
     def get_separators(self):
-        return separators(self)
+        if self.separators is None:
+            self.separators = separators(self)
+        return self.separators
 
     def log_n_junction_trees(self, seps):
         lm = 0.0
@@ -103,6 +126,7 @@ def n_junction_trees(p):
         p (int): number of internal nodes
     """
     import trilearn.graph.decomposable as dlib
+
     graphs = dlib.all_dec_graphs(p)
     num = 0
     for g in graphs:

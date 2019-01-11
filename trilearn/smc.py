@@ -12,7 +12,7 @@ import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.junction_tree_collapser
 import trilearn.graph.junction_tree_expander
 import trilearn.set_process as sp
-
+import auxiliary_functions as aux
 
 def smc_ggm_graphs(N, alpha, beta, radius, X, D, delta):
     cache = {}
@@ -32,7 +32,7 @@ def smc_approximate_ggm(N, alpha, beta, radius, X, D, delta):
     return dist
 
 
-def approximate(N, alpha, beta, radius, seq_dist, debug=False):
+def approximate(N, alpha, beta, radius, seq_dist, debug=False, neig_set_cache={}):
     """ Sequential Monte Carlo for junction trees using the christmas
     tree algorithm as proposal kernel.
 
@@ -55,6 +55,7 @@ def approximate(N, alpha, beta, radius, seq_dist, debug=False):
     old_trees = [None for _ in range(N)]
     ind_perms = np.matrix(np.zeros((N, p)), dtype=np.object)
     total = set(range(p))
+
     for n in range(p):
         norm_w = None
         new_trees = [None for _ in range(N)]
@@ -74,11 +75,16 @@ def approximate(N, alpha, beta, radius, seq_dist, debug=False):
                 new_trees[i] = T
                 log_w[i, n] = 0.0
             else:
-                ind_perms[i, n] = sp.gen_order_neigh(ind_perms[I[i], n - 1],
-                                                     radius, total)
+
+                order_frozenset = frozenset(ind_perms[I[i], n - 1])
+                if order_frozenset not in neig_set_cache:
+                    neig_set_cache[order_frozenset] = sp.order_neigh_set(ind_perms[I[i], n - 1], radius, total)
+                ind_perms[i, n] = ind_perms[I[i], n - 1] + [aux.random_element_from_coll(neig_set_cache[order_frozenset])]
                 node = ind_perms[i, n][n]
+
                 new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
                     old_trees[I[i]], node, alpha, beta, only_tree=False)
+
                 # Backward kernel
                 log_R = trilearn.graph.junction_tree_collapser.log_pdf(new_trees[i], old_trees[I[i]], node)
                 log_density_ratio = seq_dist.log_ratio(old_cliques,
@@ -91,7 +97,7 @@ def approximate(N, alpha, beta, radius, seq_dist, debug=False):
     return (new_trees, log_w)
 
 
-def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False):
+def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=False, neig_set_cache={}):
     """ SMC an junction trees conditioned on the trajectories T_cond
     and perm_cond.
     """
@@ -105,6 +111,7 @@ def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=
     total = range(p)
     maxradius = radius >= p
     copy_time = 0.0
+
     for n in range(p):
         # Reset the new trees and perms so that we do not alter the old ones
         new_trees = [None for _ in range(N)]
@@ -159,10 +166,13 @@ def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=
                     # Weights for rest
                     T_old = old_trees[I[i]]  # Create an nx.Graph once for speed.
                     # Get permutation
-                    ind_perms[i, n] = sp.gen_order_neigh(ind_perms[I[i], n - 1],
-                                                         radius,
-                                                         total)
+                    order_frozenset = frozenset(ind_perms[I[i], n - 1])
+                    if order_frozenset not in neig_set_cache:
+                        neig_set_cache[order_frozenset] = sp.order_neigh_set(ind_perms[I[i], n - 1], radius, total)
+
+                    ind_perms[i, n] = ind_perms[I[i], n - 1] + [aux.random_element_from_coll(neig_set_cache[order_frozenset])]
                     node = ind_perms[i, n][n]  # the added node
+
                     # Expand the junction tree T
                     new_trees[
                         i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
