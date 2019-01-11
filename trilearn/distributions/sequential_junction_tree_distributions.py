@@ -216,5 +216,5 @@ class GGMJTPosterior(SequentialJTDistribution):
                                                                self.parameters["delta"],
                                                                cliques, separators, self.cache)
 
-    def __str__(self):
-        return "ggm_jt_post"
+        def __str__(self):
+        return "ggm_posterior_n_"+str(self.n)+"_p_"+str(self.p)+"_prior_scale_"+str(self.parameters["delta"]) + "_shape_x"
