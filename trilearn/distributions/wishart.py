@@ -26,7 +26,7 @@ def log_norm_constant(D, delta, cache={}):
         cache[(t, p)] = scp.multigammaln(t, p)
     K += cache[(t, p)]
 
-    tup = tuple(np.array(D).ravel())
+    tup = np.array(D).ravel().tostring()
     if tup not in cache:
         (sign, logdet) = np.linalg.slogdet(D)
         cache[tup] = logdet
