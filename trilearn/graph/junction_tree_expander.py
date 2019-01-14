@@ -231,9 +231,10 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
     # Construct and add the new edges between the new cliques,
     # replicating the subtree
     for e in subtree_edges:
-        if not C[e[0]] & C[e[1]] in new_separators:
-            new_separators[C[e[0]] & C[e[1]]] = []
-        new_separators[C[e[0]] & C[e[1]]].append((C[e[0]], C[e[1]]))
+        sep = C[e[0]] & C[e[1]]
+        if not sep in new_separators:
+            new_separators[sep] = []
+        new_separators[sep].append((C[e[0]], C[e[1]]))
 
         # lab = str(tuple(C[e[0]] & C[e[1]]))
         # if len(C[e[0]] & C[e[1]]) == 1:
@@ -256,9 +257,10 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
             tree.remove_node(c)
             old_cliques.add(c)
         else:  # If not connecting to every node in a clique
-            if not C[c] & c in new_separators:
-                new_separators[C[c] & c] = []
-            new_separators[C[c] & c].append((C[c], c))
+            sep = C[c] & c
+            if not sep in new_separators:
+                new_separators[sep] = []
+            new_separators[sep].append((C[c], c))
             # lab = str(tuple(C[c] & c))
             # if len(C[c] & c) == 1:
             #     lab = "(" + str(list(C[c] & c)[0]) + ")"
