@@ -1,5 +1,5 @@
 # Particle Gibbs for Bayesian classification and structure learning in decomposable graphical models
-A grapihcal predictive classifier and a particle Gibbs sampler for Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models.
+A graphical predictive classifier and a particle Gibbs sampler for Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models.
 
 ### Installation
 
@@ -32,7 +32,7 @@ $ pgibbs_ggm_analyze -N 50 -M 1000 -f sample_data/dataset_p15.csv
 this will produce a bunch of files in the current directory to be analyzed.
 
 ### Discrete data
-The dataset examples/data/czech_autoworkers.csv contains six variables, each taking values in {0,1}.
+The data set examples/data/czech_autoworkers.csv contains six variables, each taking values in {0,1}.
 To estimate the underlying decomposable graph posterior run
 ```
 $ pgibbs_loglinear_sample -N 50 -M 300 -f sample_data/czech_autoworkers.csv
