@@ -3,24 +3,23 @@
 import os.path
 
 import numpy as np
+import pandas as pd
 
 import trilearn.pgibbs
-import trilearn.smc as smc
 
 
-def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, data_filename, output_directory, **args):
+def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, data_filename, output_directory, reset_cache, **args):
     if seed is not None:
         np.random.seed(seed)
+    df = pd.read_csv(data_filename, sep=',', header=None)
 
-    X = np.matrix(np.loadtxt(data_filename, delimiter=','))
-    filename_base = os.path.splitext(os.path.basename(data_filename))[0]
     if parallel is True:
-        trilearn.pgibbs.sample_trajectories_ggm_parallel(X, trajectory_length, n_particles,
-                                                         alphas=alphas, betas=betas, radii=radii, cache={},
-                                                         filename_prefix=output_directory + "/" + filename_base)
+        trilearn.pgibbs.sample_trajectories_ggm_parallel(df, n_particles, trajectory_length, alphas=alphas, betas=betas,
+                                                         radii=radii, reset_cache=reset_cache)
     else:
-        trilearn.pgibbs.sample_trajectories_ggm(X, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
-                                                reset_cache={}, filename_prefix=output_directory + "/" + filename_base)
+        filename_base = os.path.splitext(os.path.basename(data_filename))[0]
+        trilearn.pgibbs.sample_trajectories_ggm(df, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
+                                                reset_cache=reset_cache, filename_prefix=output_directory + "/" + filename_base)
 
 if __name__ == "__main__":
     import argparse
@@ -69,6 +68,12 @@ if __name__ == "__main__":
         required=False, default="./",
         help="Output directory"
     )
+    parser.add_argument(
+        '--reset_cache',
+        required=False, default=True, action="store_true",
+        help="Reset the cache in each iteration"
+    )
+
 
     args = parser.parse_args()
     main(**args.__dict__)
