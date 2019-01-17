@@ -85,11 +85,11 @@ class Trajectory:
         #with sns.axes_style("white"):
         #    autocorrelation_plot(size)
 
-    def write_file(self, filename, optional={}):
+    def write_file(self, optional={}):
         """ Writes a MCMC Trajectory together with the corresponding
         sequential distribution to a json-file.
         """
-        with open(filename, 'w') as outfile:
+        with open(str(self) + ".json", 'w') as outfile:
             json.dump(self.to_json(optional=optional), outfile)
 
     def to_json(self, optional={}):

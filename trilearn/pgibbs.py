@@ -105,7 +105,7 @@ def sample_trajectory_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, 
 
 
 def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
-                            radii=[None], reset_cache=True, filename_prefix=None, **args):
+                            radii=[None], reset_cache=True, **args):
     graph_trajectories = []
     for N in n_particles:
         for T in n_samples:
@@ -119,11 +119,6 @@ def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0
                                                                  alpha=alpha, beta=beta,
                                                                  radius=rad, reset_cache=reset_cache)
                         graph_trajectories.append(graph_trajectory)
-                        if filename_prefix:
-                            graphs_file = filename_prefix + str(graph_trajectory) + '_N_' + str(N)
-                            graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-                            graphs_file += '_radius_' + str(rad) + '.txt'
-                            graph_trajectory.write_file(graphs_file)
     return graph_trajectories
 
 
@@ -190,7 +185,8 @@ def sample_trajectories_loglin(dataframe, n_particles, n_samples, pseudo_observa
                                     T) + '_N_' + str(N)
                                 graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
                                 graphs_file += '_radius_' + str(rad) + '_graphs.txt'
-                                graph_trajectory.write_file(graphs_file)
+
+                                graph_trajectory.write_file()
     return graph_trajectories
 
 
@@ -237,8 +233,8 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, res
 
     """
     graphtraj = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
+    graphtraj.write_file()
     print "wrote file: " + str(graphtraj) + '.json'
-    graphtraj.write_file(str(graphtraj) + '.json')
     return graphtraj
 
 
@@ -252,22 +248,32 @@ def trajectories_from_file(model, data_shape , n_particles, n_samples, delta=1.0
             for radius_i, radius in enumerate(radii):
                 for alpha_i, alpha in enumerate(alphas):
                     for beta_i, beta in enumerate(betas):
+                        traj = mcmctraj.Trajectory()
                         if model == "ggm":
-                            traj = mcmctraj.Trajectory()
                             filename = ("pgibbs_graph_trajectory_ggm_posterior_" +
                                         "n_" + str(data_shape[0]) + "_" +
                                         "p_" + str(data_shape[1]) + "_" +
-                                        "prior_scale_" + str(delta) + "_" \
-                                        "shape_x_" \
-                                        "length_" + str(T) + "_" \
-                                        "N_" + str(N) + "_" \
-                                        "alpha_" + str(
-                                        alpha) + "_" \
-                                             "beta_" + str(beta) + "_" \
-                                                                   "radius_" + str(radius) + ".json")
-                            traj.read_file(filename)
+                                        "prior_scale_" + str(delta) + "_"
+                                        "shape_x_" +
+                                        "length_" + str(T) + "_"
+                                        "N_" + str(N) + "_"
+                                        "alpha_" + str(alpha) + "_"
+                                        "beta_" + str(beta) + "_"
+                                        "radius_" + str(radius) + ".json")
+                        if model == "loglin":
+                            filename = ("pgibbs_graph_trajectory_loglin_posterior_" +
+                                        "n_" + str(data_shape[0]) + "_" +
+                                        "p_" + str(data_shape[1]) + "_" +
+                                        "prior_scale_" + str(delta) + "_"
+                                        "shape_x_"
+                                        "length_" + str(T) + "_"
+                                        "N_" + str(N) + "_"
+                                        "alpha_" + str(alpha) + "_"
+                                        "beta_" + str(beta) + "_"
+                                        "radius_" + str(radius) + ".json")
 
-                            trajectories.append(traj)
+                        traj.read_file(filename)
+                        trajectories.append(traj)
     return trajectories
 
 # def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radius, debug=False):

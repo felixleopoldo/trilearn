@@ -8,7 +8,8 @@ import pandas as pd
 import trilearn.pgibbs
 
 
-def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, data_filename, output_directory, reset_cache, **args):
+def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel,
+         data_filename, output_directory, reset_cache, **args):
     if seed is not None:
         np.random.seed(seed)
     df = pd.read_csv(data_filename, sep=',', header=None)
@@ -18,8 +19,11 @@ def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel, d
                                                          radii=radii, reset_cache=reset_cache)
     else:
         filename_base = os.path.splitext(os.path.basename(data_filename))[0]
-        trilearn.pgibbs.sample_trajectories_ggm(df, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
+        trajs = trilearn.pgibbs.sample_trajectories_ggm(df, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
                                                 reset_cache=reset_cache, filename_prefix=output_directory + "/" + filename_base)
+        for t in trajs:
+            t.write_file()
+
 
 if __name__ == "__main__":
     import argparse
