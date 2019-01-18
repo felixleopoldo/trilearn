@@ -65,10 +65,10 @@ def main(data_filename, n_particles, trajectory_length, radius, alphas, betas,
 
     print trajectories
     for param_setting, traj_list in trajectories.iteritems():
+        print traj_list[0].sampling_method
+        print "Average sample time (for the first trajectory): " + str(np.mean(traj_list[0].time))
+
         for t in traj_list:
-            print "Plotting size"
-            print t.sampling_method
-            #print "Average sample time: " + str(np.mean(t.time))
             t.size(burnin_end).plot()
         plt.title(str(t.sampling_method))
         plt.savefig(output_directory + str(t) + "_size.png")
