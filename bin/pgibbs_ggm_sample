@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import os.path
-
 import numpy as np
 import pandas as pd
 
@@ -9,21 +7,19 @@ import trilearn.pgibbs
 
 
 def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel,
-         data_filename, output_directory, reset_cache, **args):
+         data_filename, output_directory, reset_cache, reps, **args):
     if seed is not None:
         np.random.seed(seed)
     df = pd.read_csv(data_filename, sep=',', header=None)
 
     if parallel is True:
         trilearn.pgibbs.sample_trajectories_ggm_parallel(df, n_particles, trajectory_length, alphas=alphas, betas=betas,
-                                                         radii=radii, reset_cache=reset_cache)
+                                                         radii=radii, reps=reps, reset_cache=reset_cache,
+                                                         output_directory=output_directory)
     else:
-        filename_base = os.path.splitext(os.path.basename(data_filename))[0]
-        trajs = trilearn.pgibbs.sample_trajectories_ggm(df, n_particles, trajectory_length, alphas=alphas, betas=betas, radii=radii,
-                                                reset_cache=reset_cache, filename_prefix=output_directory + "/" + filename_base)
-        for t in trajs:
-            t.write_file()
-
+        trilearn.pgibbs.sample_trajectories_ggm_to_file(df, n_particles, trajectory_length, alphas=alphas, betas=betas,
+                                                        radii=radii, reps=reps, reset_cache=reset_cache,
+                                                        output_directory=output_directory)
 
 if __name__ == "__main__":
     import argparse
@@ -64,12 +60,17 @@ if __name__ == "__main__":
         type=int, required=False, default=None
     )
     parser.add_argument(
+        '--reps',
+        type=int, required=False, default=1,
+        help='Number of trajectories to sample for each parameter setting'
+    )
+    parser.add_argument(
         '--parallel',
         required=False, action="store_true"
     )
     parser.add_argument(
         '-o', '--output_directory',
-        required=False, default="./",
+        required=False, default=".",
         help="Output directory"
     )
     parser.add_argument(

@@ -1,8 +1,11 @@
 import time
 from multiprocessing.process import Process
+import os
 
 import numpy as np
 from tqdm import tqdm
+import datetime
+import time
 
 import trilearn.graph
 from trilearn import set_process as sp
@@ -105,52 +108,81 @@ def sample_trajectory_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, 
 
 
 def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
-                            radii=[None], reset_cache=True, **args):
+                            radii=[None], reset_cache=True, reps=1, **args):
     graph_trajectories = []
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        if rad is None:
-                            rad = dataframe.shape[1]
-                        graph_trajectory = sample_trajectory_ggm(dataframe, n_particles=N,
-                                                                 n_samples=T, D=D, delta=delta,
-                                                                 alpha=alpha, beta=beta,
-                                                                 radius=rad, reset_cache=reset_cache)
-                        graph_trajectories.append(graph_trajectory)
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            if rad is None:
+                                rad = dataframe.shape[1]
+                            graph_trajectory = sample_trajectory_ggm(dataframe, n_particles=N,
+                                                                     n_samples=T, D=D, delta=delta,
+                                                                     alpha=alpha, beta=beta,
+                                                                     radius=rad, reset_cache=reset_cache)
+                            graph_trajectories.append(graph_trajectory)
     return graph_trajectories
 
 
-def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5],
-                                     betas=[0.5], radii=[None], reset_cache=True, **args):
+def sample_trajectories_ggm_to_file(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
+                                     radii=[None], reset_cache=True, reps=1, output_directory=".", **args):
     p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
     if radii == [None]:
         radii = [p]
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        sd = seqdist.GGMJTPosterior()
-                        sd.init_model(np.asmatrix(dataframe), D, delta, {})
-                        print "Starting: " + str((N, T, alpha, beta, rad,
-                                                   str(sd), reset_cache))
 
-                        proc = Process(target=trajectory_to_file,
-                                       args=(N, T, alpha, beta, rad,
-                                             sd, reset_cache))
-                        proc.start()
+    graph_trajectories = []
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            sd = seqdist.GGMJTPosterior()
+                            sd.init_model(np.asmatrix(dataframe), D, delta, {})
+
+                            graph_trajectory = trajectory_to_file(N, T, alpha, beta, rad, sd,
+                                                                  reset_cache=reset_cache, dir=output_directory)
+                            graph_trajectories.append(graph_trajectory)
+    return graph_trajectories
 
 
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        proc.join()
+def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
+                                     radii=[None], reset_cache=True, reps=1, output_directory=".", **args):
+    p = dataframe.shape[1]
+    if D is None:
+        D = np.identity(p)
+    if radii == [None]:
+        radii = [p]
+
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            sd = seqdist.GGMJTPosterior()
+                            sd.init_model(np.asmatrix(dataframe), D, delta, {})
+
+                            print "Starting: " + str((N, T, alpha, beta, rad,
+                                                       str(sd), reset_cache, output_directory, True))
+
+                            proc = Process(target=trajectory_to_file,
+                                           args=(N, T, alpha, beta, rad,
+                                                 sd, reset_cache, output_directory, True))
+                            proc.start()
+                            time.sleep(2)
+
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            proc.join()
 
 
 def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, reset_cache=False, alpha=0.5, beta=0.5,
@@ -216,7 +248,7 @@ def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseud
                             proc.join()
 
 
-def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, reset_cache=True):
+def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, reset_cache=True, dir=".", reseed=False):
     """ Writes the trajectory of graphs generated by particle Gibbs to file.
 
     Args:
@@ -232,70 +264,47 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, res
         mcmctraj.Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
 
     """
-    graphtraj = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
-    graphtraj.write_file()
-    print "wrote file: " + str(graphtraj) + '.json'
-    return graphtraj
+    if reseed is True:
+        np.random.seed()
+    graph_trajectory = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
+    date = datetime.datetime.today().strftime('%Y%m%d%H%m%S')
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+
+    filename = dir + "/" + str(graph_trajectory) + date + ".json"
+    graph_trajectory.write_file(filename=filename)
+    print "wrote file: " + filename
+
+    return graph_trajectory
 
 
-def trajectories_from_file(model, data_shape , n_particles, n_samples, delta=1.0, alphas=[0.5],
-                           betas=[0.5], radii=[None]):
-
-    trajectories = []
-
-    for N_i, N in enumerate(n_particles):
-        for T_i, T in enumerate(n_samples):
-            for radius_i, radius in enumerate(radii):
-                for alpha_i, alpha in enumerate(alphas):
-                    for beta_i, beta in enumerate(betas):
-                        traj = mcmctraj.Trajectory()
-                        if model == "ggm":
-                            filename = ("pgibbs_graph_trajectory_ggm_posterior_" +
-                                        "n_" + str(data_shape[0]) + "_" +
-                                        "p_" + str(data_shape[1]) + "_" +
-                                        "prior_scale_" + str(delta) + "_"
-                                        "shape_x_" +
-                                        "length_" + str(T) + "_"
-                                        "N_" + str(N) + "_"
-                                        "alpha_" + str(alpha) + "_"
-                                        "beta_" + str(beta) + "_"
-                                        "radius_" + str(radius) + ".json")
-                        if model == "loglin":
-                            filename = ("pgibbs_graph_trajectory_loglin_posterior_" +
-                                        "n_" + str(data_shape[0]) + "_" +
-                                        "p_" + str(data_shape[1]) + "_" +
-                                        "prior_scale_" + str(delta) + "_"
-                                        "shape_x_"
-                                        "length_" + str(T) + "_"
-                                        "N_" + str(N) + "_"
-                                        "alpha_" + str(alpha) + "_"
-                                        "beta_" + str(beta) + "_"
-                                        "radius_" + str(radius) + ".json")
-
-                        traj.read_file(filename)
-                        trajectories.append(traj)
-    return trajectories
-
-# def particle_gibbs_ggm(X, alpha, beta, n_particles, traj_length, D, delta, radius, debug=False):
-#     """ Particle Gibbs for approximating distributions over
-#     Gaussian graphical models.
+# def trajectory_from_file(model, data_shape , n_particles, n_samples, delta, alpha,
+#                          beta, radius):
+#     traj = mcmctraj.Trajectory()
 #
-#     Args:
-#         n_particles (int): Number of particles in SMC in each Gibbs iteration
-#         traj_length (int): Number of Gibbs iterations (samples)
-#         alpha (float): sparsity parameter for the Christmas tree algorithm
-#         beta (float): sparsity parameter for the Christmas tree algorithm
-#         radius (float): defines the radius within which ned nodes are selected
-#         X (np.matrix): row matrix of data
-#         D (np.matrix): matrix parameter for the hyper inverse wishart prior
-#         delta (float): degrees of freedom for the hyper inverse wishart prior
+#     filename = ("pgibbs_graph_trajectory_"+model+"_posterior_" +
+#                 "n_" + str(data_shape[0]) + "_" +
+#                 "p_" + str(data_shape[1]) + "_" +
+#                 "prior_scale_" + str(delta) + "_"
+#                 "shape_x_" +
+#                 "length_" + str(n_samples) + "_"
+#                 "N_" + str(n_particles) + "_"
+#                 "alpha_" + str(alpha) + "_"
+#                 "beta_" + str(beta) + "_"
+#                 "radius_" + str(radius)) + ".json"
 #
-#     Returns:
-#         mcmctraj.Trajectory: Markov chain of the underlying graphs of the junction trees sampled by pgibbs.
-#     """
+#     traj.read_file(filename)
+#     return traj
 #
-#     cache = {}
-#     seq_dist = seqdist.GGMJTPosterior()
-#     seq_dist.init_model(np.asmatrix(X), D, delta, cache)
-#     mcmctraj = particle_gibbs(n_particles, alpha, beta, radius, traj_length, seq_dist, debug=debug)
-#     return mcmctraj
+# def trajectories_from_file(model, data_shape , n_particles, n_samples, delta=1.0, alphas=[0.5],
+#                            betas=[0.5], radii=[None], reps=1):
+#     for N_i, N in enumerate(n_particles):
+#         for T_i, T in enumerate(n_samples):
+#             for radius_i, radius in enumerate(radii):
+#                 for alpha_i, alpha in enumerate(alphas):
+#                     for beta_i, beta in enumerate(betas):
+#                         traj = trajectory_from_file(model, data_shape , N, T,
+#                                                     delta, alpha, beta, radius)
+#                         trajectories.append(traj)
+#     return trajectories
+#
