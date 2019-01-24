@@ -185,8 +185,8 @@ def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, 
                             proc.join()
 
 
-def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, reset_cache=False, alpha=0.5, beta=0.5,
-                             radius=None, **args):
+def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, alpha=0.5, beta=0.5,
+                             radius=None, reset_cache=True, **args):
     p = dataframe.shape[1]
     if radius is None:
         radius = p
@@ -194,58 +194,89 @@ def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
     levels = np.array([range(l) for l in n_levels])
 
-    sd = seqdist.LogLinearJTPosterior(dataframe.get_values(), pseudo_obs, levels, {})
+    sd = seqdist.LogLinearJTPosterior()
+    sd.init_model(dataframe.get_values(), pseudo_obs, levels, {})
     return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd, reset_cache=reset_cache)
 
 
 def sample_trajectories_loglin(dataframe, n_particles, n_samples, pseudo_observations=[1.0], alphas=[0.5], betas=[0.5],
-                               radii=[None], cache={}, filename_prefix=None, **args):
+                               radii=[None], reset_cache=True, reps=1, **args):
     graph_trajectories = []
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        for pseudo_obs in pseudo_observations:
-                            graph_trajectory = sample_trajectory_loglin(dataframe, N, T, pseudo_obs, cache, alpha,
-                                                                        beta, rad)
-                            graph_trajectories.append(graph_trajectory)
-                            if filename_prefix:
-                                if rad is None:
-                                    rad = dataframe.shape[1]
-                                graphs_file = filename_prefix + '_loglin_pseudo_obs_' + str(pseudo_obs) + '_T_' + str(
-                                    T) + '_N_' + str(N)
-                                graphs_file += '_alpha_' + str(alpha) + '_beta_' + str(beta)
-                                graphs_file += '_radius_' + str(rad) + '_graphs.txt'
-
-                                graph_trajectory.write_file()
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            for pseudo_obs in pseudo_observations:
+                                graph_trajectory = sample_trajectory_loglin(dataframe, n_particles=N, n_samples=T,
+                                                                            pseudo_obs=pseudo_obs, alpha=alpha,
+                                                                            beta=beta, radius=rad, reset_cache=reset_cache)
+                                graph_trajectories.append(graph_trajectory)
     return graph_trajectories
 
 
-def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseudo_observations, alphas, betas, radii,
-                                        filename_prefix, **args):
-    cache = {}
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        for pseudo_obs in pseudo_observations:
-                            sd = seqdist.LogLinearJTPosterior(dataframe, pseudo_obs, levels, cache)
-                            print "Starting: " + str((N, alpha, beta, rad,
-                                                      T, sd, filename_prefix,))
-                            proc = Process(target=trajectory_to_file,
-                                           args=(N, alpha, beta, rad,
-                                                 T, sd, filename_prefix,))
-                            proc.start()
+def sample_trajectories_loglin_to_file(dataframe, n_particles, n_samples, pseudo_observations=[1.0], alphas=[0.5], betas=[0.5],
+                                       radii=[None], reset_cache=True, reps=1, output_directory=".", **args):
+    p = dataframe.shape[1]
+    if radii == [None]:
+        radii = [p]
 
-    for N in n_particles:
-        for T in n_samples:
-            for rad in radii:
-                for alpha in alphas:
-                    for beta in betas:
-                        for pseudo_obs in pseudo_observations:
-                            proc.join()
+    n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
+    levels = np.array([range(l) for l in n_levels])
+
+    graph_trajectories = []
+    cache = {}
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            for pseudo_obs in pseudo_observations:
+                                sd = seqdist.LogLinearJTPosterior()
+                                sd.init_model(dataframe.get_values(), pseudo_obs, levels, cache_complete_set_prob=cache)
+                                graph_trajectory = trajectory_to_file(N, T, alpha, beta, rad, sd,
+                                                                      reset_cache=reset_cache, dir=output_directory)
+
+                                graph_trajectories.append(graph_trajectory)
+    return graph_trajectories
+
+
+def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseudo_observations=[1.0], alphas=[0.5], betas=[0.5],
+                                        radii=[None], reset_cache=True, reps=1, output_directory=".", **args):
+    p = dataframe.shape[1]
+    if radii == [None]:
+        radii = [p]
+
+    n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
+    levels = np.array([range(l) for l in n_levels])
+
+    cache = {}
+    for _ in range(reps):
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            for pseudo_obs in pseudo_observations:
+                                sd = seqdist.LogLinearJTPosterior()
+                                sd.init_model(dataframe.get_values(), pseudo_obs, levels, cache_complete_set_prob=cache)
+                                print "Starting: " + str((N, T, alpha, beta, rad,
+                                                          str(sd), reset_cache, output_directory, True))
+
+                                proc = Process(target=trajectory_to_file,
+                                               args=(N, T, alpha, beta, rad,
+                                                     sd, reset_cache, output_directory, True))
+                                proc.start()
+                                time.sleep(2)
+        for N in n_particles:
+            for T in n_samples:
+                for rad in radii:
+                    for alpha in alphas:
+                        for beta in betas:
+                            for pseudo_obs in pseudo_observations:
+                                proc.join()
 
 
 def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, reset_cache=True, dir=".", reseed=False):
@@ -266,12 +297,14 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, res
     """
     if reseed is True:
         np.random.seed()
+
+    print (n_particles, alpha, beta, radius, n_samples, str(seqdist), reset_cache)
     graph_trajectory = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
     date = datetime.datetime.today().strftime('%Y%m%d%H%m%S')
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    filename = dir + "/" + str(graph_trajectory) + date + ".json"
+    filename = dir + "/" + str(graph_trajectory) +"_"+ date + ".json"
     graph_trajectory.write_file(filename=filename)
     print "wrote file: " + filename
 

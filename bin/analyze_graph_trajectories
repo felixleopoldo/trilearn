@@ -5,23 +5,21 @@ from __future__ import unicode_literals
 import os
 import glob
 
-import matplotlib
 import numpy as np
 from pandas.plotting import autocorrelation_plot
 
 import trilearn.auxiliary_functions as aux
 from trilearn.graph import trajectory
 
-matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['text.latex.unicode'] = True
+# matplotlib.rcParams['text.usetex'] = True
+# matplotlib.rcParams['text.latex.unicode'] = True
 import matplotlib.pyplot as plt
-matplotlib.rc('xtick', labelsize=8)
-matplotlib.rc('ytick', labelsize=8)
+# matplotlib.rc('xtick', labelsize=8)
+# matplotlib.rc('ytick', labelsize=8)
+# np.set_printoptions(precision=2)
 
-np.set_printoptions(precision=2)
 
-
-def main(data_filename, burnin_end, input_directory, output_directory):
+def main(burnin_end, input_directory, output_directory):
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
@@ -36,7 +34,7 @@ def main(data_filename, burnin_end, input_directory, output_directory):
             trajectories[str(t)] = []
         trajectories[str(t)].append(t)
 
-    print trajectories
+
     for param_setting, traj_list in trajectories.iteritems():
         print traj_list[0].sampling_method
         print "Average sample time: " + str(np.mean(traj_list[0].time))
@@ -71,10 +69,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Generates analytics for the Markov chain of decomposable graphs generated "
                                      "by particle Gibbs.")
 
-    parser.add_argument(
-        '-f', '--data_filename',
-        required=False,
-        help="Filename of dataset")
     parser.add_argument(
         '-o', '--output_directory',
         required=False, default="./",

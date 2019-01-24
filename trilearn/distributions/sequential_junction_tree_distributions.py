@@ -76,8 +76,8 @@ class LogLinearJTPosterior(SequentialJTDistribution):
     Posterior for a log-linear model.
     """
 
-    def __init__(self, X, cell_alpha, levels, cache_complete_set_prob={},
-                 counts={}):
+    def init_model(self, X, cell_alpha, levels, cache_complete_set_prob={},
+                   counts={}):
         """
         Args:
             cell_alpha: the constant number of pseudo counts for each cell
@@ -91,8 +91,14 @@ class LogLinearJTPosterior(SequentialJTDistribution):
         self.no_levels = np.array([len(l) for l in levels])
         self.counts = counts
 
+    def init_model_from_json(self, sd_json):
+        self.init_model(np.array(sd_json["data"]), # TODO: Might be a bug
+                        sd_json["parameters"]["cell_alpha"],
+                        np.array(sd_json["parameters"]["levels"]),
+                        cache_complete_set_prob={})
+
     def get_json_model(self):
-        return {"name": self.__str__(),
+        return {"name": "loglin_jt_post",
                 "parameters": {"cell_alpha": self.cell_alpha,
                                "levels": [list(l) for l in self.levels]},
                 "data": self.data.tolist()}

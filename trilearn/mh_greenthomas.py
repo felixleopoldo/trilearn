@@ -21,6 +21,11 @@ def mh(n_mh_samples, randomize, sd):
     log_prob_traj = [None] * n_mh_samples
 
     gtraj = mcmctraj.Trajectory()
+    gtraj.set_sampling_method({"method": "mh",
+                               "params": {"samples": n_mh_samples,
+                                          "randomize_interval": randomize}
+                               })
+
     gtraj.set_sequential_distribution(sd)
 
     log_prob_traj[0] = 0.0
@@ -36,8 +41,6 @@ def mh(n_mh_samples, randomize, sd):
             MAP_graph = (graphs[i-1], log_prob_traj[i-1])
 
         if i % randomize == 0:
-            print i
-            print "SHUFFLE"
             jtlib.randomize(jt)
             graphs[i] = jtlib.graph(jt)  # TODO: Improve.
             log_prob_traj[i] = sd.log_likelihood(graphs[i]) - jtlib.log_n_junction_trees(jt, jtlib.separators(jt))
@@ -234,11 +237,20 @@ def mh(n_mh_samples, randomize, sd):
     return gtraj
 
 
-def gen_ggm_trajectory(dataframe, n_samples, randomize=1000, D=None, delta=1.0, cache={}, alpha=0.5, beta=0.5, **args):
+def sample_trajectory_ggm(dataframe, n_samples, randomize=1000, D=None, delta=1.0, cache={}, **args):
     p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
     sd = seqdist.GGMJTPosterior()
     sd.init_model(np.asmatrix(dataframe), D, delta, cache)
+    return mh(n_samples, randomize, sd)
+
+
+def sample_trajectory_loglin(dataframe, n_samples, pseudo_obs, randomize=1000, cache={}, **args):
+
+    n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
+    levels = np.array([range(l) for l in n_levels])
+    sd = seqdist.LogLinearJTPosterior(dataframe, pseudo_obs, levels, cache_complete_set_prob=cache)
+
     return mh(n_samples, randomize, sd)
 

@@ -119,6 +119,9 @@ class Trajectory:
         self.sampling_method = mcmc_json["sampling_method"]
         if mcmc_json["model"]["name"] == "ggm_jt_post":
             self.seqdist = sd.GGMJTPosterior()
+        elif mcmc_json["model"]["name"] == "loglin_jt_post":
+            self.seqdist = sd.LogLinearJTPosterior()
+
         self.seqdist.init_model_from_json(mcmc_json["model"])
 
     def read_file(self, filename):
@@ -136,5 +139,8 @@ class Trajectory:
             "_alpha_" + str(self.sampling_method["params"]["alpha"]) + \
             "_beta_" + str(self.sampling_method["params"]["beta"]) + \
             "_radius_" + str(self.sampling_method["params"]["radius"])
-        else:
-            return "graph_trajectory_" + str(self.seqdist) + "_length_" + str(len(self.trajectory))
+        elif self.sampling_method["method"] == "mh":
+            return "mh_graph_trajectory_" + str(self.seqdist) + "_length_" + str(len(self.trajectory)) + \
+                "_randomize_interval_" + str(self.sampling_method["params"]["randomize_interval"])
+
+
