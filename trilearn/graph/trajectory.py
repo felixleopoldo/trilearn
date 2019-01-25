@@ -4,10 +4,9 @@ A class for handling Markov chains produced from e.g. MCMC.
 """
 import json
 
-import networkx as nx
-import numpy as np
 from networkx.readwrite import json_graph
 import pandas as pd
+import numpy as np
 
 import trilearn.graph.empirical_graph_distribution as gdist
 from trilearn.distributions import sequential_junction_tree_distributions as sd
@@ -56,12 +55,6 @@ class Trajectory:
         self.trajectory.append(graph)
         self.time.append(time)
 
-    # def heatmap(self, from_index=0):
-    #     """ Returns a heatmap of the adjancency matrices in the trajectory.
-    #     """
-    #     length = len(self.trajectory) - from_index
-    #     return np.sum(nx.to_numpy_matrix(g)
-    #                   for g in self.trajectory[from_index:]) / length
 
     def empirical_distribution(self, from_index=0):
         length = len(self.trajectory) - from_index
@@ -75,6 +68,10 @@ class Trajectory:
             self.logl = [self.seqdist.log_likelihood(g) for g in self.trajectory]
         return pd.Series(self.logl[from_index:])
 
+    def maximum_likelihood_graph(self):
+        ml_ind = self.log_likelihood().idxmax()
+        return self.trajectory[ml_ind]
+
     def size(self, from_index=0):
         """ Plots the auto-correlation function of the graph size (number of edges)
         Args:
@@ -82,8 +79,6 @@ class Trajectory:
         """
         size = [g.size() for g in self.trajectory[from_index:]]
         return pd.Series(size)
-        #with sns.axes_style("white"):
-        #    autocorrelation_plot(size)
 
     def write_file(self, filename=None, optional={}):
         """ Writes a Trajectory together with the corresponding
@@ -107,8 +102,6 @@ class Trajectory:
                      "trajectory": js_graphs}
         return mcmc_traj
 
-    def save_to_db(self, db, optional={}):
-        db.insert_one(self.to_json(optional=optional))
 
     def from_json(self, mcmc_json):
         graphs = [json_graph.node_link_graph(js_graph)
