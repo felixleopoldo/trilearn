@@ -7,19 +7,21 @@ import glob
 
 import numpy as np
 from pandas.plotting import autocorrelation_plot
+import networkx as nx
 
 import trilearn.auxiliary_functions as aux
 from trilearn.graph import trajectory
 
-# matplotlib.rcParams['text.usetex'] = True
-# matplotlib.rcParams['text.latex.unicode'] = True
+import matplotlib
+matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.latex.unicode'] = True
 import matplotlib.pyplot as plt
-# matplotlib.rc('xtick', labelsize=8)
-# matplotlib.rc('ytick', labelsize=8)
-# np.set_printoptions(precision=2)
+matplotlib.rc('xtick', labelsize=8)
+matplotlib.rc('ytick', labelsize=8)
+np.set_printoptions(precision=2)
 
 
-def main(burnin_end, input_directory, output_directory):
+def main(burnin_end, input_directory, output_directory, file_extension):
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
@@ -42,25 +44,35 @@ def main(burnin_end, input_directory, output_directory):
         for t in traj_list:
             t.size(burnin_end).plot()
         plt.title(str(t.sampling_method))
-        plt.savefig(output_directory + str(t) + "_size.png")
+        plt.savefig(output_directory + str(t) + "_size."+file_extension)
         plt.clf()
 
         for t in traj_list:
             t.log_likelihood(burnin_end).plot()
         plt.title(str(t.sampling_method))
-        plt.savefig(output_directory + str(t) + "_log-likelihood.png")
+        plt.savefig(output_directory + str(t) + "_log-likelihood."+file_extension)
         plt.clf()
 
         for i, t in enumerate(traj_list):
             aux.plot_heatmap(t.empirical_distribution(burnin_end).heatmap())
-            plt.title(str(traj_list[0].sampling_method))
-            plt.savefig(output_directory + str(t) + "_heatmap_"+str(i)+".png")
+            plt.title(str(t.sampling_method))
+            plt.savefig(output_directory + str(t) + "_heatmap_" + str(i) + "."+file_extension)
             plt.clf()
 
-        for i, t in enumerate(traj_list):
             autocorrelation_plot(t.size(burnin_end))
             plt.title(str(t.sampling_method))
-            plt.savefig(output_directory + str(t) + "_size_autocorr_"+str(i)+".png")
+            plt.savefig(output_directory + str(t) + "_size_autocorr_" + str(i) + "."+file_extension)
+            plt.clf()
+
+            top = t.empirical_distribution().mode(1)
+            aux.plot_heatmap(nx.to_numpy_array(top[0][0]))
+            plt.title(str(t.sampling_method))
+            plt.savefig(output_directory + str(t) + "_map_" + str(i) + "."+file_extension)
+            plt.clf()
+
+            aux.plot_heatmap(nx.to_numpy_array(t.maximum_likelihood_graph()))
+            plt.title(str(t.sampling_method))
+            plt.savefig(output_directory + str(t) + "_ml_" + str(i) + "."+file_extension)
             plt.clf()
 
 
@@ -77,6 +89,10 @@ if __name__ == "__main__":
         '-i', '--input_directory',
         required=False, default="./",
         help="Input directory")
+    parser.add_argument(
+        '-e', '--file_extension',
+        required=False, default="png",
+        help="File type")
     parser.add_argument(
         '--burnin_end', type=int, required=False, default=0,
         help="Burn-in period ends at this index")
