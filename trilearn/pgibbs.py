@@ -310,34 +310,3 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, res
 
     return graph_trajectory
 
-
-# def trajectory_from_file(model, data_shape , n_particles, n_samples, delta, alpha,
-#                          beta, radius):
-#     traj = mcmctraj.Trajectory()
-#
-#     filename = ("pgibbs_graph_trajectory_"+model+"_posterior_" +
-#                 "n_" + str(data_shape[0]) + "_" +
-#                 "p_" + str(data_shape[1]) + "_" +
-#                 "prior_scale_" + str(delta) + "_"
-#                 "shape_x_" +
-#                 "length_" + str(n_samples) + "_"
-#                 "N_" + str(n_particles) + "_"
-#                 "alpha_" + str(alpha) + "_"
-#                 "beta_" + str(beta) + "_"
-#                 "radius_" + str(radius)) + ".json"
-#
-#     traj.read_file(filename)
-#     return traj
-#
-# def trajectories_from_file(model, data_shape , n_particles, n_samples, delta=1.0, alphas=[0.5],
-#                            betas=[0.5], radii=[None], reps=1):
-#     for N_i, N in enumerate(n_particles):
-#         for T_i, T in enumerate(n_samples):
-#             for radius_i, radius in enumerate(radii):
-#                 for alpha_i, alpha in enumerate(alphas):
-#                     for beta_i, beta in enumerate(betas):
-#                         traj = trajectory_from_file(model, data_shape , N, T,
-#                                                     delta, alpha, beta, radius)
-#                         trajectories.append(traj)
-#     return trajectories
-#
