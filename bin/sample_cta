@@ -10,7 +10,6 @@ import numpy as np
 import trilearn.auxiliary_functions
 import trilearn.graph.junction_tree
 import trilearn.graph.junction_tree as jtlib
-import trilearn.graph.junction_tree_expander as jtexp
 import trilearn.graph.graph as glib
 
 

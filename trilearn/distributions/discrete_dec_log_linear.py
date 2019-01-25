@@ -5,7 +5,6 @@ import numpy as np
 import scipy.stats as stats
 
 import trilearn.graph.decomposable
-import trilearn.graph.graph as libg
 import trilearn.graph.junction_tree as libj
 import trilearn.auxiliary_functions as aux
 from trilearn.distributions import dirichlet
