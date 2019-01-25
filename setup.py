@@ -32,7 +32,7 @@ classifiers = [
 
 setup(
     name='trilearn',
-    version=0.192,
+    version=0.193,
     description='Bayesian predictive classification and structure learning in decomposable graphical models using particle Gibbs.',
     long_description=readme,
     packages=packages,
@@ -56,7 +56,7 @@ setup(
     author="Felix Rios",
     author_email='felix.leopoldo.rios@gmail.com',
     url='https://github.com/felixleopoldo/trilearn',
-    download_url = 'https://github.com/felixleopoldo/trilearn/archive/0.192.tar.gz',
+    download_url = 'https://github.com/felixleopoldo/trilearn/archive/0.193.tar.gz',
     license='Apache 2.0',
     classifiers=classifiers,
 )
