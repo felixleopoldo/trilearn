@@ -188,17 +188,19 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
     M = {c: set() for c in subtree_nodes}
     for c in S:
         for neig in subtree_adjlist[c]:
-            S[c] = S[c] | (c & neig)
+            #S[c] = S[c] | (c & neig)
+            S[c] |= (c & neig)
     RM = {c: c - S[c] for c in S}
     C = {c: set() for c in subtree_nodes}
     P = {}
     N_S = {c: set() for c in subtree_nodes}
 
+    sepCondition = {}
     for c in RM:
-        sepCondition = len({neig for neig in subtree_adjlist[c] if
+        sepCondition[c] = len({neig for neig in subtree_adjlist[c] if
                            S[c] == neig & c}) > 0 or len(subtree_adjlist) == 1
 
-        if sepCondition is True:
+        if sepCondition[c] is True:
             tmp = np.array(list(RM[c]))
             first_node = []
             if len(tmp) > 0:
@@ -224,9 +226,11 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
     for clique in subtree_nodes:
         N_S[clique] = {neig for neig in tree.neighbors(clique)
                        if neig & clique <= C[clique] and neig not in subtree_nodes}
+
     # Add the new cliques
-    for c in subtree_nodes:
-        tree.add_node(C[c], label=str(tuple(C[c])), color="red")
+    #for c in subtree_nodes:
+    #    tree.add_node(C[c], label=str(tuple(C[c])), color="red")
+    tree.add_nodes_from([C[c] for c in subtree_nodes])
 
     # Construct and add the new edges between the new cliques,
     # replicating the subtree
@@ -236,11 +240,6 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
             new_separators[sep] = []
         new_separators[sep].append((C[e[0]], C[e[1]]))
 
-        # lab = str(tuple(C[e[0]] & C[e[1]]))
-        # if len(C[e[0]] & C[e[1]]) == 1:
-        #     lab = "(" + str(list(C[e[0]] & C[e[1]])[0]) + ")"
-        # tree.add_edge(C[e[0]], C[e[1]],
-        #               label=lab)
         tree.add_edge(C[e[0]], C[e[1]])
 
     # Move the neighbors of a swallowed node to the swallowing node
@@ -250,10 +249,8 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
             # If connecting to all nodes in a clique
             for neig in tree.neighbors(c):
                 if neig not in subtree_nodes:
-                    lab = str(tuple(C[c] & neig))
-                    if len(C[c] & neig) == 1:
-                        lab = "(" + str(list(C[c] & neig)[0]) + ")"
-                    tree.add_edge(C[c], neig, label=lab)
+                    tree.add_edge(C[c], neig)#, label=lab)
+
             tree.remove_node(c)
             old_cliques.add(c)
         else:  # If not connecting to every node in a clique
@@ -261,30 +258,25 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
             if not sep in new_separators:
                 new_separators[sep] = []
             new_separators[sep].append((C[c], c))
-            # lab = str(tuple(C[c] & c))
-            # if len(C[c] & c) == 1:
-            #     lab = "(" + str(list(C[c] & c)[0]) + ")"
-            # tree.add_edge(C[c], c, label=lab)
+
             #print "adding edge: " + str((C[c], c))
             tree.add_edge(C[c], c)
             # Pick random subset of neighbors intersecting with subset of S U M
 
             N = aux.random_subset(N_S[c])
-            for neig in N:
-                # lab = str(tuple(C[c] & neig))
-                # if len(C[c] & neig) == 1:
-                #     lab = "(" + str(list(C[c] & neig)[0]) + ")"
-                # tree.add_edge(C[c], neig, label=lab)
-                tree.add_edge(C[c], neig)
+            #for neig in N:
+            #    tree.add_edge(C[c], neig)
+
+            tree.add_edges_from([(C[c], neig) for neig in N])
             tree.remove_edges_from([(c, neig) for neig in N])
 
     # Compute probabilities
     N = {}
     for c in subtree_nodes:
-        sepCondition = len({neig for neig in subtree_adjlist[c] if
-                            S[c] == neig & c}) > 0 or len(subtree_adjlist) == 1
+        #sepCondition = len({neig for neig in subtree_adjlist[c] if
+        #                    S[c] == neig & c}) > 0 or len(subtree_adjlist) == 1
 
-        if sepCondition is False:
+        if sepCondition[c] is False:
             # Every internal node in c belongs to a separator
             P[c] = np.power(2.0, - len(RM[c]))
             if not len(c) + 1 == len(C[c]):
