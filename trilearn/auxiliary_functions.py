@@ -177,7 +177,11 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
 
 def plot_multiple_traj_statistics(trajectories, burnin_end,
                                   write_to_file=False, output_directory="./", file_extension="eps"):
+
+    print "outpur dir"
+    print output_directory
     print(trajectories)
+
     for param_setting, traj_list in trajectories.iteritems():
         print(traj_list[0].sampling_method)
         print("Average sample time: " + str(np.mean(traj_list[0].time)))
@@ -188,7 +192,7 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
             t.size(burnin_end).plot()
         #plt.title(str(t.sampling_method))
         if write_to_file:
-            plt.savefig(output_directory + str(t) + "_size." + file_extension)
+            plt.savefig(output_directory +"/"+ str(t) + "_size." + file_extension)
         plt.clf()
 
         print("Plotting log-likelihood")
@@ -197,7 +201,7 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
             t.log_likelihood(burnin_end).plot()
         #plt.title(str(t.sampling_method))
         if write_to_file:
-            plt.savefig(output_directory + str(t) + "_log-likelihood."+file_extension)
+            plt.savefig(output_directory +"/"+ str(t) + "_log-likelihood."+file_extension)
         plt.clf()
 
         print("Plotting autocorr")
@@ -206,7 +210,7 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
             autocorrelation_plot(t.size(burnin_end))
         #plt.title(str(t.sampling_method))
         if write_to_file:
-            plt.savefig(output_directory + str(t) + "_autocorr."+file_extension)
+            plt.savefig(output_directory +"/"+ str(t) + "_autocorr."+file_extension)
         plt.clf()
 
 
@@ -218,21 +222,25 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
-                plt.savefig(output_directory + str(t) + "_heatmap_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_heatmap_" + str(i) + "."+file_extension)
             plt.clf()
+
             plot_heatmap(t.empirical_distribution(burnin_end).heatmap(), cbar=True,
                          xticklabels=np.arange(1, t.seqdist.p +1),
                          yticklabels=np.arange(1, t.seqdist.p +1))
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
+            cax = plt.gcf().axes[-2]
+            cax.tick_params(labelsize=6)
+
             if write_to_file:
-                plt.savefig(output_directory + str(t) + "_heatmap_cbar_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_heatmap_cbar_" + str(i) + "."+file_extension)
             plt.clf()
 
             sns.set_style("white")
             autocorrelation_plot(t.size(burnin_end))
             if write_to_file:
-                plt.savefig(output_directory + str(t) + "_size_autocorr_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_size_autocorr_" + str(i) + "."+file_extension)
             plt.clf()
 
             top = t.empirical_distribution().mode(1)
@@ -240,14 +248,14 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
-                plt.savefig(output_directory + str(t) + "_map_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_map_" + str(i) + "."+file_extension)
             plt.clf()
 
             plot_heatmap(nx.to_numpy_array(t.maximum_likelihood_graph()))
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
-                plt.savefig(output_directory + str(t) + "_ml_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_ml_" + str(i) + "."+file_extension)
             plt.clf()
 
 def read_all_trajectories_in_dir(directory):
