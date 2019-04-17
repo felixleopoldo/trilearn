@@ -64,8 +64,8 @@ n_samples = n_dim + 50
 
 df_full = sample_classification_datasets(mus, covmats, n_samples_in_each_class=n_samples)
 
-df_full.to_csv("classification_full_dataset.csv", index=False)
-df_full = pd.read_csv("classification_full_dataset.csv")
+df_full.to_csv("sample_data/classification_full_dataset.csv", index=False)
+df_full = pd.read_csv("sample_data/classification_full_dataset.csv")
 
 x_train, x_test, y_train, y_test = train_test_split(df_full.drop(["y"], axis=1), df_full["y"],
                                                     test_size=0.3, random_state=1)
