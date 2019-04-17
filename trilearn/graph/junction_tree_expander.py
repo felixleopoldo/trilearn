@@ -234,19 +234,23 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
 
     # Construct and add the new edges between the new cliques,
     # replicating the subtree
+    new_subtree_edges = []
     for e in subtree_edges:
         sep = C[e[0]] & C[e[1]]
         if not sep in new_separators:
             new_separators[sep] = []
         new_separators[sep].append((C[e[0]], C[e[1]]))
-
+        #new_subtree_edges.append((C[e[0]], C[e[1]]))
         tree.add_edge(C[e[0]], C[e[1]])
+    # tree.add_edges_from(new_subtree_edges)
 
-    # Move the neighbors of a swallowed node to the swallowing node
-    # Remove the swallowed node
+    # Connect cliques in the subtree to the new cliques
     for c in subtree_nodes:
+        # Move the neighbors of a swallowed node to the swallowing node
+        # Remove the swallowed node
+
         if C[c] - {new} == c:
-            # If connecting to all nodes in a clique
+            # If connecting to all nodes in a clique (the node should be replaces instead)
             for neig in tree.neighbors(c):
                 if neig not in subtree_nodes:
                     tree.add_edge(C[c], neig)#, label=lab)

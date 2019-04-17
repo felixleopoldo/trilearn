@@ -326,8 +326,8 @@ def random_tree_from_forest(F, edge_label=""):
     p = F.order()
     # 1. Label the vertices's
     all_nodes = []
-    for i, l in enumerate(comps):
-        for j in range(len(l)):
+    for i, comp in enumerate(comps):
+        for j in range(len(comp)):
             all_nodes.append((i, j))
     # 2. Construct a list v containing q - 2 vertices each chosen at
     #    random with replacement from the set of all p vertices.

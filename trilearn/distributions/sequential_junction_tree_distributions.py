@@ -5,8 +5,6 @@ Junction tree distributions suitable for SMC sampling.
 import numpy as np
 
 import trilearn.graph.decomposable
-import trilearn.graph.junction_tree
-import trilearn.graph.junction_tree as jtlib
 from trilearn.distributions import gaussian_graphical_model
 from trilearn.distributions import discrete_dec_log_linear as loglin
 
@@ -105,7 +103,7 @@ class LogLinearJTPosterior(SequentialJTDistribution):
 
     def log_likelihood(self, graph):
         tree = trilearn.graph.decomposable.junction_tree(graph)
-        separators = jtlib.separators(tree)
+        separators = tree.get_separators()
         return loglin.log_likelihood_partial(tree.nodes(), separators, self.no_levels, self.cell_alpha,
                                              self.counts, self.data, self.levels, self.cache_complete_set_prob)
 

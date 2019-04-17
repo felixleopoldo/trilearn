@@ -51,15 +51,13 @@ def sample(tree, node):
                 origin_c = neigs[np.random.randint(len(neigs))]
             origins[c] = origin_c
             # Add the new clique
-            shrinked_tree.add_node(origin_c,
-                                   label=tuple(origin_c),
-                                   color="blue")
+            shrinked_tree.add_node(origin_c) #, label=tuple(origin_c), color="blue")
             # Add neighbors
             # this might add c as a neighbor, but it is removed afterwards
             for neig in tree.neighbors(c):
                 if not neig == origins[c]:
-                    lab = str(tuple(origin_c & neig))
-                    shrinked_tree.add_edge(origin_c, neig, label=lab)
+                    #lab = str(tuple(origin_c & neig))
+                    shrinked_tree.add_edge(origin_c, neig)#, label=lab)
 
         # Remove the old cliques
         shrinked_tree.remove_nodes_from(origins)
@@ -67,8 +65,8 @@ def sample(tree, node):
         V_prime = {c for c in tree.nodes() if node in c}
         J_prime = tree.subgraph(V_prime)
         for e in J_prime.edges():
-            lab = str(tuple(origins[e[0]] & origins[e[1]]))
-            shrinked_tree.add_edge(origins[e[0]], origins[e[1]], label=lab)
+            #lab = str(tuple(origins[e[0]] & origins[e[1]]))
+            shrinked_tree.add_edge(origins[e[0]], origins[e[1]])#, label=lab)
 
     return shrinked_tree
 
