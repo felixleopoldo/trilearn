@@ -1,8 +1,12 @@
+import glob
+
+import networkx as nx
 import numpy as np
 import pandas as pd
 from numpy import linalg as la
 from matplotlib import pyplot as plt
 import seaborn as sns
+from pandas.plotting import autocorrelation_plot
 
 
 def plot_heatmap(heatmap, cbar=False, annot=False, xticklabels=1, yticklabels=1):
@@ -169,3 +173,125 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
     return df
     # return x, y
     # return pd.DataFrame(x), pd.Series(np.array(y).flatten(), dtype=int)
+
+
+def plot_multiple_traj_statistics(trajectories, burnin_end,
+                                  write_to_file=False, output_directory="./", file_extension="eps"):
+    print(trajectories)
+    for param_setting, traj_list in trajectories.iteritems():
+        print(traj_list[0].sampling_method)
+        print("Average sample time: " + str(np.mean(traj_list[0].time)))
+
+        print("Plotting size")
+        sns.set_style("whitegrid")
+        for t in traj_list:
+            t.size(burnin_end).plot()
+        #plt.title(str(t.sampling_method))
+        if write_to_file:
+            plt.savefig(output_directory + str(t) + "_size." + file_extension)
+        plt.clf()
+
+        print("Plotting log-likelihood")
+        sns.set_style("whitegrid")
+        for t in traj_list:
+            t.log_likelihood(burnin_end).plot()
+        #plt.title(str(t.sampling_method))
+        if write_to_file:
+            plt.savefig(output_directory + str(t) + "_log-likelihood."+file_extension)
+        plt.clf()
+
+        print("Plotting autocorr")
+        sns.set_style("whitegrid")
+        for t in traj_list:
+            autocorrelation_plot(t.size(burnin_end))
+        #plt.title(str(t.sampling_method))
+        if write_to_file:
+            plt.savefig(output_directory + str(t) + "_autocorr."+file_extension)
+        plt.clf()
+
+
+        print("Plotting heatmap, size auto-correlation, MAP and ML graph")
+        for i, t in enumerate(traj_list):
+            plot_heatmap(t.empirical_distribution(burnin_end).heatmap(),
+                         xticklabels=np.arange(1, t.seqdist.p +1),
+                         yticklabels=np.arange(1, t.seqdist.p +1))
+            cax = plt.gcf().axes[-1]
+            cax.tick_params(labelsize=6)
+            if write_to_file:
+                plt.savefig(output_directory + str(t) + "_heatmap_" + str(i) + "."+file_extension)
+            plt.clf()
+            plot_heatmap(t.empirical_distribution(burnin_end).heatmap(), cbar=True,
+                         xticklabels=np.arange(1, t.seqdist.p +1),
+                         yticklabels=np.arange(1, t.seqdist.p +1))
+            cax = plt.gcf().axes[-1]
+            cax.tick_params(labelsize=6)
+            if write_to_file:
+                plt.savefig(output_directory + str(t) + "_heatmap_cbar_" + str(i) + "."+file_extension)
+            plt.clf()
+
+            sns.set_style("white")
+            autocorrelation_plot(t.size(burnin_end))
+            if write_to_file:
+                plt.savefig(output_directory + str(t) + "_size_autocorr_" + str(i) + "."+file_extension)
+            plt.clf()
+
+            top = t.empirical_distribution().mode(1)
+            plot_heatmap(nx.to_numpy_array(top[0][0]))
+            cax = plt.gcf().axes[-1]
+            cax.tick_params(labelsize=6)
+            if write_to_file:
+                plt.savefig(output_directory + str(t) + "_map_" + str(i) + "."+file_extension)
+            plt.clf()
+
+            plot_heatmap(nx.to_numpy_array(t.maximum_likelihood_graph()))
+            cax = plt.gcf().axes[-1]
+            cax.tick_params(labelsize=6)
+            if write_to_file:
+                plt.savefig(output_directory + str(t) + "_ml_" + str(i) + "."+file_extension)
+            plt.clf()
+
+def read_all_trajectories_in_dir(directory):
+    trajectories = {}
+    from trilearn.graph import trajectory as gtraj
+    for filename in glob.glob(directory + "/*.json"):
+        print("Loading: " + str(filename))
+        # Gather all with the same parameter setting in the same plot
+        t = gtraj.Trajectory()
+        t.read_file(filename)
+        if str(t) not in trajectories:
+            trajectories[str(t)] = []
+        trajectories[str(t)].append(t)
+    return trajectories
+
+
+def plot_graph_traj_statistics(graph_traj, write_to_file=False):
+    top = graph_traj.empirical_distribution().mode(5)
+    print("Probability\tEdge list: ")
+    for graph, prob in top:
+        print(str(prob) + "\t\t" + str(list(graph.edges())))
+
+    graph_traj.size().plot()
+    if write_to_file:
+        plt.savefig(str(graph_traj)+"_size.png")
+    plt.clf()
+
+    autocorrelation_plot(graph_traj.size())
+    if write_to_file:
+        plt.savefig(str(graph_traj)+"_autocorr.png")
+    plt.clf()
+
+    graph_traj.log_likelihood().plot()
+    if write_to_file:
+        plt.savefig(str(graph_traj)+"_loglik.png")
+    plt.clf()
+
+    plot_heatmap(graph_traj.empirical_distribution().heatmap())
+    if write_to_file:
+        plt.savefig(str(graph_traj)+"_heatmap.png")
+    plt.clf()
+
+    top = graph_traj.empirical_distribution().mode(1)
+    plot_heatmap(nx.to_numpy_array(top[0][0]))
+    if write_to_file:
+        plt.savefig(str(graph_traj)+"_map.png")
+    plt.clf()

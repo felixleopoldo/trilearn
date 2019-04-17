@@ -35,7 +35,7 @@ def main(graph_filename, parameters_filename, data_samples, output_directory, **
     levels = [range(l) for l in no_levels]
 
     table = loglin.locals_to_joint_prob_table(graph, parameters, levels)
-    data = loglin.sample(table, 1000)
+    data = loglin.sample(table, data_samples)
 
     print data.shape
     np.savetxt(output_directory+"/"+param_basename +
