@@ -177,9 +177,6 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
 
 def plot_multiple_traj_statistics(trajectories, burnin_end,
                                   write_to_file=False, output_directory="./", file_extension="eps"):
-
-    print "outpur dir"
-    print output_directory
     print(trajectories)
 
     for param_setting, traj_list in trajectories.iteritems():
@@ -190,7 +187,6 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
         sns.set_style("whitegrid")
         for t in traj_list:
             t.size(burnin_end).plot()
-        #plt.title(str(t.sampling_method))
         if write_to_file:
             plt.savefig(output_directory +"/"+ str(t) + "_size." + file_extension)
         plt.clf()
@@ -199,7 +195,6 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
         sns.set_style("whitegrid")
         for t in traj_list:
             t.log_likelihood(burnin_end).plot()
-        #plt.title(str(t.sampling_method))
         if write_to_file:
             plt.savefig(output_directory +"/"+ str(t) + "_log-likelihood."+file_extension)
         plt.clf()
@@ -208,7 +203,6 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
         sns.set_style("whitegrid")
         for t in traj_list:
             autocorrelation_plot(t.size(burnin_end))
-        #plt.title(str(t.sampling_method))
         if write_to_file:
             plt.savefig(output_directory +"/"+ str(t) + "_autocorr."+file_extension)
         plt.clf()
