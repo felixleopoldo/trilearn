@@ -9,3 +9,4 @@ dist/
 trilearn.egg-info/
 env/
 testing_stuff.ipynb
+sandbox/
