@@ -8,3 +8,4 @@ dist/
 .idea/
 trilearn.egg-info/
 env/
+testing_stuff.ipynb
