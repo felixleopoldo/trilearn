@@ -40,7 +40,8 @@ def sample(tree, node):
         origins = {}
         Ncp = possible_origins(tree, node)
 
-        for c, neigs in Ncp.iteritems():
+        #for c, neigs in Ncp.iteritems():
+        for c, neigs in Ncp.items():
             # take origin depending on if it was connected to all
             # in a clique or not
             # this is used when replicating the structure

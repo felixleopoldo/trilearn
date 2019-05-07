@@ -1,4 +1,5 @@
-from multiprocessing.process import Process
+from multiprocessing import Process
+import multiprocessing
 import datetime
 import time
 import os
@@ -12,6 +13,7 @@ import trilearn.graph.trajectory as mcmctraj
 import trilearn.graph.junction_tree as jtlib
 import trilearn.graph.decomposable as dlib
 import trilearn.graph.greenthomas as aglib
+from trilearn import auxiliary_functions as aux
 
 
 def sample_trajectory(n_samples, randomize, sd):
@@ -41,6 +43,7 @@ def sample_trajectory(n_samples, randomize, sd):
 
     MAP_graph = (graphs[0], log_prob_traj[0])
 
+
     for i in tqdm(range(1, n_samples), desc="Metropolis-Hastings samples"):
         if log_prob_traj[i-1] > MAP_graph[1]:
             MAP_graph = (graphs[i-1], log_prob_traj[i-1])
@@ -51,15 +54,12 @@ def sample_trajectory(n_samples, randomize, sd):
             log_prob_traj[i] = sd.log_likelihood(graphs[i]) - jtlib.log_n_junction_trees(jt, jtlib.separators(jt))
 
         r = np.random.randint(2)  # Connect / disconnect move
-        #assert(jtlib.is_junction_tree(jt))
         num_seps = jt.size()
         log_p1 = log_prob_traj[i - 1]
         if r == 0:
             # Connect move
             num_cliques = jt.order()
             conn = aglib.connect_move(jt)  # need to move to calculate posterior
-
-            #assert(jtlib.is_junction_tree(jt))
             seps_prop = jtlib.separators(jt)
             log_p2 = sd.log_likelihood(jtlib.graph(jt)) - jtlib.log_n_junction_trees(jt, seps_prop)
 
@@ -76,13 +76,11 @@ def sample_trajectory(n_samples, randomize, sd):
                     # print "Accept"
                     accept_traj[i] = 1
                     log_prob_traj[i] = log_p2
-                    # jt_traj[i] = jt.copy()  # TODO: Improve.
                     graphs[i] = jtlib.graph(jt)  # TODO: Improve.
                 else:
                     #print "Reject"
                     aglib.disconnect_a(jt, C_disconn, X, Y, CX_disconn, CY_disconn, XSneig, YSneig)
                     log_prob_traj[i] = log_prob_traj[i-1]
-                    # jt_traj[i] = jt_traj[i-1]
                     graphs[i] = graphs[i-1]
                     continue
 
@@ -96,13 +94,10 @@ def sample_trajectory(n_samples, randomize, sd):
                     accept_traj[i] = 1
                     log_prob_traj[i] = log_p2
                     graphs[i] = jtlib.graph(jt) # TODO: Improve.
-                    #jt_traj[i] = jt.copy()  # TODO: Improve.
                 else:
                     #print "Reject"
                     aglib.disconnect_b(jt, C_disconn, X, Y, CX_disconn, CY_disconn)
-                    #assert(jtlib.is_junction_tree(jt))
                     log_prob_traj[i] = log_prob_traj[i-1]
-                    #jt_traj[i] = jt_traj[i-1]
                     graphs[i] = graphs[i-1]
                     continue
 
@@ -115,14 +110,12 @@ def sample_trajectory(n_samples, randomize, sd):
                     accept_traj[i] = 1
                     #print "Accept"
                     log_prob_traj[i] = log_p2
-                    #jt_traj[i] = jt.copy()  # TODO: Improve.
                     graphs[i] = jtlib.graph(jt) # TODO: Improve.
                 else:
                     #print "Reject"
                     aglib.disconnect_c(jt, C_disconn, X, Y, CX_disconn, CY_disconn)
                     log_prob_traj[i] = log_prob_traj[i-1]
                     graphs[i] = graphs[i-1]
-                    #jt_traj[i] = jt_traj[i-1]
                     continue
 
             elif conn[0] == "d":
@@ -134,13 +127,11 @@ def sample_trajectory(n_samples, randomize, sd):
                     accept_traj[i] = 1
                     #print "Accept"
                     log_prob_traj[i] = log_p2
-                    #jt_traj[i] = jt.copy()  # TODO: Improve.
                     graphs[i] = jtlib.graph(jt) # TODO: Improve.
                 else:
                     #print "Reject"
                     aglib.disconnect_d(jt, C_disconn, X, Y, CX_disconn, CY_disconn)
                     log_prob_traj[i] = log_prob_traj[i-1]
-                    #jt_traj[i] = jt_traj[i-1]
                     graphs[i] = graphs[i-1]
                     continue
 
@@ -162,14 +153,11 @@ def sample_trajectory(n_samples, randomize, sd):
                         accept_traj[i] = 1
                         #print "Accept"
                         log_prob_traj[i] = log_p2
-                        #jt_traj[i] = jt.copy()  # TODO: Improve.
                         graphs[i] = jtlib.graph(jt) # TODO: Improve.
                     else:
                         #print "Reject"
                         aglib.connect_a(jt, S, X, Y, CX_conn, CY_conn)
-                        #assert(jtlib.is_junction_tree(jt))
                         log_prob_traj[i] = log_prob_traj[i-1]
-                        #jt_traj[i] = jt_traj[i-1]
                         graphs[i] = graphs[i-1]
                         continue
 
@@ -182,14 +170,11 @@ def sample_trajectory(n_samples, randomize, sd):
                         accept_traj[i] = 1
                         #print "Accept"
                         log_prob_traj[i] = log_p2
-                        #jt_traj[i] = jt.copy()  # TODO: Improve.
                         graphs[i] = jtlib.graph(jt) # TODO: Improve.
                     else:
                         #print "Reject"
                         aglib.connect_b(jt, S, X, Y, CX_conn, CY_conn)
-                        #assert(jtlib.is_junction_tree(jt))
                         log_prob_traj[i] = log_prob_traj[i-1]
-                        #jt_traj[i] = jt_traj[i-1]
                         graphs[i] = graphs[i-1]
                         continue
 
@@ -202,14 +187,11 @@ def sample_trajectory(n_samples, randomize, sd):
                         accept_traj[i] = 1
                         #print "Accept"
                         log_prob_traj[i] = log_p2
-                        #jt_traj[i] = jt.copy()  # TODO: Improve.
                         graphs[i] = jtlib.graph(jt) # TODO: Improve.
                     else:
                         #print "Reject"
                         aglib.connect_c(jt, S, X, Y, CX_conn, CY_conn)
-                        #assert(jtlib.is_junction_tree(jt))
                         log_prob_traj[i] = log_prob_traj[i-1]
-                        #jt_traj[i] = jt_traj[i-1]
                         graphs[i] = graphs[i-1]
                         continue
 
@@ -222,22 +204,18 @@ def sample_trajectory(n_samples, randomize, sd):
                         #print "Accept"
                         accept_traj[i] = 1
                         log_prob_traj[i] = log_p2
-                        #jt_traj[i] = jt.copy()  # TODO: Improve.
                         graphs[i] = jtlib.graph(jt) # TODO: Improve.
                     else:
                         #print "Reject"
                         aglib.connect_d(jt, S, X, Y, CX_conn, CY_conn)
-                        #assert(jtlib.is_junction_tree(jt))
                         log_prob_traj[i] = log_prob_traj[i-1]
-                        #jt_traj[i] = jt_traj[i-1]
                         graphs[i] = graphs[i-1]
                         continue
             else:
                 log_prob_traj[i] = log_prob_traj[i-1]
-                #jt_traj[i] = jt_traj[i-1]
                 graphs[i] = graphs[i-1]
                 continue
-
+        #print(np.mean(accept_traj[:i]))
     gtraj.set_trajectory(graphs)
     return gtraj
 
@@ -275,26 +253,31 @@ def sample_trajectories_loglin_parallel(dataframe, n_samples, randomize=[1000], 
 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
     levels = np.array([range(l) for l in n_levels])
+    queue = multiprocessing.Queue()
+    processes = []
+    rets = []
 
     for _ in range(reps):
         for r in randomize:
             for T in n_samples:
                 sd = seqdist.LogLinearJTPosterior()
                 sd.init_model(dataframe.get_values(), pseudo_obs, levels)
-                print("Starting: " + str((T, r, str(sd), output_directory, True)))
+                print("Starting: " + str((T, r, str(sd), True)))
 
-                proc = Process(target=trajectory_to_file,
+                proc = Process(target=trajectory_to_queue,
                                args=(T, r,
-                                     sd, output_directory, True))
+                                     sd, queue, True))
                 proc.start()
+                processes.append(proc)
                 time.sleep(2)
 
-    for _ in range(reps):
-        for r in randomize:
-            for T in n_samples:
-                proc.join()
+    for _ in processes:
+        ret = queue.get()  # will block
+        rets.append(ret)
+    for p in processes:
+        p.join()
 
-
+    return aux.group_trajectories_by_setting(rets)
 
 
 def trajectory_to_file(n_samples, randomize, seqdist, dir=".", reseed=False):
@@ -323,6 +306,23 @@ def trajectory_to_file(n_samples, randomize, seqdist, dir=".", reseed=False):
 
     return graph_trajectory
 
+def trajectory_to_queue(n_samples, randomize, seqdist, queue, reseed=False):
+    """ Writes the trajectory of graphs generated by particle Gibbs to file.
+
+    Args:
+        seq_dist (SequentialJTDistributions): the distribution to be sampled from
+        filename_prefix (string): prefix to the filename
+
+    Returns:
+        mcmctraj.Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
+
+    """
+    if reseed is True:
+        np.random.seed()
+
+    print(n_samples, str(randomize), str(seqdist))
+    graph_trajectory = sample_trajectory(n_samples, randomize, seqdist)
+    queue.put(graph_trajectory)
 
 def sample_trajectory_ggm(dataframe, n_samples, randomize=1000, D=None, delta=1.0, cache={}, **args):
     p = dataframe.shape[1]
@@ -355,6 +355,9 @@ def sample_trajectories_ggm_parallel(dataframe, n_samples, randomize=[1000], D=N
     p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
+    queue = multiprocessing.Queue()
+    processes = []
+    rets = []
 
     for _ in range(reps):
         for r in randomize:
@@ -362,16 +365,19 @@ def sample_trajectories_ggm_parallel(dataframe, n_samples, randomize=[1000], D=N
                 sd = seqdist.GGMJTPosterior()
                 sd.init_model(np.asmatrix(dataframe), D, delta, {})
 
-                print("Starting: " + str((T, r, str(sd), output_directory, True)))
+                print("Starting: " + str((T, r, str(sd), True)))
 
-                proc = Process(target=trajectory_to_file,
+                proc = Process(target=trajectory_to_queue,
                                args=(T, r,
-                                     sd, output_directory, True))
+                                     sd, queue, True))
                 proc.start()
+                processes.append(proc)
                 time.sleep(2)
 
-    for _ in range(reps):
-        for r in randomize:
-            for T in n_samples:
-                proc.join()
+    for _ in processes:
+        ret = queue.get() # will block
+        rets.append(ret)
+    for p in processes:
+        p.join()
 
+    return aux.group_trajectories_by_setting(rets)

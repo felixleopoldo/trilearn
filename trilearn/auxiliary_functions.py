@@ -1,4 +1,5 @@
 import glob
+import os
 
 import networkx as nx
 import numpy as np
@@ -8,6 +9,10 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from pandas.plotting import autocorrelation_plot
 
+from sys import platform as sys_pf
+if sys_pf == 'darwin':
+    import matplotlib
+    matplotlib.use("TkAgg")
 
 def plot_heatmap(heatmap, cbar=False, annot=False, xticklabels=1, yticklabels=1):
     mask = np.zeros_like(heatmap)
@@ -177,9 +182,12 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
 
 def plot_multiple_traj_statistics(trajectories, burnin_end,
                                   write_to_file=False, output_directory="./", file_extension="eps"):
-    print(trajectories)
 
-    for param_setting, traj_list in trajectories.iteritems():
+    if not os.path.exists(output_directory):
+        os.mkdir(output_directory)
+
+    # for param_setting, traj_list in trajectories.iteritems():
+    for param_setting, traj_list in trajectories.items():
         print(traj_list[0].sampling_method)
         print("Average sample time: " + str(np.mean(traj_list[0].time)))
 
@@ -253,16 +261,26 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
             plt.clf()
 
 def read_all_trajectories_in_dir(directory):
-    trajectories = {}
+
     from trilearn.graph import trajectory as gtraj
+    trajlist = []
+
     for filename in glob.glob(directory + "/*.json"):
         print("Loading: " + str(filename))
-        # Gather all with the same parameter setting in the same plot
         t = gtraj.Trajectory()
         t.read_file(filename)
+        trajlist.append(t)
+
+    return group_trajectories_by_setting(trajlist)
+
+def group_trajectories_by_setting(trajlist):
+    # Gather all with the same parameter setting
+    trajectories = {}
+    for t in trajlist:
         if str(t) not in trajectories:
             trajectories[str(t)] = []
         trajectories[str(t)].append(t)
+
     return trajectories
 
 

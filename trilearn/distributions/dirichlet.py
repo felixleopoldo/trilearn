@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 
+import sys
+
 def log_norm_constant(alpha):
     """ Log of the normalizing constant in the Dirichlet distribution.
 
@@ -73,9 +75,11 @@ def log_norm_constant_multidim(alpha, beta, levels):
     no_cells = np.prod([len(l) for l in levels])
     numerator = (no_cells-len(alpha)) * math.lgamma(beta)
 
-    for cell, count in alpha.iteritems():
+    #for cell, count in alpha.iteritems():
+    for cell, count in alpha.items():
         numerator += math.lgamma(count + beta)
-    n = np.sum([val for key, val in alpha.iteritems()])
+    #n = np.sum([val for key, val in alpha.iteritems()])
+    n = np.sum([val for key, val in alpha.items()])
     denominator = math.lgamma(no_cells*beta + n)
 
     return numerator - denominator

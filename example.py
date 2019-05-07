@@ -15,14 +15,12 @@ import trilearn.distributions.g_intra_class as gic
 import trilearn.mh_greenthomas as green
 import trilearn.distributions.discrete_dec_log_linear as loglin
 
-np.random.seed(2)
 
 # Discrete data
 # reads labels and support from rows 0 and 1 respectively
+np.random.seed(2)
 aw_df = pd.read_csv("sample_data/czech_autoworkers.csv", header=[0, 1])
-pgibbs.sample_trajectories_loglin_parallel(dataframe=aw_df, n_particles=[100], n_samples=[10000], reps=10,
-                                           output_directory="./aw_trajs/")
-graph_trajs = aux.read_all_trajectories_in_dir("./aw_trajs/")
+graph_trajs = pgibbs.sample_trajectories_loglin_parallel(dataframe=aw_df, n_particles=[100], n_samples=[10000], reps=10)
 aux.plot_multiple_traj_statistics(graph_trajs, 0, write_to_file=True, output_directory="./aw_trajs/")
 
 ## Continuous AR(1-5)-model
@@ -32,20 +30,10 @@ cov_mat = gic.cov_matrix(ar_graph, 0.9, 1.0)
 ar_df = pd.DataFrame(np.random.multivariate_normal(np.zeros(50), cov_mat, 100))
 
 # PGibbs algorithm
-pgibbs.sample_trajectories_ggm_parallel(dataframe=ar_df, n_particles=[50], n_samples=[10000],
-                                        radius=[5, 50], alpha=[0.5], beta=[0.8],
-                                        reset_cache=True, reps=10,
-                                        output_directory="./ar_1-5_trajs/")
-graph_trajs = aux.read_all_trajectories_in_dir("./ar_1-5_trajs/")
-aux.plot_multiple_traj_statistics(graph_trajs, 0, write_to_file=True, output_directory="./ar_1-5_trajs/")
-
-# Metropolis-Hastings algorithm from
-# P. J. Green and A. Thomas. Sampling decomposable graphs using a Markov chain on junction trees. Biometrika, 100(1):91-110, 2013.
-green.sample_trajectories_ggm_parallel(dataframe=ar_df, randomize=[100, 1000], n_samples=[500000],
-                                        reset_cache=True, reps=10, output_directory="./ar_1-5_trajs_mh/")
-graph_trajs = aux.read_all_trajectories_in_dir("./ar_1-5_trajs_mh/")
-aux.plot_multiple_traj_statistics(graph_trajs, 0, write_to_file=True, output_directory="./ar_1-5_trajs_mh/")
-
+graph_trajs = pgibbs.sample_trajectories_ggm_parallel(dataframe=ar_df, n_particles=[50], n_samples=[10000],
+                                                      radius=[5], alpha=[0.5], beta=[0.8],
+                                                      reset_cache=True, reps=10)
+aux.plot_multiple_traj_statistics(graph_trajs, 3000, write_to_file=True, output_directory="./ar_1-5_trajs/")
 
 ## 15 nodes log-linear data
 loglin_graph = nx.Graph()
@@ -59,9 +47,14 @@ levels = np.array([range(2)] * loglin_graph.order())
 loglin_table = loglin.sample_prob_table(loglin_graph, levels, 1.0)
 np.random.seed(5)
 loglin_df = pd.DataFrame(loglin.sample(loglin_table, 1000))
-loglin_df.columns = [range(loglin_graph.order()), [len(l) for l in levels]]
+loglin_df.columns = [list(range(loglin_graph.order())), [len(l) for l in levels]]
 
-pgibbs.sample_trajectories_loglin_parallel(dataframe=loglin_df, n_particles=[100], n_samples=[10000], reps=10,
-                                           output_directory="./loglin_trajs/")
-graph_trajs = aux.read_all_trajectories_in_dir("./loglin_trajs/")
+graph_trajs = pgibbs.sample_trajectories_loglin_parallel(dataframe=loglin_df, n_particles=[100], n_samples=[10000], reps=10)
 aux.plot_multiple_traj_statistics(graph_trajs, 0, write_to_file=True, output_directory="./loglin_trajs/")
+
+
+# Metropolis-Hastings algorithm from
+# P. J. Green and A. Thomas. Sampling decomposable graphs using a Markov chain on junction trees. Biometrika, 100(1):91-110, 2013.
+graph_trajs = green.sample_trajectories_ggm_parallel(dataframe=ar_df, randomize=[100], n_samples=[500000],
+                                                     reset_cache=True, reps=10)
+aux.plot_multiple_traj_statistics(graph_trajs, 350000, write_to_file=True, output_directory="./ar_1-5_trajs_mh/")

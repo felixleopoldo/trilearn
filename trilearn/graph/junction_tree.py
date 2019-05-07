@@ -49,6 +49,11 @@ class JunctionTree(nx.Graph):
         self.log_nus = {}
         return super(JunctionTree, self).remove_edge(u, v)
 
+    def remove_node(self, n):
+        self.separators = None
+        self.log_nus = {}
+        return super(JunctionTree, self).remove_node(n)
+
     def remove_edges_from(self, ebunch):
         self.separators = None
         self.log_nus = {}
@@ -58,6 +63,12 @@ class JunctionTree(nx.Graph):
         if self.separators is None:
             self.separators = separators(self)
         return self.separators
+
+    def connected_component_vertices(self):
+        return [list(c) for c in nx.connected_components(self)]
+
+    def connected_components(self):
+        return nx.connected_components(self)
 
     def log_n_junction_trees(self, seps):
         lm = 0.0
@@ -144,12 +155,9 @@ def subtree_induced_by_subset(tree, s):
        s (set): Subset of the node in the underlying graph of T.
     """
     if len(s) == 0:
-        #return tree.subgraph(tree.nodes()) # nx < 2.x
-        return tree.copy() # nx > 2.x
+        return tree.copy()
     v_prime = {c for c in tree.nodes() if s <= c}
-    #return tree.subgraph(v_prime)  # nx < 2.x
-    return tree.subgraph(v_prime).copy() # nx > 2.x
-
+    return tree.subgraph(v_prime).copy()
 
 def induced_subtree_nodes(tree, node, visited, sep):
     neigs = [n for n in tree.neighbors(node)
@@ -204,7 +212,8 @@ def separators(tree):
 
 
 def log_nu(tree, s):
-    """ Returns the number of equivalent junction trees for tree where tree is cut at the separator s and then constructed again.
+    """ Returns the number of equivalent junction trees for tree where
+        tree is cut at the separator s and then constructed again.
 
     Args:
         tree (NetworkX graph): A junction tree
@@ -221,7 +230,8 @@ def log_nu(tree, s):
 
 def n_subtrees_aux(tree, node, sep, visited, start_nodes):
     visited.add(node)
-    for n in nx.neighbors(tree, node):
+    #for n in nx.neighbors(tree, node):
+    for n in tree.neighbors(node):
         if sep < n:
             if n not in visited:
                 if n & node == sep:
@@ -238,7 +248,8 @@ def n_subtrees(tree, sep):
     leaf = None
     counts = []
     for n in tree.nodes():
-        valid_neighs = [ne for ne in nx.neighbors(tree, n) if sep < ne]
+        #valid_neighs = [ne for ne in nx.neighbors(tree, n) if sep < ne]
+        valid_neighs = [ne for ne in tree.neighbors(n) if sep < ne]
         if len(valid_neighs) == 1 and sep < n:
             leaf = n
             break
@@ -292,10 +303,11 @@ def randomize_at_sep(tree, s):
             to_remove += [(e[0], e[1])]
 
     tree.remove_edges_from(to_remove)
-    # Add the new edges
 
-    for e in new_edges:
-        tree.add_edge(e[0], e[1])
+    # Add the new edges
+    tree.add_edges_from(new_edges)
+    #for e in new_edges:
+    #    tree.add_edge(e[0], e[1])
 
 
 def randomize(tree):
@@ -312,16 +324,17 @@ def randomize(tree):
     for s in S:
         randomize_at_sep(tree, s)
 
-
 def random_tree_from_forest(F, edge_label=""):
-    """ Returns a random tree from a the forest F.
+    """ Returns a random tree from the forest F.
 
     Args:
         F (NetworkX graph): A forest.
         edge_label (string): Labels for the edges.
     """
-    comps = [list(c) for c in nx.connected_components(F)]
+    comps = F.connected_component_vertices()
 
+    #comps = [list(c) for c in nx.connected_components(F)]
+    #comps = [list(t.nodes()) for t in F.connected_components(prune=False)]
     q = len(comps)
     p = F.order()
     # 1. Label the vertices's
@@ -431,10 +444,10 @@ def n_junction_trees_update(new_separators, from_tree, to_tree, log_old_mu):
         log_old_mu: Log of the number of junction trees of from_tree.
 
     """
-    return n_junction_trees_update_ratio(new_separators, from_tree, to_tree) + log_old_mu
+    return log_n_junction_trees_update_ratio(new_separators, from_tree, to_tree) + log_old_mu
 
 
-def n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
+def log_n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
     """ Returns the log of the ratio of number of junction trees of from_tree and to_tree.
 
     Args:
@@ -489,10 +502,13 @@ def sample(internal_nodes, alpha=0.5, beta=0.5):
     else:
         nodes = internal_nodes
 
-    G = nx.Graph()
-    # G = jtlib.JunctionTree()
-    G.add_node(nodes[0], shape="circle")
-    tree = dlib.junction_tree(G)
+
+    tree = JunctionTree()
+
+    #from trilearn.graph.junction_tree_gt import JunctionTreeGT
+    #tree = JunctionTreeGT()
+
+    tree.add_node(frozenset([nodes[0]]))
     # print tree.nodes()
     # for n in tree.nodes():
     #     lab = tuple(n)
@@ -502,6 +518,9 @@ def sample(internal_nodes, alpha=0.5, beta=0.5):
 
     for j in nodes[1:]:
         (tree, _, _, _, _, _) = jte.sample(tree, j, alpha, beta, only_tree=False)
+
+        #print("vert dict: " + str(tree.gp.vert_dict))
+        #print("nodes: " + str(list(tree.vp.nodes)))
 
     return tree
 

@@ -9,10 +9,11 @@ from tqdm import tqdm
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
 import trilearn.graph.graph as glib
 import trilearn.graph.junction_tree as jtlib
+#import trilearn.graph.junction_tree_gt as jtgt
 import trilearn.graph.junction_tree_collapser
 import trilearn.graph.junction_tree_expander
 import trilearn.set_process as sp
-import auxiliary_functions as aux
+import trilearn.auxiliary_functions as aux
 
 def smc_ggm_graphs(N, alpha, beta, radius, X, D, delta):
     cache = {}
@@ -66,11 +67,12 @@ def approximate(N, alpha, beta, radius, seq_dist, debug=False, neig_set_cache={}
         I = np.random.choice(N, size=N, p=norm_w)
         for i in range(N):
             if i % 5000 == 0 and not i == 0 and debug:
-                print "n: " + str(n) + ", i: " + str(i)
+                print("n: " + str(n) + ", i: " + str(i))
             if n == 0:
                 ind_perms[i, n] = sp.gen_order_neigh([], radius, total)
                 node = ind_perms[i, n][n]
                 T = jtlib.JunctionTree()
+                #T = jtgt.JunctionTreeGT()
                 T.add_node(frozenset([node]), label=tuple([node]), color="red")
                 new_trees[i] = T
                 log_w[i, n] = 0.0
@@ -123,12 +125,13 @@ def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=
         I = np.random.choice(N, size=N, p=norm_w)
         for i in range(N):
             if i % 500 == 0 and not i == 0 and debug:
-                print "n: " + str(n) + ", i: " + str(i)
+                print("n: " + str(n) + ", i: " + str(i))
             if n == 0:
                 # Index permutation
                 ind_perms[i, n] = sp.gen_order_neigh([], radius, total)
                 node = ind_perms[i, n][n]
                 T = jtlib.JunctionTree()
+                #T = jtgt.JunctionTreeGT()
                 T.add_node(frozenset(ind_perms[i, n]),
                            label=tuple([node]),
                            color="red")
@@ -262,7 +265,7 @@ def est_dec_max_clique_size(order, n_particles, alpha=0.5, beta=0.5, n_smc_estim
         est_exp = (max_clique_sizes * norm_w).sum()  # weighted expected value
         expected_maxl_clique_sizes.append(est_exp)
         if debug:
-            print t, est_exp
+            print(t, est_exp)
     return expected_maxl_clique_sizes
 
 

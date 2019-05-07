@@ -84,28 +84,36 @@ class Trajectory:
         """ Writes a Trajectory together with the corresponding
         sequential distribution to a json-file.
         """
+
+        def default(o):
+            if isinstance(o, np.int64): return int(o)
+            raise TypeError
+
         if filename is None:
             with open(str(self) + ".json", 'w') as outfile:
-                json.dump(self.to_json(optional=optional), outfile)
+                json.dump(self.to_json(optional=optional), outfile, default=default)
         else:
             with open(filename, 'w') as outfile:
-                json.dump(self.to_json(optional=optional), outfile)
+                json.dump(self.to_json(optional=optional), outfile, default=default)
 
 
     def to_json(self, optional={}):
         js_graphs = [json_graph.node_link_data(graph) for
                      graph in self.trajectory]
+
         mcmc_traj = {"model": self.seqdist.get_json_model(),
                      "run_time": self.time,
                      "optional": optional,
                      "sampling_method": self.sampling_method,
-                     "trajectory": js_graphs}
+                     "trajectory": js_graphs
+                     }
         return mcmc_traj
 
 
     def from_json(self, mcmc_json):
         graphs = [json_graph.node_link_graph(js_graph)
                   for js_graph in mcmc_json["trajectory"]]
+
         self.set_trajectory(graphs)
         self.set_time(mcmc_json["run_time"])
         self.optional = mcmc_json["optional"]

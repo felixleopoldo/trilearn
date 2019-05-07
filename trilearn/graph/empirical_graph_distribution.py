@@ -25,7 +25,8 @@ class GraphDistribution(object):
         dist_json = {"_id": dist_id,
                      "distribution": [],
                      "optional": optional}
-        for key, val in self.distribution.iteritems():
+        # for key, val in self.distribution.iteritems():
+        for key, val in self.distribution.items():
             dist_json["distribution"].append([json_graph.node_link_data(
                 val["graph"]),
                 val["prob"]])
@@ -69,10 +70,12 @@ class GraphDistribution(object):
 
     def __str__(self):
         tmp = [(val["graph"].edges(), val["prob"]) for
-               key, val in self.distribution.iteritems()]
+               # key, val in self.distribution.iteritems()]
+               key, val in self.distribution.items()]
         return str(tmp)
 
     def mode(self, number=1):
-        graphs_probs = [(val["graph"], val["prob"]) for _, val in self.distribution.iteritems()]
+        # graphs_probs = [(val["graph"], val["prob"]) for _, val in self.distribution.iteritems()]
+        graphs_probs = [(val["graph"], val["prob"]) for _, val in self.distribution.items()]
         graphs_probs.sort(key=itemgetter(1), reverse=True)
         return graphs_probs[:number]

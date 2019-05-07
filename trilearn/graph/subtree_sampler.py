@@ -37,14 +37,15 @@ def random_subtree(T, alpha, beta, subtree_mark):
     start = np.random.randint(n)  # then n means new component
     separators = {}
     #start_node = T.nodes()[start] # nx < 2.x
-    start_node = list(T.nodes)[start] # nx > 2.x
+
+    start_node = list(T.nodes())[start] # nx > 2.x
     q.append(start_node)
     subtree_adjlist = {start_node: []}
     while len(q) > 0:
         node = q.popleft()
         visited.add(node)
         subtree_nodes.append(node)
-        T.node[node]["subnode"] = subtree_mark
+        #T.node[node]["subnode"] = subtree_mark
         for neig in T.neighbors(node):
             b = np.random.multinomial(1, [1-alpha, alpha]).argmax()
             if neig not in visited:
@@ -61,7 +62,9 @@ def random_subtree(T, alpha, beta, subtree_mark):
                 else:
                     w += 1
 
-    #subtree = T.subgraph(subtree_nodes)
+    # subtree = T.subgraph(subtree_nodes)
+    # assert subtree_nodes in T.nodes()
+
     subtree = None
     v = len(subtree_nodes)
     probtree = beta * v * np.power(alpha, v-1) / np.float(n)
@@ -86,7 +89,8 @@ def pdf(subtree, T, alpha, beta):
     if p == 0:
         return 1.0 - beta
     forest = T.subgraph(set(T.nodes()) - set(subtree.nodes()))
-    components = nx.connected_components(forest)
+    #components = nx.connected_components(forest)
+    components = forest.connected_components()
     w = float(len(list(components)))
     v = float(subtree.order())
     alpha = float(alpha)

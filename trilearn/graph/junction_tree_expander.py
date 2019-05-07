@@ -100,40 +100,50 @@ def subtree_cond_pdf(tree1, tree2, tree2_subtree_nodes, new):
     """
 
     # if new is isolated in the underlying graph
-    if len(tree2_subtree_nodes) == 1 and tree2_subtree_nodes.values()[0] is None:
+
+    #if len(tree2_subtree_nodes) == 1 and tree2_subtree_nodes.values()[0] is None:
+    if len(tree2_subtree_nodes) == 1 and list(tree2_subtree_nodes.values())[0] is None:
         sep = frozenset([])
         c = frozenset([new])
         lognu = trilearn.graph.junction_tree.log_nu(tree2, sep)
-        return ({c: np.power(np.exp(lognu), -1.0)}, {c: 1.0})
+        return ({c: np.exp(-lognu)}, {c: 1.0})
 
     # Get the subtree induced by the nodes
-    tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in
-                                    tree2_subtree_nodes.iteritems()])
+    #tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in tree2_subtree_nodes.iteritems()])
+    tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in tree2_subtree_nodes.items()])
 
 
     # Get the separating sets
     # S = sepsets_in_subgraph(tree2_subtree_nodes, tree1_subtree)
-    S = {c: set() for c_t2, c in tree2_subtree_nodes.iteritems()}
-    for c_tree2, c in tree2_subtree_nodes.iteritems():
+
+    # S = {c: set() for c_t2, c in tree2_subtree_nodes.iteritems()}
+    S = {c: set() for c_t2, c in tree2_subtree_nodes.items()}
+    #for c_tree2, c in tree2_subtree_nodes.iteritems():
+    for c_tree2, c in tree2_subtree_nodes.items():
         for neig in tree1_subtree.neighbors(c):
             S[c] = S[c] | (c & neig)
 
     # P, N get_subset_probabilities(tree2_)
     # Get the chosen internal nodes
     M = {}
-    for c_tree2, c in tree2_subtree_nodes.iteritems():
+    # for c_tree2, c in tree2_subtree_nodes.iteritems():
+    for c_tree2, c in tree2_subtree_nodes.items():
         M[c] = c_tree2 - {new} - S[c]
 
     # Calculate probabilities corresponding to each clique
     P = {}
     N = {}
-    for c_tree2, c in tree2_subtree_nodes.iteritems():
+    # for c_tree2, c in tree2_subtree_nodes.iteritems():
+    for c_tree2, c in tree2_subtree_nodes.items():
         neigs = {neig for neig in tree1.neighbors(c) if
                  neig & c <= c_tree2 and neig not in tree1_subtree.nodes()}
         RM = c - S[c]
         gamma = tree1_subtree.order()
-        sepCondition = len({neig for neig in nx.neighbors(tree1_subtree, c) if
+        # sepCondition = len({neig for neig in nx.neighbors(tree1_subtree, c) if
+        #                     S[c] == neig & c}) > 0 or gamma == 1
+        sepCondition = len({neig for neig in tree1_subtree.neighbors(c) if
                             S[c] == neig & c}) > 0 or gamma == 1
+
         N[c] = 1.0
         if sepCondition is False:
             # Every internal node in c belongs to a separator
@@ -164,14 +174,16 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
     new_cliques = set()
     old_cliques = set()
     subtree_order = len(subtree_nodes)
+    #print("subtree nodes:" + str(subtree_nodes))
 
     if subtree_order == 0:
         # If the tree, tree is empty (n isolated node),
         # add random neighbor.
         c = frozenset([new])
         new_cliques.add(c)
-        #c2 = tree.nodes()[0] # nx 1.9
-        c2 = list(tree.nodes)[0] # nx 2.1
+        #c2 = tree.nodes()[0]  # nx 1.9
+        c2 = list(tree.nodes())[0]  # GraphTool
+        #c2 = list(tree.nodes)[0] # nx 2.1
         tree.add_node(c, label=tuple([new]), color="red")
         tree.add_edge(c, c2, label=tuple([]))
 
@@ -181,7 +193,7 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
 
         new_separators[sep] = [(c, c2)]
         # tree TODO: the actual value for the key is not needed.
-        P = {c: 1.0 / np.exp(tree.log_nu(sep))}
+        P = {c: np.exp(-tree.log_nu(sep))}
         return (old_cliques, new_cliques, new_separators, P, {c: 1.0})
 
     S = {c: set() for c in subtree_nodes}
@@ -297,7 +309,11 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
                     N[c] = np.power(2.0, - len(N_S[c]))
 
     # Remove the edges in tree
+    #print(list(tree.nodes()))
+    #print(list(tree.edges()))
+    #print(subtree_edges)
     tree.remove_edges_from(subtree_edges)
+    # Todo: This will introduce a bug if we instead replace a node.
     return (old_cliques, new_cliques, new_separators, P, N)
 
 
@@ -318,7 +334,8 @@ def pdf(tree1, tree2, alpha, beta, new):
     prob = 0.0
     tree2_tree1_subtree_nodes = get_subtree_nodes(tree1, tree2, new)
     for tree2_subtree_nodes in tree2_tree1_subtree_nodes:
-        tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in tree2_subtree_nodes.iteritems() if c_t1 is not None])
+        # tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in tree2_subtree_nodes.iteritems() if c_t1 is not None])
+        tree1_subtree = tree1.subgraph([c_t1 for c_t2, c_t1 in tree2_subtree_nodes.items() if c_t1 is not None])
         tree1_subtree_prob = ss.pdf(tree1_subtree, tree1, alpha, beta)
 
         (P, N) = subtree_cond_pdf(tree1, tree2, tree2_subtree_nodes, new)
@@ -354,7 +371,7 @@ def get_subtree_nodes(T1, T2, new):
     elif T2_ind.order() == 1:
         # Look which is its neighbor
         #c = T2_ind.nodes()[0] # nx < 2.x
-        c = list(T2_ind.nodes)[0] # nx > 2.x
+        c = list(T2_ind.nodes())[0] # nx > 2.x
 
         if T1.has_node(c - {new}):
             # if it was connected to everything in a clique

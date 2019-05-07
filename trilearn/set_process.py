@@ -80,7 +80,8 @@ def gen_backward_order_neigh(from_order, radius, maxradius):
     """
     removable_neigs = backward_order_neigh_set(from_order, radius, maxradius)
     to_remove = aux.random_element_from_coll(removable_neigs)
-    to_order = from_order[:]
+    #to_order = from_order[:]
+    to_order = list(from_order[:])
     to_order.remove(to_remove)
     return to_order
 
