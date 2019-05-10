@@ -217,6 +217,7 @@ def sample_trajectory(n_samples, randomize, sd):
                 continue
         #print(np.mean(accept_traj[:i]))
     gtraj.set_trajectory(graphs)
+    gtraj.logl = log_prob_traj
     return gtraj
 
 

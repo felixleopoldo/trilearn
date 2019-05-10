@@ -21,7 +21,8 @@ class Trajectory:
         self.time = []
         self.seqdist = None
         self.burnin = 0
-        self.logl = None
+        self.logl = []
+        self._size = []
 
     def set_sampling_method(self, method):
         self.sampling_method = method
@@ -45,7 +46,7 @@ class Trajectory:
     def set_time(self, generation_time):
         self.time = generation_time
 
-    def add_sample(self, graph, time):
+    def add_sample(self, graph, time, logl):
         """ Add graph to the trajectory.
 
         Args:
@@ -54,7 +55,7 @@ class Trajectory:
         """
         self.trajectory.append(graph)
         self.time.append(time)
-
+        self.logl.append(logl)
 
     def empirical_distribution(self, from_index=0):
         length = len(self.trajectory) - from_index
@@ -64,7 +65,7 @@ class Trajectory:
         return graph_dist
 
     def log_likelihood(self, from_index=0):
-        if self.logl is None:
+        if self.logl == []:
             self.logl = [self.seqdist.log_likelihood(g) for g in self.trajectory]
         return pd.Series(self.logl[from_index:])
 
@@ -77,8 +78,9 @@ class Trajectory:
         Args:
             from_index (int): Burn-in period, default=0.
         """
-        size = [g.size() for g in self.trajectory[from_index:]]
-        return pd.Series(size)
+        if self._size == []:
+            self._size = [g.size() for g in self.trajectory[from_index:]]
+        return pd.Series(self._size)
 
     def write_file(self, filename=None, optional={}):
         """ Writes a Trajectory together with the corresponding

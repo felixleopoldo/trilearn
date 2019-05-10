@@ -51,7 +51,6 @@ def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
             #start_graph = nx.Graph()
             #start_graph.add_nodes_from(range(seqdist.p))
             #start_tree = dlib.junction_tree(start_graph)
-
             (trees, log_w) = approximate(smc_N, alpha, beta, radius, seq_dist, neig_set_cache=neig_set_cache)
         else:
             # Sample backwards trajectories
@@ -66,14 +65,16 @@ def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
                                                   T_traj,
                                                   perm_traj, neig_set_cache=neig_set_cache)
         # Sample T from T_1..p
-        log_w_rescaled = np.array(log_w.T)[seq_dist.p - 1] - max(np.array(log_w.T)[seq_dist.p - 1])
-        norm_w = np.exp(log_w_rescaled) / sum(np.exp(log_w_rescaled))
+        log_w_array = np.array(log_w.T)[seq_dist.p - 1]
+        log_w_rescaled = log_w_array - max(log_w_array)
+        w_rescaled = np.exp(log_w_rescaled)
+        norm_w = w_rescaled / sum(w_rescaled)
         I = np.random.choice(smc_N, size=1, p=norm_w)[0]
         T = trees[I]
-        end_time = time.time()
         prev_tree = T
-        graph_traj.add_sample(jtlib.graph(T), end_time - start_time)
-
+        graph = jtlib.graph(T)
+        end_time = time.time()
+        graph_traj.add_sample(graph, end_time - start_time, log_w_array[I])
     return graph_traj
 
 def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, queue,
@@ -96,7 +97,7 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, que
     if reseed is True:
         np.random.seed()
 
-    print (n_particles, alpha, beta, radius, n_samples, str(seqdist), reset_cache)
+    #print (n_particles, alpha, beta, radius, n_samples, str(seqdist), reset_cache)
     graph_trajectory = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
     date = datetime.datetime.today().strftime('%Y%m%d%H%m%S')
     if not os.path.exists(dir):
@@ -128,7 +129,7 @@ def trajectory_to_queue(n_particles, n_samples, alpha, beta, radius, seqdist, qu
     """
     if reseed is True:
         np.random.seed()
-    print (n_particles, alpha, beta, radius, n_samples, str(seqdist), reset_cache)
+    #print (n_particles, alpha, beta, radius, n_samples, str(seqdist), reset_cache)
     graph_trajectory = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
     queue.put(graph_trajectory)
 

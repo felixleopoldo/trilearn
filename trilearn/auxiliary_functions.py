@@ -8,6 +8,7 @@ from numpy import linalg as la
 from matplotlib import pyplot as plt
 import seaborn as sns
 from pandas.plotting import autocorrelation_plot
+from tqdm import tqdm
 
 from sys import platform as sys_pf
 if sys_pf == 'darwin':
@@ -186,38 +187,35 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
-    # for param_setting, traj_list in trajectories.iteritems():
     for param_setting, traj_list in trajectories.items():
-        print(traj_list[0].sampling_method)
+        print("Setting: " + str(traj_list[0].sampling_method))
         print("Average sample time: " + str(np.mean(traj_list[0].time)))
 
-        print("Plotting size")
         sns.set_style("whitegrid")
-        for t in traj_list:
+        for t in tqdm(traj_list, total=len(traj_list), desc="Plotting size"):
             t.size(burnin_end).plot()
         if write_to_file:
             plt.savefig(output_directory +"/"+ str(t) + "_size." + file_extension)
         plt.clf()
 
-        print("Plotting log-likelihood")
         sns.set_style("whitegrid")
-        for t in traj_list:
+        for t in tqdm(traj_list, total=len(traj_list), desc="Plotting log-likelihood"):
             t.log_likelihood(burnin_end).plot()
         if write_to_file:
             plt.savefig(output_directory +"/"+ str(t) + "_log-likelihood."+file_extension)
         plt.clf()
 
-        print("Plotting autocorr")
         sns.set_style("whitegrid")
-        for t in traj_list:
+        for t in tqdm(traj_list, total=len(traj_list), desc="Plotting autocorr"):
             autocorrelation_plot(t.size(burnin_end))
         if write_to_file:
             plt.savefig(output_directory +"/"+ str(t) + "_autocorr."+file_extension)
         plt.clf()
 
 
-        print("Plotting heatmap, size auto-correlation, MAP and ML graph")
-        for i, t in enumerate(traj_list):
+        for i, t in tqdm(enumerate(traj_list), total=len(traj_list),
+                         desc="Plotting heatmap, size auto-correlation, MAP and ML graph"):
+        #for i, t in enumerate(traj_list):
             plot_heatmap(t.empirical_distribution(burnin_end).heatmap(),
                          xticklabels=np.arange(1, t.seqdist.p +1),
                          yticklabels=np.arange(1, t.seqdist.p +1))
