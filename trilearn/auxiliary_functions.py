@@ -182,7 +182,7 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
 
 
 def plot_multiple_traj_statistics(trajectories, burnin_end,
-                                  write_to_file=False, output_directory="./", file_extension="eps"):
+                                  write_to_file=False, annot=False, output_directory="./", file_extension="eps"):
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
@@ -218,7 +218,7 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
         #for i, t in enumerate(traj_list):
             plot_heatmap(t.empirical_distribution(burnin_end).heatmap(),
                          xticklabels=np.arange(1, t.seqdist.p +1),
-                         yticklabels=np.arange(1, t.seqdist.p +1))
+                         yticklabels=np.arange(1, t.seqdist.p +1), annot=annot)
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
@@ -227,7 +227,7 @@ def plot_multiple_traj_statistics(trajectories, burnin_end,
 
             plot_heatmap(t.empirical_distribution(burnin_end).heatmap(), cbar=True,
                          xticklabels=np.arange(1, t.seqdist.p +1),
-                         yticklabels=np.arange(1, t.seqdist.p +1))
+                         yticklabels=np.arange(1, t.seqdist.p +1), annot=annot)
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             cax = plt.gcf().axes[-2]
