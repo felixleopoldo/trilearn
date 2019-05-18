@@ -97,10 +97,10 @@ def test_transprob():
             # trans_probs[tree_tuple_old].add((tree_tuple, K))
             trees[n].add(tree_tuple)
 
-    for tree, exp_trees in trans_probs.iteritems():
+    for tree, exp_trees in trans_probs.items():
         # print exp_trees
         sum = 0.0
-        for key, val in exp_trees.iteritems():
+        for key, val in exp_trees.items():
             # print val
             sum += val
         assert(np.abs(sum - 1.0) < 0.0001)
@@ -134,10 +134,10 @@ def test_logmu_monte_carlo():
     #print "Exact number of chordal graphs: " + str(len(graph_jtreps))
     #print "Exact number of junction trees: " + str(np.sum([val for key, val in graphs.iteritems()]))
     sum = 0
-    for graph, val in graph_jtreps.iteritems():
+    for graph, val in graph_jtreps.items():
         #print val["mu"], val["jts"]
         #print val["mu"] - len(val["jts"])
         sum += len(val["jts"])
         assert np.abs(val["mu"] - len(val["jts"]) < 0.0000001)
 
-    print sum
+    print(sum)
