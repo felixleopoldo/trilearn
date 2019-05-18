@@ -208,7 +208,7 @@ def sample_trajectories_ggm_to_file(dataframe, n_particles, n_samples, D=None, d
 
 
 def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
-                                     radii=[None], reset_cache=True, reps=1, output_directory=".", **args):
+                                     radii=[None], reset_cache=True, reps=1, **args):
     p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
@@ -227,7 +227,7 @@ def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, 
                             sd.init_model(np.asmatrix(dataframe), D, delta, {})
 
                             print("Starting: " + str((N, T, alpha, beta, rad,
-                                  str(sd), reset_cache, output_directory, True)))
+                                  str(sd), reset_cache, True)))
 
                             proc = Process(target=trajectory_to_queue,
                                            args=(N, T, alpha, beta, rad,
