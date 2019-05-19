@@ -132,9 +132,7 @@ def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=
                 node = ind_perms[i, n][n]
                 T = jtlib.JunctionTree()
                 #T = jtgt.JunctionTreeGT()
-                T.add_node(frozenset(ind_perms[i, n]),
-                           label=tuple([node]),
-                           color="red")
+                T.add_node(frozenset(ind_perms[i, n]))
                 new_trees[i] = T
                 log_w[i, n] = 0.0
             else:
@@ -149,23 +147,15 @@ def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=
 
                     old_cliques = T_old.nodes()
                     old_separators = T_old.get_separators()
+
                     new_cliques = T.nodes()
                     new_separators = T.get_separators()
                     node = list(set(perm_cond[n]) - set(perm_cond[n - 1]))[0]
                     K_st = trilearn.graph.junction_tree_expander.pdf(T_old, T, alpha, beta, node)
-                    log_order_pdf = sp.backward_order_neigh_log_prob(perm_cond[n - 1],
+                    log_order_pr = sp.backward_order_neigh_log_prob(perm_cond[n - 1],
                                                                      perm_cond[n],
                                                                      radius, maxradius)
-                    log_R = log_order_pdf + trilearn.graph.junction_tree_collapser.log_pdf(T, T_old, node)
-
-                    # Set weight
-                    log_w[i, n] = seq_dist.log_ratio(old_cliques,
-                                                     old_separators,
-                                                     new_cliques,
-                                                     new_separators,
-                                                     T_old,
-                                                     T) + log_R - np.log(K_st)
-                elif i > 0:
+                else:
                     # Weights for rest
                     T_old = old_trees[I[i]]  # Create an nx.Graph once for speed.
                     # Get permutation
@@ -177,20 +167,20 @@ def approximate_cond(N, alpha, beta, radius, seq_dist, T_cond, perm_cond, debug=
                     node = ind_perms[i, n][n]  # the added node
 
                     # Expand the junction tree T
-                    new_trees[
-                        i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
+                    new_trees[i], K_st, old_cliques, old_separators, new_cliques, new_separators = trilearn.graph.junction_tree_expander.sample(
                         T_old, node, alpha, beta, only_tree=False)
                     log_order_pr = sp.backward_order_neigh_log_prob(ind_perms[I[i], n - 1],
                                                                     ind_perms[i, n],
                                                                     radius, maxradius)
                     T = new_trees[i]
-                    log_R = log_order_pr + trilearn.graph.junction_tree_collapser.log_pdf(T, T_old, node)
-                    log_w[i, n] = seq_dist.log_ratio(old_cliques,
-                                                     old_separators,
-                                                     new_cliques,
-                                                     new_separators,
-                                                     T_old,
-                                                     T) + log_R - np.log(K_st)
+
+                log_R = log_order_pr + trilearn.graph.junction_tree_collapser.log_pdf(T, T_old, node)
+                log_w[i, n] = seq_dist.log_ratio(old_cliques,
+                                                 old_separators,
+                                                 new_cliques,
+                                                 new_separators,
+                                                 T_old,
+                                                 T) + log_R - np.log(K_st)
         old_trees = new_trees
     return (new_trees, log_w, Is)
 

@@ -242,7 +242,7 @@ def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, 
     for p in processes:
         p.join()
 
-    return aux.group_trajectories_by_setting(rets)
+    return rets
 
 
 def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, alpha=0.5, beta=0.5,
@@ -340,4 +340,4 @@ def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseud
     for p in processes:
         p.join()
 
-    return aux.group_trajectories_by_setting(rets)
+    return rets

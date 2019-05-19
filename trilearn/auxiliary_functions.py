@@ -181,9 +181,9 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
     # return pd.DataFrame(x), pd.Series(np.array(y).flatten(), dtype=int)
 
 
-def plot_multiple_traj_statistics(trajectories, burnin_end,
+def plot_multiple_traj_statistics(trajs, burnin_end,
                                   write_to_file=False, annot=False, output_directory="./", file_extension="eps"):
-
+    trajectories = group_trajectories_by_setting(trajs)
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 

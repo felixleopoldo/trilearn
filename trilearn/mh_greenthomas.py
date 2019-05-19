@@ -278,7 +278,7 @@ def sample_trajectories_loglin_parallel(dataframe, n_samples, randomize=[1000], 
     for p in processes:
         p.join()
 
-    return aux.group_trajectories_by_setting(rets)
+    return rets
 
 
 def trajectory_to_file(n_samples, randomize, seqdist, dir=".", reseed=False):
@@ -381,4 +381,4 @@ def sample_trajectories_ggm_parallel(dataframe, n_samples, randomize=[1000], D=N
     for p in processes:
         p.join()
 
-    return aux.group_trajectories_by_setting(rets)
+    return rets
