@@ -46,7 +46,7 @@ class Trajectory:
     def set_time(self, generation_time):
         self.time = generation_time
 
-    def add_sample(self, graph, time, logl):
+    def add_sample(self, graph, time, logl=None):
         """ Add graph to the trajectory.
 
         Args:
@@ -55,7 +55,8 @@ class Trajectory:
         """
         self.trajectory.append(graph)
         self.time.append(time)
-        self.logl.append(logl)
+        if logl is not None:
+            self.logl.append(logl)
 
     def empirical_distribution(self, from_index=0):
         length = len(self.trajectory) - from_index

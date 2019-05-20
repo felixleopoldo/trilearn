@@ -74,7 +74,7 @@ def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
         prev_tree = T
         graph = jtlib.graph(T)
         end_time = time.time()
-        graph_traj.add_sample(graph, end_time - start_time, log_w_array[I])
+        graph_traj.add_sample(graph, end_time - start_time)
     return graph_traj
 
 def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, queue,
