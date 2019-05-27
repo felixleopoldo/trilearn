@@ -209,20 +209,19 @@ def plot_multiple_traj_statistics(trajs, burnin_end,
         for t in tqdm(traj_list, total=len(traj_list), desc="Plotting autocorr"):
             autocorrelation_plot(t.size(burnin_end))
         if write_to_file:
-            plt.savefig(output_directory +"/"+ str(t) + "_autocorr."+file_extension)
+            plt.savefig(output_directory +"/"+ str(t) + "_autocorr"+"_burnin_"+str(burnin_end)+"."+file_extension)
         plt.clf()
 
 
         for i, t in tqdm(enumerate(traj_list), total=len(traj_list),
                          desc="Plotting heatmap, size auto-correlation, MAP and ML graph"):
-        #for i, t in enumerate(traj_list):
             plot_heatmap(t.empirical_distribution(burnin_end).heatmap(),
                          xticklabels=np.arange(1, t.seqdist.p +1),
                          yticklabels=np.arange(1, t.seqdist.p +1), annot=annot)
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
-                plt.savefig(output_directory +"/"+ str(t) + "_heatmap_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_heatmap_" + str(i) + "_burnin_"+str(burnin_end)+"."+file_extension)
             plt.clf()
 
             plot_heatmap(t.empirical_distribution(burnin_end).heatmap(), cbar=True,
@@ -234,24 +233,30 @@ def plot_multiple_traj_statistics(trajs, burnin_end,
             cax.tick_params(labelsize=6)
 
             if write_to_file:
-                plt.savefig(output_directory +"/"+ str(t) + "_heatmap_cbar_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_heatmap_cbar_" + str(i) + "_burnin_"+str(burnin_end)+ "."+file_extension)
             plt.clf()
 
             sns.set_style("white")
             autocorrelation_plot(t.size(burnin_end))
             if write_to_file:
-                plt.savefig(output_directory +"/"+ str(t) + "_size_autocorr_" + str(i) + "."+file_extension)
+                plt.savefig(output_directory +"/"+ str(t) + "_size_autocorr_" + str(i) + "_burnin_"+str(burnin_end)+ "."+file_extension)
             plt.clf()
 
             top = t.empirical_distribution().mode(1)
-            plot_heatmap(nx.to_numpy_array(top[0][0]))
+            plot_heatmap(nx.to_numpy_array(top[0][0]),
+                         xticklabels=np.arange(1, t.seqdist.p +1),
+                         yticklabels=np.arange(1, t.seqdist.p +1)
+                         )
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
                 plt.savefig(output_directory +"/"+ str(t) + "_map_" + str(i) + "."+file_extension)
             plt.clf()
 
-            plot_heatmap(nx.to_numpy_array(t.maximum_likelihood_graph()))
+            plot_heatmap(nx.to_numpy_array(t.maximum_likelihood_graph()),
+                         xticklabels=np.arange(1, t.seqdist.p +1),
+                         yticklabels=np.arange(1, t.seqdist.p +1)
+                         )
             cax = plt.gcf().axes[-1]
             cax.tick_params(labelsize=6)
             if write_to_file:
