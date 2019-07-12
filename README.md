@@ -1,6 +1,6 @@
-# Particle Gibbs for Bayesian classification and structure learning in decomposable graphical models
-A graphical predictive classifier and a particle Gibbs sampler for Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models.
-
+# Bayesian inference in decomposable graphical models uing sequential Monte Carlo methods
+Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models using particle Gibbs.
+Bayesian predictive classification with BMA obtained by particle Gibbs.
 ### Installation
 
 If graphviz is not installed, you can install it from brew / aptitude / pacman for example
