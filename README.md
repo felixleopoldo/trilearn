@@ -1,6 +1,6 @@
-# Bayesian inference in decomposable graphical models uing sequential Monte Carlo methods
+# Bayesian inference in decomposable graphical models using sequential Monte Carlo methods
 Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models using particle Gibbs.
-Bayesian predictive classification with BMA obtained by particle Gibbs.
+Bayesian model averged predictive classification using particle Gibbs.
 ### Installation
 
 If graphviz is not installed, you can install it from brew / aptitude / pacman for example
