@@ -1,3 +1,7 @@
+![GitHub](https://img.shields.io/github/license/felixleopoldo/trilearn)
+![PyPI](https://img.shields.io/pypi/v/trilearn)
+![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/pypi/trilearn)
+
 # Bayesian inference in decomposable graphical models using sequential Monte Carlo methods
 This library contains Bayesian inference in decomposable (triangulated) graphical models based on sequential Monte Carlo methods.
 Currently supported functionalities include:
