@@ -1,5 +1,15 @@
-# Particle Gibbs for Bayesian classification and structure learning in decomposable graphical models
-A graphical predictive classifier and a particle Gibbs sampler for Bayesian structure learning in discrete log-linear and Gaussian decomposable graphical models.
+![GitHub](https://img.shields.io/github/license/felixleopoldo/trilearn)
+![PyPI](https://img.shields.io/pypi/v/trilearn)
+![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/pypi/trilearn)
+
+# Bayesian inference in decomposable graphical models using sequential Monte Carlo methods
+This library contains Bayesian inference in decomposable (triangulated) graphical models based on sequential Monte Carlo methods.
+Currently supported functionalities include:
+
+- Bayesian structure learning for discrete log-linear and Gaussian data.
+- Estimation of the number of decomopsable graphs with a given number of nodes.
+- Predictive classification using Bayesian model averaging (BMA).
+- Random generation of junction trees (the Christmas tree algorithm).
 
 ### Installation
 
@@ -11,7 +21,7 @@ Then run
 ```
 $ pip install trilearn
 ```
-
+This package currently requieres Python 2.7
 ### Running the tests
 
 ```
@@ -57,13 +67,13 @@ $ count_chordal_graphs -p 15 -N 20000
 * [Seaborn](https://seaborn.pydata.org/api.html)
 ## Authors
 
-* **Felix Rios**
+* **Felix L. Rios** just send me an e-mail in case of any questions, felix.leopoldo.rios at gmail com 
 
 ## References
-* [Jimmy Olsson, Tetyana Pavlenko, Felix L. Rios, Sequential sampling of junction trees for decomposable graphs,
- ArXiv 2018](https://arxiv.org/abs/1806.00584)
-* [Jimmy Olsson, Tetyana Pavlenko, Felix L. Rios, Bayesian inference in decomposable graphical models using sequential Monte Carlo methods, ArXiv 2018](https://arxiv.org/abs/1805.12571)
-* [Tetyana Pavlenko, Felix L. Rios, Graphical posterior predictive classifier: Bayesian model averaging with particle Gibbs, ArXiv 2018](https://arxiv.org/abs/1707.06792)
+* [J. Olsson, T. Pavlenko, F. L. Rios, Sequential sampling of junction trees for decomposable graphs,
+ ArXiv, 2018](https://arxiv.org/abs/1806.00584)
+* [J. Olsson, T. Pavlenko, and F. L. Rios. Bayesian learning of weakly structural Markov graph laws using sequential Monte Carlo methods. *Electron. J. Statist.*, 13(2):2865–2897, 2019.](https://projecteuclid.org/euclid.ejs/1567065622)
+* [T. Pavlenko, F. L. Rios, Graphical posterior predictive classifier: Bayesian model averaging with particle Gibbs, ArXiv 2018](https://arxiv.org/abs/1707.06792)
 
 ## License
 
