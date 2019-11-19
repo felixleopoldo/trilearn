@@ -1,4 +1,5 @@
 import itertools
+import random
 
 import networkx as nx
 import numpy as np
@@ -103,13 +104,17 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
     Returns:
         NetworkX graph: a decomposable graph.
     """
-    T = libj.gen_JT(internal_nodes, alpha, beta, directory)
+
+    T = libj.sample(internal_nodes, alpha=alpha, beta=beta)
     return libj.graph(T)
 
 
-def sample_decomposable_graph(order, alpha=0.5, beta=0.5):
+def sample(order, alpha=0.5, beta=0.5):
+
     if type(order) is int:
-        tree = libj.sample(range(order), alpha, beta)
+        nodes = range(order)  # OBS. Python 2.7
+        random.shuffle(nodes)
+        tree = libj.sample(nodes, alpha, beta)
         return jtlib.graph(tree)
     elif type(order) is list:
         tree = libj.sample(order, alpha, beta)

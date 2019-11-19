@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from pandas.plotting import autocorrelation_plot
 from tqdm import tqdm
+import random
 
 from sys import platform as sys_pf
 if sys_pf == 'darwin':
@@ -24,6 +25,9 @@ def plot_heatmap(heatmap, cbar=False, annot=False, xticklabels=1, yticklabels=1)
                     vmin=0.0, vmax=1.0, square=True,
                     cbar=cbar,
                     xticklabels=xticklabels, yticklabels=yticklabels)
+    #sns.set_style("whitegrid")
+    cax = plt.gcf().axes[-1]
+    cax.tick_params(labelsize=6)
 
 
 def random_subset(A):
@@ -179,6 +183,40 @@ def sample_classification_datasets(mus, covmats, n_samples_in_each_class):
     return df
     # return x, y
     # return pd.DataFrame(x), pd.Series(np.array(y).flatten(), dtype=int)
+
+
+def is_pos_def(x):
+    return np.all(np.linalg.eigvals(x) > 0)
+
+
+def gen_prec_mat(graph, a):
+    def gen_mat(graph):
+        p = graph.order()
+        prec_mat = np.zeros(p * p).reshape(p, p)
+
+        adj_mat = nx.to_numpy_array(graph)
+        d = np.diag(np.random.uniform(low=a, high=1, size=p))
+        for i in range(p - 1):
+            for j in range(i + 1, p):
+                if adj_mat[i, j] == 1:
+                    rn = random.uniform(a, 1)
+                    if random.randint(0, 1) == 1:
+                        rn *= -1
+                    prec_mat[i, j] = rn
+                    prec_mat[j, i] = rn
+
+        prec_mat += d
+        return prec_mat
+
+    prec_mat = gen_mat(graph)
+    p = graph.order()
+    i = 0
+    e = 0.1
+    while not is_pos_def(prec_mat):
+        i += 1
+        prec_mat += np.diag(np.ones(p)*e)
+
+    return prec_mat
 
 
 def plot_multiple_traj_statistics(trajs, burnin_end,

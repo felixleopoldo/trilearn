@@ -3,10 +3,13 @@ Examples for graph inference for continuous data and discrete data.
 The data (and all the belonging parameters) are either be simulated
 or read from an external file.
 """
+import random
 
 import numpy as np
 import pandas as pd
 import networkx as nx
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from trilearn import pgibbs
 import trilearn.auxiliary_functions as aux
@@ -15,6 +18,8 @@ import trilearn.distributions.g_intra_class as gic
 import trilearn.mh_greenthomas as green
 import trilearn.distributions.discrete_dec_log_linear as loglin
 from trilearn.graph import trajectory as mcmctraj
+
+
 
 # Discrete data
 # reads labels and support from rows 0 and 1 respectively
@@ -63,3 +68,35 @@ aux.plot_multiple_traj_statistics(graph_trajs, 0, write_to_file=True, output_dir
 graph_trajs = green.sample_trajectories_ggm_parallel(dataframe=ar_df, randomize=[100,1000], n_samples=[50],
                                                      reset_cache=True, reps=2)
 aux.plot_multiple_traj_statistics(graph_trajs, 0, write_to_file=True, output_directory="./ar_1-5_trajs_mh/")
+
+
+
+## Random graph GGM
+random.seed(2)
+np.random.seed(3)
+p = 30
+graph = dlib.sample(p)
+agraph = nx.nx_agraph.to_agraph(graph)
+agraph.draw("./randomgraph/agraph.eps", prog="circo")
+plt.clf()
+
+aux.plot_heatmap(nx.to_numpy_array(graph),
+                         xticklabels=np.arange(1, p +1),
+                         yticklabels=np.arange(1, p +1), annot=False)
+
+sns.set_style("whitegrid")
+
+plt.savefig("./randomgraph/adjmat.eps")
+plt.clf()
+
+prec_mat = aux.gen_prec_mat(graph, 0.5)
+cov_mat = np.matrix(prec_mat).I
+df = pd.DataFrame(np.random.multivariate_normal(np.zeros(p), cov_mat, 100))
+
+# PGibbs algorithm
+graph_trajs = pgibbs.sample_trajectories_ggm_parallel(dataframe=df, n_particles=[50], n_samples=[200],
+                                                      radii=[p], alphas=[0.5], betas=[0.5],
+                                                      reset_cache=True, reps=1)
+aux.plot_multiple_traj_statistics(graph_trajs,  0, write_to_file=True, output_directory="./randomgraph/")
+
+
