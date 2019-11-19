@@ -21,12 +21,15 @@ Then run
 ```
 $ pip install trilearn
 ```
-This package currently requieres Python 2.7
+This package currently requires Python 2.7
 ### Running the tests
 
 ```
 $ make test
 ```
+## Usage
+See the Jupyter notebooks for examples of usage.
+
 
 ## Scripts
 ### Continuous data
@@ -70,9 +73,9 @@ $ count_chordal_graphs -p 15 -N 20000
 * **Felix L. Rios** just send me an e-mail in case of any questions, felix.leopoldo.rios at gmail com 
 
 ## References
+* [J. Olsson, T. Pavlenko, and F. L. Rios. Bayesian learning of weakly structural Markov graph laws using sequential Monte Carlo methods. *Electron. J. Statist.*, 13(2):2865–2897, 2019.](https://projecteuclid.org/euclid.ejs/1567065622)
 * [J. Olsson, T. Pavlenko, F. L. Rios, Sequential sampling of junction trees for decomposable graphs,
  ArXiv, 2018](https://arxiv.org/abs/1806.00584)
-* [J. Olsson, T. Pavlenko, and F. L. Rios. Bayesian learning of weakly structural Markov graph laws using sequential Monte Carlo methods. *Electron. J. Statist.*, 13(2):2865–2897, 2019.](https://projecteuclid.org/euclid.ejs/1567065622)
 * [T. Pavlenko, F. L. Rios, Graphical posterior predictive classifier: Bayesian model averaging with particle Gibbs, ArXiv 2018](https://arxiv.org/abs/1707.06792)
 
 ## License
