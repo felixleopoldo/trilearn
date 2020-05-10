@@ -176,51 +176,60 @@ def connect(tree, old_node, new_node, connector_node=None):
 
 
 def propose_moves(tree, node):
+    """ Proposes a random set of new moves, given the current state of
+        the junction tree. Returns the set of new junction tree nodes, 
+        after performing the move directly on the tree, and the probability
+        of those moves.
+    Args:
+      tree (NetwokrX) a junction tree
+      node (integer) a node
+    """
     if not type(node) is set and not type(node) is frozenset:
         node = frozenset([node])
 
-    bd_bucket, nei_bucket = all_possible_moves(tree, node)
-    if not bd_bucket and not nei_bucket:
-        return set(), np.log(.0001)
-    n_single = len(bd_bucket)
-    m_ = len(nei_bucket.keys())
-    n = n_single + m_
-    sample_n = np.random.randint(n) + 1
-    # sample_n = 1
-    subset = np.random.choice(n, sample_n, replace=False).tolist()
-    bd_n = [i for i in subset if i < n_single] if n_single else None
-    nei_n = [i - n_single for i in subset if i >= n_single] if m_ else None
+    bd_no_nei, nei_no_bd, nei_and_bd = all_possible_moves(tree, node)
+    new_bd = set()
+    keys = nei_and_bd.keys()
+    for x in keys:
+        if np.random.uniform(size=1) <= 0.5:
+            new_bd.add(x)
+            nei_and_bd.pop(x, None)
+
+    bd_bucket = bd_no_nei.union(new_bd)
+    nei_no_bd.update(nei_and_bd)
+    n_bd = len(bd_bucket)
+    nei_value_len = [len(x) for x in nei_no_bd.values()]
+    n_nei = int(np.sum(nei_value_len))
+    N = int(n_bd + n_nei)
+    k = np.random.randint(N) + 1
+    subset = np.random.choice(N, k, replace=False).tolist()
+    bd_n = [i for i in subset if i < n_bd] if n_bd else None
+    nei_n = [i - n_bd for i in subset if i >= n_bd] if n_nei else None
     new_nodes = set()
-    subp = [1]
     if bd_n:
-        single_bucket_moves, p = sample_1per_bucket(bd_bucket)
-        keys = list(single_bucket_moves.keys())
-        subkeys = [keys[i] for i in bd_n]
-        subp = [p[i] for i in bd_n]
-        sampled_bd_moves = extract(single_bucket_moves, subkeys)
-        for connector_node, old_node in sampled_bd_moves.items():
-            if node & old_node:         # disconnect move
-                X = old_node - node
-                disconnect(tree, old_node, X)
-            else:       # connect move
-                X = node | old_node
-                connect(tree, old_node, X, connector_node)
+        bb = list(bd_bucket)
+        for i in bd_n:
+            old_node = bb[i]
+            X = old_node - node
+            disconnect(tree, old_node, X)
             new_nodes.add(X)
     if nei_n:
-        keys = list(nei_bucket.keys())
-        subkeys = [keys[i] for i in nei_n]
-        sampled_nei_moves = extract(nei_bucket, subkeys)
-        for old_node, connector_node in sampled_nei_moves.items():
-            if node & old_node:         # disconnect move
-                X = old_node - node
-                disconnect(tree, old_node, X)
-            else:       # connect move
+        keys = nei_no_bd.keys()
+        aux = list(range(len(keys)))
+        index = np.repeat(aux, nei_value_len).tolist()
+        a = [index[i] for i in nei_n]
+        values, counts = np.unique(a, return_counts=True)
+        for i in range(len(values)):
+            conn = keys[values[i]]
+            j = counts[i]
+            nei = nei_no_bd[conn]
+            np.random.shuffle(nei)
+            for old_node in nei[:j]:
                 X = node | old_node
-                connect(tree, old_node, X, connector_node[0])
-            new_nodes.add(X)
-    subp = [1]
-    return new_nodes, log_prob(n, sample_n, subp)
+                connect(tree, old_node, X, conn)
+                new_nodes.add(X)
 
+    return new_nodes, log_prob(N, k, len(nei_no_bd.keys()))
 
 def log_prob(n, k, m=0):
     """ returns the log probability of choosing k out of n
