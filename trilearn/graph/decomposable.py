@@ -145,6 +145,7 @@ def junction_tree(graph):
     jt = libj.JunctionTree()
     jt.add_nodes_from(T.nodes())
     jt.add_edges_from(T.edges())
+    jt.num_graph_nodes = len(graph)
     return jt
 
 

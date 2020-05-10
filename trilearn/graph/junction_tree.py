@@ -14,6 +14,7 @@ class JunctionTree(nx.Graph):
         nx.Graph.__init__(self, data, **attr)
         self.log_nus = {}
         self.separators = None
+        self.num_graph_nodes = None
 
     def log_nu(self, sep):
         if sep not in self.log_nus:
@@ -210,6 +211,24 @@ def separators(tree):
         separators[sep].add(edge)
     return separators
 
+def log_nu_dfs(tree, s):
+    """ Returns the number of equivalent junction trees for tree where
+        tree is cut at the separator s and then constructed again.
+
+    Args:
+        tree (NetworkX graph): A junction tree
+        s (set): A separator of tree
+
+    Returns:
+        float
+    """
+    
+    subtree =  forest_induced_by_sep(tree, s)
+    f = [len(x) for x in  nx.connected_components(subtree)]
+    ts = np.sum(f)
+    ms = len(f) - 1
+    return np.log(f).sum() + np.log(ts) * (ms - 1)
+    
 
 def log_nu(tree, s):
     """ Returns the number of equivalent junction trees for tree where
@@ -249,8 +268,8 @@ def n_subtrees(tree, sep):
     counts = []
     for n in tree.nodes():
         #valid_neighs = [ne for ne in nx.neighbors(tree, n) if sep < ne]
-        valid_neighs = [ne for ne in tree.neighbors(n) if sep < ne]
-        if len(valid_neighs) == 1 and sep < n:
+        valid_neighs = [ne for ne in tree.neighbors(n) if sep <= ne]
+        if len(valid_neighs) == 1 and sep <= n:
             leaf = n
             break
 
@@ -263,6 +282,23 @@ def n_subtrees(tree, sep):
         prev_visited = len(visited)
 
     return counts
+
+def log_n_junction_trees_dfs(tree, S):
+    """ Returns the number of junction trees equivalent to tree where trees
+    is cut as the separators in S. is S i the full set of separators in tree,
+    this is the number of junction trees equivalent to tree.
+
+    Args:
+        tree (NetworkX graph): A junction tree
+        S (list): List of separators of tree
+
+    Returns:
+        float
+    """
+    log_mu = 0.0
+    for s in S:
+        log_mu += log_nu_dfs(tree, s)
+    return log_mu
 
 
 def log_n_junction_trees(tree, S):

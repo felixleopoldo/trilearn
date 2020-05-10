@@ -1,11 +1,11 @@
 init:
-	pip install -r requirements.txt
+	pip2 install -r requirements.txt
 
 test:
 	nosetests tests
 
 distr:
-	python setup.py bdist_wheel
+	python2 setup.py bdist_wheel
 	twine upload dist/*
 
 clean:

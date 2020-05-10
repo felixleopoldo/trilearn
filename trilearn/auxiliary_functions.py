@@ -356,3 +356,8 @@ def plot_graph_traj_statistics(graph_traj, write_to_file=False):
     if write_to_file:
         plt.savefig(str(graph_traj)+"_map.png")
     plt.clf()
+
+    nx.draw(graph_traj.maximum_likelihood_graph(), with_labels=True)
+    if write_to_file:
+        plt.savefig(str(graph_traj)+"_MAP.png")
+    plt.clf()
