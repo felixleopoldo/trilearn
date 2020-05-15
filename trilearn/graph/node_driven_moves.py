@@ -83,11 +83,11 @@ def propose_connect_moves(tree, node):
 
     nei_cliques = neighboring_cliques_node(tree, node)
     if not nei_cliques:
-        return [None] * 4
+        return [None] * 2
     nei_value_len = [len(x) for x in nei_cliques.values()]
     N = int(np.sum(nei_value_len))
     k = np.random.randint(N) + 1
-    k = 1
+    #k = 1
     nei_n = np.random.choice(N, k, replace=False).tolist()
     new_cliques = set()
     if N > 0:
@@ -105,7 +105,9 @@ def propose_connect_moves(tree, node):
                 X = node | old_node
                 connect(tree, old_node, X, conn)
                 new_cliques.add(X)
-    return new_cliques, log_prob(N, k, 1), N, k
+        if k>N:
+            import pdb; pdb.set_trace()
+    return new_cliques, log_prob(N, k, 1)
 
 
 def propose_disconnect_moves(tree, node, *cache):
@@ -122,10 +124,10 @@ def propose_disconnect_moves(tree, node, *cache):
 
     bd_cliques = boundary_cliques_node(tree, node, *cache)
     if not bd_cliques:
-        return [None] * 4
+        return [None] * 2
     N = len(bd_cliques)
     k = np.random.randint(N) + 1
-    k = 1
+    #k = 1
     subset = np.random.choice(N, k, replace=False).tolist()
     new_cliques = set()
     if N > 0:
@@ -135,7 +137,9 @@ def propose_disconnect_moves(tree, node, *cache):
             X = old_node - node
             disconnect(tree, old_node, X)
             new_cliques.add(X)
-    return new_cliques, log_prob(N, k, 1), N, k
+        if k>N:
+            import pdb; pdb.set_trace()
+    return new_cliques, log_prob(N, k, 1)
 
 
 def all_possible_moves(tree, node, empty_node=True, *cache):
@@ -280,18 +284,21 @@ def log_prob(n, k, m=0):
     return - np.log(sp.binom(n, k)) - m*np.log(2)       # np.sum(np.log(m))
 
 
-def inverse_proposal_prob(tree, node, new_cliques):
+def inverse_proposal_prob(tree, node, new_cliques, move_type):
     """ Returns the log probability of the inverse propoal"""
-
+    if not type(node) is frozenset:
+        node = frozenset([node])
     k = len(new_cliques)
-    if node & new_cliques:         # inverse is disconnect
+    if move_type == 0:               # move_type ==0 disconnect
         bd_cliques = boundary_cliques_node(tree, node, new_cliques)
         N = len(bd_cliques)
     else:                       # inverse is connect
         nei_cliques = neighboring_cliques_node(tree, node, False)
         nei_value_len = [len(x) for x in nei_cliques.values()]
         N = int(np.sum(nei_value_len)) + 1*(len(tree) < tree.num_graph_nodes)
-    return log_prob(N, k, 1), N, k
+    if N < k:
+        import pdb;pdb.set_trace()
+    return log_prob(N, k, 1)
 
 
 def revert_moves(tree, node, cliques):

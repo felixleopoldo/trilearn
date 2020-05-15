@@ -11,3 +11,5 @@ trilearn.egg-info/
 env/
 testing_stuff.ipynb
 sandbox/
+sims/
+local_tests/
