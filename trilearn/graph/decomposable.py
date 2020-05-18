@@ -5,7 +5,7 @@ import networkx as nx
 import numpy as np
 
 from trilearn.graph import junction_tree as libj, junction_tree as jtlib
-
+from trilearn.graph import almond_tree as atlib
 
 def separators(graph):
     """ Returns the separators of graph.
@@ -147,6 +147,59 @@ def junction_tree(graph):
     jt.add_edges_from(T.edges())
     jt.num_graph_nodes = len(graph)
     return jt
+
+def almond_tree(graph):
+    """ Returns the unique almond tree representation of graph.
+
+    Args:
+        graph (NetworkX graph): A decomposable graph
+
+    Returns:
+        NetworkX graph: An almond tree
+    """
+    jt = junction_tree(graph)
+    almondt = atlib.AlmondTree()
+    seps = jt.get_separators()
+    almondt.add_nodes_from(jt.nodes())
+    almondt.add_separators_from(seps.keys())
+    clique_sep_edges = []
+    for s, e in seps.items():
+        for x in e:
+            l = list(x)
+            clique_sep_edges.append((s, l[0]))
+            clique_sep_edges.append((s, l[1]))
+    sep_sep_edges = []
+    for n1 in seps.keys():
+        for n2 in seps.keys():
+            if n1 < n2 and n1 != frozenset([]):
+                sep_sep_edges.append((n1, n2))
+
+    almondt.add_edges_from(clique_sep_edges, weight=0)
+    almondt.add_edges_from(sep_sep_edges, weight=0)
+    # implementation from Jensen (1994) Optimal Junction tree, and
+    # Almond (1993) Optimality issues in constructing a Markov tree from Graphical Models
+    for s in seps.keys():
+        multi = len(seps[s]) + 1
+        n_edges_to_remove = almondt.degree(s) - multi
+        if n_edges_to_remove > 0:
+            nei_C = almondt.clique_neighbors(s)
+            nei_S = almondt.separator_neighbors(s)
+            for n in nei_S:
+                nei_n_C = almondt.clique_neighbors(n)
+                inter = list(set(nei_n_C) & set(nei_C))
+                if s < n and inter:
+                    for x in inter:
+                        if almondt.has_edge(x, s):
+                            almondt[x][s]['weight'] -= 1
+                            almondt[n][s]['weight'] -= 1
+
+    T = nx.minimum_spanning_tree(almondt)
+    at = atlib.AlmondTree()
+    at.add_nodes_from(jt.nodes())
+    at.add_separators_from(seps.keys())
+    at.add_edges_from(T.edges())
+
+    return at
 
 
 def gen_AR2_graph(n_dim):

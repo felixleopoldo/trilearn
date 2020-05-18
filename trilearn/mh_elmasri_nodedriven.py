@@ -50,26 +50,28 @@ def sample_trajectory(n_samples, randomize, sd, init_graph=None):
             jt = dlib.junction_tree(jtlib.graph(jt))
             jtlib.randomize(jt)
             graphs[i] = jtlib.graph(jt)  # TODO: Improve.
+            jjt = dlib.junction_tree(jtlib.graph(jt))
             log_prob_traj[i] = sd.log_likelihood(graphs[i]) \
-                - jtlib.log_n_junction_trees(jt, jtlib.separators(jt))
+                - jtlib.log_n_junction_trees(jjt, jtlib.separators(jjt))
         # A move
         log_p1 = log_prob_traj[i - 1]
-        sample_node = np.random.randint(num_nodes)
+        node = np.random.randint(num_nodes)
         move_type = np.random.randint(2)
         if move_type == 0:          # connect
-            new_cliques, log_q12 = ndlib.propose_connect_moves(jt,
-                                                               sample_node)
+            new_cliques, log_q12, N, k = ndlib.propose_connect_moves(jt,
+                                                                     node)
         else:                       # diconnect
-            new_cliques, log_q12 = ndlib.propose_disconnect_moves(jt,
-                                                                  sample_node)
+            new_cliques, log_q12, N, k = ndlib.propose_disconnect_moves(jt,
+                                                                        node)
         if new_cliques:
+            jjt = dlib.junction_tree(jtlib.graph(jt))
             log_p2 = sd.log_likelihood(jtlib.graph(jt)) \
-                - jtlib.log_n_junction_trees(jt, jtlib.separators(jt))
+                - jtlib.log_n_junction_trees(jjt, jtlib.separators(jjt))
             # revese move
-            log_q21 = ndlib.inverse_proposal_prob(jt,
-                                                  sample_node,
-                                                  new_cliques,
-                                                  move_type)
+            log_q21, Ninv, kinv = ndlib.inverse_proposal_prob(jt,
+                                                              node,
+                                                              new_cliques,
+                                                              move_type)
             #log_q12 = log_q21
             alpha = min(np.exp(log_p2 + log_q21 - log_p1 - log_q12), 1)
         else:
@@ -85,7 +87,7 @@ def sample_trajectory(n_samples, randomize, sd, init_graph=None):
             # print "Reject"
             # Reverse the tree
             ndlib.revert_moves(jt,
-                               sample_node,
+                               node,
                                new_cliques)
             log_prob_traj[i] = log_prob_traj[i-1]
             graphs[i] = graphs[i-1]
@@ -105,11 +107,11 @@ def sample_trajectory_ggm(dataframe, n_samples, randomize=1000,
     return sample_trajectory(n_samples, randomize, sd)
 
 
-def max_likelihood_gmm(dataframe, graph, jt=None):
+def max_likelihood_gmm(dataframe, graph, delta=1.0, jt=None):
     p = dataframe.shape[1]
     D = np.identity(p)
     sd = seqdist.GGMJTPosterior()
-    sd.init_model(np.asmatrix(dataframe), D, 1.0, {})
+    sd.init_model(np.asmatrix(dataframe), D, delta, {})
     # graph = ar_graph.copy()
     if not jt:
         jt = dlib.junction_tree(graph)

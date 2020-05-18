@@ -24,19 +24,14 @@ def boundary_cliques_node(tree, node, *cache):
     """
     # boundary cliques (disconnect move)
     boundary_cliques = set()
+    dumble = False
     T = jtlib.subtree_induced_by_subset(tree, node)
-    if len(T) == 1:             # num of nodes is 1
-        None
-    elif len(T) == 2:              # a prob (2 nodes) return a random one
-        if cache:
-            boundary_cliques = T.nodes() & cache[0]
-        else:
-            r = np.random.randint(2)  # choose a random clique
-            boundary_cliques = {frozenset(list(T.nodes())[r])}
-    else:
+    if len(T) > 1:             # num of nodes is 1
         boundary_cliques = leaf_nodes(T)
     boundary_cliques = {x for x in boundary_cliques if x - node not in tree}
-    return boundary_cliques
+    if len(T) == 2 and len(boundary_cliques) == 2:
+        dumble = True
+    return boundary_cliques, dumble
 
 
 def neighboring_cliques_node(tree, node, empty_node=True):
@@ -83,7 +78,7 @@ def propose_connect_moves(tree, node):
 
     nei_cliques = neighboring_cliques_node(tree, node)
     if not nei_cliques:
-        return [None] * 2
+        return [None] * 4
     nei_value_len = [len(x) for x in nei_cliques.values()]
     N = int(np.sum(nei_value_len))
     k = np.random.randint(N) + 1
@@ -107,7 +102,7 @@ def propose_connect_moves(tree, node):
                 new_cliques.add(X)
         if k>N:
             import pdb; pdb.set_trace()
-    return new_cliques, log_prob(N, k, 1)
+    return new_cliques, log_prob(N, k, 1), N, k
 
 
 def propose_disconnect_moves(tree, node, *cache):
@@ -122,12 +117,15 @@ def propose_disconnect_moves(tree, node, *cache):
     if not type(node) is set and not type(node) is frozenset:
         node = frozenset([node])
 
-    bd_cliques = boundary_cliques_node(tree, node, *cache)
+    bd_cliques, dumble = boundary_cliques_node(tree, node, *cache)
     if not bd_cliques:
-        return [None] * 2
+        return [None] * 4
     N = len(bd_cliques)
-    k = np.random.randint(N) + 1
-    #k = 1
+    if dumble:
+        k = 1
+        N = 2
+    else:
+        k = np.random.randint(N) + 1
     subset = np.random.choice(N, k, replace=False).tolist()
     new_cliques = set()
     if N > 0:
@@ -139,7 +137,7 @@ def propose_disconnect_moves(tree, node, *cache):
             new_cliques.add(X)
         if k>N:
             import pdb; pdb.set_trace()
-    return new_cliques, log_prob(N, k, 1)
+    return new_cliques, log_prob(N, k, 1), N, k
 
 
 def all_possible_moves(tree, node, empty_node=True, *cache):
@@ -158,7 +156,7 @@ def all_possible_moves(tree, node, empty_node=True, *cache):
         if not type(node) is frozenset:
             node = frozenset([node])
    
-    bd_cliques = boundary_cliques_node(tree, node, *cache)
+    bd_cliques, dumble = boundary_cliques_node(tree, node, *cache)
     nei_cliques = neighboring_cliques_node(tree, node, empty_node)
 
     bd_nei = dict()
@@ -290,15 +288,17 @@ def inverse_proposal_prob(tree, node, new_cliques, move_type):
         node = frozenset([node])
     k = len(new_cliques)
     if move_type == 0:               # move_type ==0 disconnect
-        bd_cliques = boundary_cliques_node(tree, node, new_cliques)
+        bd_cliques, dumble = boundary_cliques_node(tree, node, new_cliques)
         N = len(bd_cliques)
+        if dumble:
+            N = 2
     else:                       # inverse is connect
         nei_cliques = neighboring_cliques_node(tree, node, False)
         nei_value_len = [len(x) for x in nei_cliques.values()]
         N = int(np.sum(nei_value_len)) + 1*(len(tree) < tree.num_graph_nodes)
     if N < k:
         import pdb;pdb.set_trace()
-    return log_prob(N, k, 1)
+    return log_prob(N, k, 1), N, k
 
 
 def revert_moves(tree, node, cliques):
