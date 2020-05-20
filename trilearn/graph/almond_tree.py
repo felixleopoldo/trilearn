@@ -17,7 +17,7 @@ class AlmondTree(nx.Graph):
 
     def log_nu(self, sep):
         if sep not in self.log_nus:
-            self.log_nus[sep] = log_nu(self, sep)
+            self.log_nus[sep] = log_nu_dfs(self, sep)
         return self.log_nus[sep]
 
     def fresh_copy(self):
@@ -73,15 +73,13 @@ class AlmondTree(nx.Graph):
         self.log_nus = {}
         return super(AlmondTree, self).remove_node(n)
 
-    def clique_neighbors(self, n):
+    def neighbors_cliques(self, n):
         nei = self.neighbors(n)
         return [c for c in nei if self.node[c]['class'] == 'C']
 
-
-    def separator_neighbors(self, n):
+    def neighbors_separators(self, n):
         nei = self.neighbors(n)
         return [c for c in nei if self.node[c]['class'] == 'S']
-
 
     def get_separators(self):
         if self.separators is None:
@@ -138,7 +136,7 @@ class AlmondTree(nx.Graph):
                                node_color='blue', node_shape='o',
                                with_labels=True)
         nx.draw_networkx_edges(self, pos, color = 'black')
-
+        nx.draw_networkx_labels(self, pos)
 
 def is_junction_tree(tree):
     """ Checks the junction tree property of a graph.
@@ -247,6 +245,24 @@ def separators(tree):
             separators[sep] = set([])
         separators[sep].add(edge)
     return separators
+
+def empty_separator(tree):
+    """ Returns a dictionary of corresponding
+    edges to an empty separator in an almond tree tree.
+
+    Args:
+        tree (NetworkX graph): An almond tree
+
+    Returns:
+        dict:  Example {sep1: [sep1_edge1, sep1_edge2, ...], sep2: [...]}
+    """
+    empty_node = frozenset([])
+    separators = set([])
+    if empty_node in tree:
+        for clique in tree.neighbors(empty_node):
+            separators.add(clique)
+    return {empty_node: separators}
+
 
 def log_nu_dfs(tree, s):
     """ Returns the number of equivalent junction trees for tree where
