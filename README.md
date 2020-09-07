@@ -7,17 +7,21 @@ This library contains Bayesian inference in decomposable (triangulated) graphica
 Currently supported functionalities include:
 
 - Bayesian structure learning for discrete log-linear and Gaussian data.
-- Estimation of the number of decomopsable graphs with a given number of nodes.
+
+- Estimation of the number of decomopsable graphs with a 
+given number of nodes.
+
 - Predictive classification using Bayesian model averaging (BMA).
+
 - Random generation of junction trees (the Christmas tree algorithm).
 
 ### Installation
-
+This package currently requires Python 2.7.
 If graphviz is not installed, you can install it from brew / aptitude / pacman for example
 ```
 $ brew install graphviz
 ```
-On Ubuntu you migh need to runn
+On Ubuntu you might need to run
 ```
 sudo apt-get install python-dev graphviz libgraphviz-dev pkg-config
 ```
@@ -26,7 +30,12 @@ Then run
 ```
 $ pip install trilearn
 ```
-This package currently requires Python 2.7
+
+It is also possible to pull trilearn as a docker image by
+```
+$ docker pull onceltuca/trilearn
+```
+
 ### Running the tests
 
 ```
@@ -62,6 +71,7 @@ $ analyze_graph_tajectories
 this will produce a number of files in the current directory.
 
 ### Estimate the number of decomposable graphs
+
 To estimate the number of decomposable graphs with up to 15 nodes run for example
 ```
 $ count_chordal_graphs -p 15 -N 20000
@@ -69,9 +79,13 @@ $ count_chordal_graphs -p 15 -N 20000
 ## Built With
 
 * [NetworkX](https://networkx.github.io/documentation/stable/index.html)
+
 * [NumPy](https://docs.scipy.org/doc/)
+
 * [Scipy](https://docs.scipy.org/doc/)
+
 * [Pandas](http://pandas.pydata.org/pandas-docs/stable/)
+
 * [Seaborn](https://seaborn.pydata.org/api.html)
 ## Authors
 
