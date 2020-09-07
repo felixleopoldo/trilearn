@@ -221,7 +221,8 @@ def gen_prec_mat(graph, a):
 
 def plot_multiple_traj_statistics(trajs, burnin_end,
                                   write_to_file=False, annot=False, output_directory="./", file_extension="eps"):
-    trajectories = group_trajectories_by_setting(trajs)
+    #trajectories = group_trajectories_by_setting(trajs) # this must have a bug
+    trajectories = trajs
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
@@ -317,13 +318,16 @@ def read_all_trajectories_in_dir(directory):
 def group_trajectories_by_setting(trajlist):
     # Gather all with the same parameter setting
     trajectories = {}
+#    print(trajlist)
     for t in trajlist:
         if str(t) not in trajectories:
             trajectories[str(t)] = []
+        
         trajectories[str(t)].append(t)
+#    print("trajs")
+#    print(trajectories)
 
     return trajectories
-
 
 def plot_graph_traj_statistics(graph_traj, write_to_file=False):
     top = graph_traj.empirical_distribution().mode(5)

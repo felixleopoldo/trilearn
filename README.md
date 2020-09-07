@@ -17,6 +17,11 @@ If graphviz is not installed, you can install it from brew / aptitude / pacman f
 ```
 $ brew install graphviz
 ```
+On Ubuntu you migh need to runn
+```
+sudo apt-get install python-dev graphviz libgraphviz-dev pkg-config
+```
+
 Then run
 ```
 $ pip install trilearn
