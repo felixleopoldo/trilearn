@@ -7,7 +7,7 @@ import json
 from networkx.readwrite import json_graph
 import pandas as pd
 import numpy as np
-
+import networkx as nx
 import trilearn.graph.empirical_graph_distribution as gdist
 from trilearn.distributions import sequential_junction_tree_distributions as sd
 
@@ -102,18 +102,16 @@ class Trajectory:
     def get_adjvec_trajectory(self):
         mats = []
         for graph in self.trajectory:
-            m = graph.to_numpy_matrix()
-            mats.append(m.flatten())
+            m = nx.to_numpy_array(graph, dtype=int)
+            mats.append(m.flatten().tolist())
         return mats
 
-    def write_adj_traj(self):
+    def write_adjvec_trajectory(self, filename):
         """ Writes the trajectory of adjacency matrices to file.
         """
-        mats = get_adjmat_trajectory()
+        mats = self.get_adjvec_trajectory()
         with open(filename, 'w') as outfile:
-                json.dump(mats, outfile, default=default)
-
-
+                json.dump(mats, outfile)
 
     def to_json(self, optional={}):
         js_graphs = [json_graph.node_link_data(graph) for
