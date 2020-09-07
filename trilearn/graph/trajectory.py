@@ -99,6 +99,21 @@ class Trajectory:
             with open(filename, 'w') as outfile:
                 json.dump(self.to_json(optional=optional), outfile, default=default)
 
+    def get_adjvec_trajectory(self):
+        mats = []
+        for graph in self.trajectory:
+            m = graph.to_numpy_matrix()
+            mats.append(m.flatten())
+        return mats
+
+    def write_adj_traj(self):
+        """ Writes the trajectory of adjacency matrices to file.
+        """
+        mats = get_adjmat_trajectory()
+        with open(filename, 'w') as outfile:
+                json.dump(mats, outfile, default=default)
+
+
 
     def to_json(self, optional={}):
         js_graphs = [json_graph.node_link_data(graph) for

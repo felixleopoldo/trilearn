@@ -97,13 +97,11 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, #qu
     if reseed is True:
         np.random.seed()
 
-    #print (n_particles, alpha, beta, radius, n_samples, str(seqdist), reset_cache)
     graph_trajectory = sample_trajectory(n_particles, alpha, beta, radius, n_samples, seqdist, reset_cache=reset_cache)
     date = datetime.datetime.today().strftime('%Y%m%d%H%m%S')
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    #queue.put(graph_trajectory) # is the queue needed here
     filename = dir + "/" + str(graph_trajectory) +"_"+ date + ".json"
     graph_trajectory.write_file(filename=filename)
     print("wrote file: " + filename)
