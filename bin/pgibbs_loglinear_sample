@@ -12,7 +12,7 @@ import trilearn.pgibbs
 
 
 def main(data_filename, n_particles, trajectory_lengths, pseudo_observations,
-         alphas, betas, radii, seed, parallel, output_directory, reset_cache, reps, **args):
+         alphas, betas, radii, seed, parallel, output_directory, reset_cache, reps, output_filename, **args):
     if seed is not None:
         np.random.seed(seed)
 
@@ -24,12 +24,14 @@ def main(data_filename, n_particles, trajectory_lengths, pseudo_observations,
         trilearn.pgibbs.sample_trajectories_loglin_parallel(df, n_particles, trajectory_lengths, alphas=alphas,
                                                             betas=betas, radii=radii, reps=reps,
                                                             pseudo_observations=pseudo_observations, reset_cache=reset_cache,
-                                                            output_directory=output_directory)
+                                                            output_directory=output_directory,
+                                                            output_filename=output_filename)
     else:
         trilearn.pgibbs.sample_trajectories_loglin_to_file(df, n_particles, trajectory_lengths,
                                                            pseudo_observations=pseudo_observations, alphas=alphas, betas=betas,
                                                            radii=radii, reps=reps, reset_cache=reset_cache,
-                                                           output_directory=output_directory)
+                                                           output_directory=output_directory,
+                                                           output_filename=output_filename)
 
 if __name__ == "__main__":
     import argparse
@@ -44,6 +46,11 @@ if __name__ == "__main__":
         '-f', '--data_filename',
         required=True,
         help="Filename of dataset stored as row vectors och floats. "
+    )
+    parser.add_argument(
+        '-F', '--output_filename',
+        required=False,
+        help="Output filename"
     )
     parser.add_argument(
         '-N', '--n_particles',
