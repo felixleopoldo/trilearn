@@ -90,14 +90,14 @@ for row in range(1, p+1):
     print str(row) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[2][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[3][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_chordal[4][row])) + " \\\\\n"
+          str('%.2E' % Decimal(table_chordal[4][row])) + " & $\\times 10^{}$\\\\\n"
           #str('%.2E' % Decimal(table_chordal[1][row])) + "\t&\t" + \
 print("Fraction of undirected graphs that are chordal")
 for row in range(1, p+1):
     print str(row) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[5][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[6][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_chordal[7][row])) + " \\\\\n"
+          str('%.2E' % Decimal(table_chordal[7][row])) + " & $\\times 10^{}$\\\\\n"
 
 
 print("Counting junction trees")
@@ -153,7 +153,7 @@ for row in range(1, p+1):
     print str(row) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[1][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[2][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_tree[3][row])) + "\t&\t" + \
+          str('%.2E' % Decimal(table_tree[3][row])) + "\t&\t$\\times 10^{}$" + \
           " \\\\\n" 
           #str('%.2E' % Decimal(table_tree[4][row])) + " \\\\\n"
 
@@ -162,7 +162,7 @@ for row in range(1, p+1):
     print str(row) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[4][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[5][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_tree[6][row])) + " \\\\\n"
+          str('%.2E' % Decimal(table_tree[6][row])) + " &$\\times 10^{}$\\\\\n"
 
 plt.clf()
 plt.semilogy(range(1,p+1), frac_tree_graph_est_means[1:], ".-")
