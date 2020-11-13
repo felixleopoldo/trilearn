@@ -4,6 +4,8 @@ env2.7/
 *.png
 build/
 dist/
+.devcontainer
+.vscode
 .DS_Store
 .ipynb_checkpoints/
 .idea/
@@ -11,3 +13,4 @@ trilearn.egg-info/
 env/
 testing_stuff.ipynb
 sandbox/
+*.csv
