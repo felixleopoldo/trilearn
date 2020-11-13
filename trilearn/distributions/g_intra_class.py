@@ -9,7 +9,7 @@ import trilearn.graph.junction_tree as jtlib
 
 
 def sample(G, r, s2, n):
-    """ Samples from the G-intra-class distribution.
+    """ Samples from the G-intra-class distribution [1]_.
 
     Args:
         G (NetworkX graph): a decompoable graph
@@ -21,7 +21,7 @@ def sample(G, r, s2, n):
         np.matrix: n samples from the G-intra-class distribution in a row matrix.
 
     References:
-        P. J. Green and A. Thomas. Sampling decomposable graphs using a Markov chain on junction trees. Biometrika, 2013. https://doi.org/10.1093/biomet/ass052
+        .. [1] P. J. Green and A. Thomas. Sampling decomposable graphs using a Markov chain on junction trees. Biometrika, 2013. https://doi.org/10.1093/biomet/ass052
 
     """
     (C, S, H, A, R) = trilearn.graph.decomposable.peo(G)
@@ -51,15 +51,15 @@ def sample(G, r, s2, n):
 
 
 def cov_matrix(G, r, s2):
-    """ Returns a covariance matrix cov such that zeros in cov.I is determined by  G.
+    """ Returns a covariance matrix cov such that zeros in cov.I is determined by G.
 
     Args:
-        G (NetworkX graph): a decompoable graph.
-        r (float): correlation.
-        s2 (float): variance.
+        G (NetworkX graph): A decomposable graph.
+        r (float): Correlation.
+        s2 (float): Variance.
 
     Returns:
-        (np.matrix): a covariance matrix cov such that zeros in cov.I is determined by G.
+        Numpy matrix: A covariance matrix cov such that zeros in it inverse is determined by G.
     """
     p = G.order()
     T = trilearn.graph.decomposable.junction_tree(G)

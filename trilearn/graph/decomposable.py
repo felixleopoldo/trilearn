@@ -11,23 +11,52 @@ def separators(graph):
     """ Returns the separators of graph.
 
     Args:
-        graph (NetworkX graph): A decomposable graph
+        graph (NetworkX graph): A decomposable graph.
 
     Returns:
-        dict:  Example {sep1: [sep1_edge1, sep1_edge2, ...], sep2: [...]}
+        dict: A dict with separators as keys an their corresponding edges as values. 
+        
+    Example:
+        >>> g = dlib.sample_random_AR_graph(5,3)
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+        >>> g.edges
+        EdgeView([(0, 1), (0, 2), (1, 2), (2, 3), (3, 4)])
+        >>>  dlib.separators(g)
+        {frozenset([2]): set([(frozenset([2, 3]), frozenset([0, 1, 2]))]), frozenset([3]): set([(frozenset([2, 3]), frozenset([3, 4]))])}
+
     """
     tree = junction_tree(graph)
     return libj.separators(tree)
 
 
 def n_junction_trees(graph):
+    """Count then number of junctino trees for graph.
+
+    Args:
+        graph (NetworkX graph): A decomposable graph.
+
+    Returns:
+        int: Number of junction trees for graph.
+
+    Example:
+        >>> g = dlib.sample_random_AR_graph(5,3)
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+        >>> g.edges
+        EdgeView([(0, 1), (0, 2), (1, 2), (2, 3), (3, 4)])
+        >>>  dlib.separators(g)
+        {frozenset([2]): set([(frozenset([2, 3]), frozenset([0, 1, 2]))]), frozenset([3]): set([(frozenset([2, 3]), frozenset([3, 4]))])}
+        >>> lib.n_junction_trees(g)
+        1.0
+    """
     tree = junction_tree(graph)
     seps = separators(graph)
     return np.exp(libj.log_n_junction_trees(tree, seps))
 
 
 def all_dec_graphs(p):
-    """ Returns all decomposable graphs with p nodes.
+    """ Returns all decomposable graphs with p nodes  [1]_.
 
     Args:
         p (int): order of the graphs.
@@ -36,7 +65,34 @@ def all_dec_graphs(p):
         list: all decomposable graphs with p nodes.
 
     Note:
-        This will only work for small numbers of p.
+        This will only work for small numbers of p (p~10).
+    
+    Example:
+        >>> glist = dlib.all_dec_graphs(3)
+        >>> for graph in glist: 
+        ...     print(graph.nodes)
+        ...     print(graph.edges)
+        ... 
+        [0, 1, 2]
+        []
+        [0, 1, 2]
+        [(0, 1), (0, 2)]
+        [0, 1, 2]
+        [(0, 2)]
+        [0, 1, 2]
+        [(0, 2), (1, 2)]
+        [0, 1, 2]
+        [(0, 1)]
+        [0, 1, 2]
+        [(0, 1), (1, 2)]
+        [0, 1, 2]
+        [(1, 2)]
+        [0, 1, 2]
+        [(0, 1), (0, 2), (1, 2)]
+
+    References:
+        .. [1] En referens..
+
     """
     graphs = set()
     for val in itertools.product(*([[0, 1]] * p**2)):
@@ -56,6 +112,12 @@ def peo(graph):
 
     Returns:
         a perfect elimination order of graph.
+
+    Example:
+        >>> from trilearn.graph import decomposable as dlib
+        >>> g = dlib.naive_decomposable_graph(5)
+        >>> dlib.peo(g)
+        ([frozenset([1, 2]), frozenset([1, 3, 4]), frozenset([0, 1, 3])], [None, frozenset([1]), frozenset([1, 3])], [frozenset([1, 2]), frozenset([1, 2, 3, 4]), frozenset([0, 1, 2, 3, 4])], [frozenset([2]), frozenset([2, 4])], [frozenset([1, 2]), frozenset([3, 4]), frozenset([0])])
     """
 
     T = junction_tree(graph)
@@ -67,10 +129,17 @@ def naive_decomposable_graph(n):
     Note that this will only for for small numbers (~10) of n.
 
     Args:
-        n (int): order of the samples graph
+        n (int): order of the samples graph.
 
     Returns:
-        NetworkX graph: a decopmosable graph
+        NetworkX graph: A decomposable graph.
+
+    Example:
+        >>> g = dlib.naive_decomposable_graph(4)
+        >>> g.edges
+        EdgeView([(0, 1), (0, 3)])
+        >>> g.nodes
+        NodeView((0, 1, 2, 3))
     """
     m = np.zeros(n*n, dtype=int)
     m.resize(n, n)
@@ -102,7 +171,15 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
         directory (string): Path to where the plots should be saved.
 
     Returns:
-        NetworkX graph: a decomposable graph.
+        NetworkX graph: A decomposable graph.
+    
+    Example:
+        >>> g = dlib.sample_dec_graph(5)
+        >>> g.edges
+        EdgeView([(0, 1), (0, 3), (1, 3), (2, 3)])
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+
     """
 
     T = libj.sample(internal_nodes, alpha=alpha, beta=beta)
@@ -110,6 +187,25 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
 
 
 def sample(order, alpha=0.5, beta=0.5):
+    """ Generates a random decomposable graph using the Christmas tree algorithm.
+
+    Args:
+        internal_nodes (list): list of internal nodes in the generated graph.
+        alpha (float): Subtree kernel parameter
+        beta (float): Subtree kernel parameter
+        directory (string): Path to where the plots should be saved.
+
+    Returns:
+        NetworkX graph: A decomposable graph.
+    
+    Example:
+        >>> g = dlib.sample_dec_graph(5)
+        >>> g.edges
+        EdgeView([(0, 1), (0, 3), (1, 3), (2, 3)])
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+
+    """
 
     if type(order) is int:
         nodes = range(order)  # OBS. Python 2.7
@@ -129,7 +225,15 @@ def junction_tree(graph):
 
     Returns:
         NetworkX graph: A junction tree.
-    """
+
+    Example:
+        >>> g = dlib.sample_dec_graph(5)
+        >>> t = dlib.junction_tree(g)
+        >>> t.nodes
+        NodeView((frozenset([4]), frozenset([2, 3]), frozenset([0, 1, 3])))
+        >>> t.edges
+        EdgeView([(frozenset([4]), frozenset([2, 3])), (frozenset([2, 3]), frozenset([0, 1, 3]))])
+            """
     CG = nx.Graph()
     for c in nx.find_cliques(graph):
         CG.add_node(frozenset(c), label=str(tuple(c)), color="red")
@@ -149,6 +253,22 @@ def junction_tree(graph):
 
 
 def gen_AR2_graph(n_dim):
+    """Generates a graph with 2-band adjacency matrix
+
+    Args:
+        n_dim (NetworkX graph): Number of nodes.
+
+    Returns:
+        NetworkX graph: A graph with 2-band adjacency matrix. 
+        Can represent depdndence structure in a AR2 model.
+
+    Example:
+        >>> g = dlib.gen_AR2_graph(5)
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+        >>> g.edges
+        EdgeView([(0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (2, 4), (3, 4)])
+    """
     graph = nx.Graph()
     for i in range(n_dim):
         graph.add_node(i, label=str(i+1))
@@ -159,6 +279,22 @@ def gen_AR2_graph(n_dim):
 
 
 def sample_random_AR_graph(n_dim, max_bandwidth):
+    """ Sample graph with adjancency matrix with varying bandwidth. 
+
+    Args:
+        n_dim (int): number of nodes.
+        max_bandwidth (int): Maximum band width.
+
+    Returns:
+        Networkx graph: A graph with band adjancency matrix. 
+    
+    Example:
+        >>> g = dlib.sample_random_AR_graph(5,3)
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+        >>> g.edges
+        EdgeView([(0, 1), (0, 2), (1, 2), (2, 3), (3, 4)])
+    """
     adjmat = np.zeros(n_dim*n_dim, dtype=int).reshape((n_dim, n_dim))
     bandwidth = 1
     for i in range(n_dim):

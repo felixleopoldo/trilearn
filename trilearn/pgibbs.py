@@ -29,7 +29,7 @@ def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
         seq_dist (SequentialJTDistributions): the distribution to be sampled from
 
     Returns:
-        mcmctraj.Trajectory: Markov chain of teh underlying graphs of the junction trees sampled by pgibbs.
+        mcmctraj.Trajectory: Markov chain of the underlying graphs of the junction trees sampled by pgibbs.
     """
     graph_traj = mcmctraj.Trajectory()
     graph_traj.set_sampling_method({"method": "pgibbs",

@@ -15,23 +15,28 @@ import trilearn.auxiliary_functions
 
 
 def from_json_file(filename):
+    """From json graph to graph.
+
+    Args:
+        filename (string): Filename of json graph.
+
+    Returns:
+        NetworksX graph: NetworkX version of the json graph.
+    """
     with open(filename) as data_file:
         json_G = json.load(data_file)
 
     return json_graph.node_link_graph(json_G)
 
 
-def contract(graph, node1, node2, node):
-    """
-    Contracts the edge (node1, node2) on to node, where node is either node1 or node2.
-    :param node1:
-    :param node2:
-    :param node:
-    :return:
-    """
-
-
 def replace_node(graph, node, new_node):
+    """Replaces node by new_node in graph.
+
+    Args:
+        graph (NetworkX graph): A graph.
+        node (hashable object): A node.
+        new_node (hashable object): Another node.
+    """
     graph.add_node(new_node)
     graph.add_edges_from([(new_node, n) for n in graph.neighbors(node)])
     graph.remove_node(node)
@@ -41,8 +46,8 @@ def plot(graph, filename, layout="dot"):
     """ Plots a networkx graph and saves it to filename.
 
     Args:
-        graph (NetworkX graph): A graph
-        filename (string): The filename
+        graph (NetworkX graph): A graph.
+        filename (string): The filename.
 
     """
     agraph = nx.nx_agraph.to_agraph(graph)
@@ -57,7 +62,15 @@ def graph_to_tuple(graph):
         graph (NetworkX graph): A graph
 
     Returns:
-        tuple: E.g. (1,0,0,...,0,0,1,0)
+        tuple: A flattened adjacency matrix in tuple format.
+    
+    Example:
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+        >>> g.edges
+        EdgeView([(0, 1), (0, 2), (1, 2), (2, 3), (3, 4)])
+        >>> glib.graph_to_tuple(g)
+        (0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0)
 
     """
     p = graph.order()
@@ -90,13 +103,29 @@ def hash_graph(graph):
         graph (NetworkX graph): A graph
 
     Returns:
-        int
+        int: A hash value of a graph.
+
+    Example:
+        >>> g = dlib.sample(5)
+        >>> g.nodes
+        NodeView((0, 1, 2, 3, 4))
+        >>> g.edges
+        EdgeView([(0, 1), (0, 3), (1, 2), (1, 3), (2, 3)])   
+        >>> glib.hash_graph(g)
+        249771633555694270
     """
     return hash(str(graph_to_tuple(graph)))
 
 
 def true_distribution(seqdist, filename):
-    """ Calculating true distribution for a graph with 6 nodes.
+    """Calculating true distribution for a graph with 6 nodes.
+
+    Args:
+        seqdist (SequentialDistribution): A (Sequential) distribution for a decomposable graph.
+        filename (string): Filename to save marginal edge distribtion.
+
+    Returns:
+        dict: The graph distribution evaluated for each graph.
     """
     p = seqdist.p
     no_chordal = 0
@@ -163,7 +192,7 @@ def plot_adjmat(graph, cbar=False):
     """ Plots the adjecency matrix of graph.
 
     Args:
-        graph (NetworkX graph): a graph
+        graph (NetworkX graph): A graph.
     """
     heatmap = nx.to_numpy_matrix(graph)
     mask = np.zeros_like(heatmap)
@@ -173,5 +202,3 @@ def plot_adjmat(graph, cbar=False):
                     cmap="Blues",
                     vmin=0.0, vmax=1.0, square=True,
                     cbar=cbar, xticklabels=5, yticklabels=5)
-
-

@@ -1,5 +1,7 @@
 
 from pathlib import Path
+import os
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -71,7 +73,7 @@ plt.semilogy(range(1, p+1), n_chordal_est_means[1:p+1], '-*', label="SMC", alpha
 plt.semilogy(range(1, p+1), sn[1:p+1], '-.', label="Asymptotic")
 plt.semilogy(range(1, min(14, p+1)), n_chordal_true[1: min(14, p+1)], '-+', label="Exact")
 plt.legend(shadow=False, fancybox=True)
-plt.savefig("n_chordal_p"+str(p)+"_N_"+str(N)+"_T_"+str(T)+".eps", format="eps")
+
 
 ## Print latex table
 table_chordal = [np.arange(p+1)] # 0
