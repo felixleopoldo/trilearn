@@ -15,7 +15,7 @@ def separators(graph):
 
     Returns:
         dict: A dict with separators as keys an their corresponding edges as values. 
-        
+
     Example:
         >>> g = dlib.sample_random_AR_graph(5,3)
         >>> g.nodes
@@ -66,7 +66,7 @@ def all_dec_graphs(p):
 
     Note:
         This will only work for small numbers of p (p~10).
-    
+
     Example:
         >>> glist = dlib.all_dec_graphs(3)
         >>> for graph in glist: 
@@ -172,7 +172,7 @@ def sample_dec_graph(internal_nodes, alpha=0.5, beta=0.5, directory='.'):
 
     Returns:
         NetworkX graph: A decomposable graph.
-    
+
     Example:
         >>> g = dlib.sample_dec_graph(5)
         >>> g.edges
@@ -197,7 +197,7 @@ def sample(order, alpha=0.5, beta=0.5):
 
     Returns:
         NetworkX graph: A decomposable graph.
-    
+
     Example:
         >>> g = dlib.sample_dec_graph(5)
         >>> g.edges
@@ -252,29 +252,29 @@ def junction_tree(graph):
     return jt
 
 
-def gen_AR2_graph(n_dim):
-    """Generates a graph with 2-band adjacency matrix
+def gen_AR_graph(n_dim, width=2):
+    """Generates a graph with k-band adjacency matrix
 
     Args:
         n_dim (NetworkX graph): Number of nodes.
 
     Returns:
-        NetworkX graph: A graph with 2-band adjacency matrix. 
+        NetworkX graph: A graph with k-band adjacency matrix. 
         Can represent depdndence structure in a AR2 model.
 
     Example:
-        >>> g = dlib.gen_AR2_graph(5)
+        >>> g = dlib.gen_AR_graph(5)
         >>> g.nodes
         NodeView((0, 1, 2, 3, 4))
         >>> g.edges
         EdgeView([(0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (2, 4), (3, 4)])
     """
-    graph = nx.Graph()
-    for i in range(n_dim):
-        graph.add_node(i, label=str(i+1))
-    for i in range(n_dim-2):
-        graph.add_edges_from([(i, i+1), (i, i+2)])
-    graph.add_edge(n_dim-2, n_dim-1)
+    m = np.eye(n_dim, k=0, dtype=int)
+    for i in range(1, width+1):
+        m += np.eye(n_dim, k=i,dtype=int)
+        m += np.eye(n_dim, k=-i,dtype=int)
+    graph = nx.from_numpy_matrix(m)
+
     return graph
 
 
@@ -287,7 +287,7 @@ def sample_random_AR_graph(n_dim, max_bandwidth):
 
     Returns:
         Networkx graph: A graph with band adjancency matrix. 
-    
+
     Example:
         >>> g = dlib.sample_random_AR_graph(5,3)
         >>> g.nodes
