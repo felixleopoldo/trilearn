@@ -113,7 +113,7 @@ class Trajectory:
             for i, e in enumerate(edge_list):  
                 s += str(e[0]) + "-" + str(e[1]) 
                 if i!= len(edge_list)-1:
-                    s +=","
+                    s +=";"
             return s + "]"
             
         added = [] 

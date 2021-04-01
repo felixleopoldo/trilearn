@@ -106,7 +106,7 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, #qu
     #graph_trajectory.write_file(filename=filename1)
     
     df = graph_trajectory.graph_diff_trajectory_df()
-    df.to_csv(dir +"/"+output_filename, sep=";", index=False)
+    df.to_csv(dir +"/"+output_filename, sep=",", index=False)
     
     #print("wrote file: " + filename1)
 
