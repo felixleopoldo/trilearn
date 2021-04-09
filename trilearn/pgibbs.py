@@ -186,7 +186,9 @@ def sample_trajectories_ggm(dataframe, n_particles, n_samples, D=None, delta=1.0
 
 
 def sample_trajectories_ggm_to_file(dataframe, n_particles, n_samples, D=None, delta=1.0, alphas=[0.5], betas=[0.5],
-                                    radii=[None], reset_cache=True, reps=1, output_directory=".", **args):
+                                    radii=[None], reset_cache=True, reps=1, output_directory=".", 
+                                    output_filename="trajectory.json", 
+                                    **args):
     p = dataframe.shape[1]
     if D is None:
         D = np.identity(p)
@@ -204,7 +206,9 @@ def sample_trajectories_ggm_to_file(dataframe, n_particles, n_samples, D=None, d
                             sd.init_model(np.asmatrix(dataframe), D, delta, {})
 
                             graph_trajectory = trajectory_to_file(N, T, alpha, beta, rad, sd,
-                                                                  reset_cache=reset_cache, dir=output_directory)
+                                                                    reset_cache=reset_cache,
+                                                                    output_filename=output_filename,
+                                                                    dir=output_directory)
                             graph_trajectories.append(graph_trajectory)
     return graph_trajectories
 
