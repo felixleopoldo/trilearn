@@ -10,7 +10,7 @@ def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel,
          data_filename, output_directory, reset_cache, reps, output_filename, **args):
     if seed is not None:
         np.random.seed(seed)
-    df = pd.read_csv(data_filename, sep=',', header=None)
+    df = pd.read_csv(data_filename, sep=',')
 
     if parallel is True:
         trilearn.pgibbs.sample_trajectories_ggm_parallel(df, n_particles, trajectory_length, alphas=alphas, betas=betas,
