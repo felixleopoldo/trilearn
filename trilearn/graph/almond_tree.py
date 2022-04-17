@@ -1,11 +1,12 @@
 """
-Functions related to junction trees.
+Functions related to AlmondTrees: Experimental. 
 """
 
 import networkx as nx
 import numpy as np
-
-
+import matplotlib.pyplot as plt
+import pydot
+from networkx.drawing.nx_pydot import graphviz_layout
 
 class AlmondTree(nx.Graph):
 
@@ -14,6 +15,7 @@ class AlmondTree(nx.Graph):
         self.log_nus = {}
         self.separators = None
         self.num_graph_nodes = None
+        self.clique_graph = None
 
     def log_nu(self, sep):
         if sep not in self.log_nus:
@@ -124,20 +126,33 @@ class AlmondTree(nx.Graph):
         return hash(self.tuple())
 
     def plot(self):
-        pos = nx.spring_layout(self)
-        clique_nodes = [n for (n,ty) in
-                        nx.get_node_attributes(self, 'class').iteritems() if ty == 'C']
-        sep_nodes = [n for (n,ty) in
-                     nx.get_node_attributes(self, 'class').iteritems() if ty == 'S']
+        pos = graphviz_layout(self, prog="twopi")
+        pos = nx.spring_layout(self, weight=None)
+        
+        clique_nodes = [x for (x, d) in
+                        self.nodes(data=True) if d['class'] == 'C']
+        sep_nodes = [x for (x, d) in
+                        self.nodes(data=True) if d['class'] == 'S']
+
+        nx.draw_networkx_edges(self, pos, color='black')
         nx.draw_networkx_nodes(self, pos, nodelist=clique_nodes,
                                node_color='red', node_shape='o',
-                               with_labels=True)
+                               with_labels=False, alpha = 0.25, node_size = 1500)
         nx.draw_networkx_nodes(self, pos, nodelist=sep_nodes,
                                node_color='blue', node_shape='o',
-                               with_labels=True)
-        nx.draw_networkx_edges(self, pos, color = 'black')
-        nx.draw_networkx_labels(self, pos)
+                               with_labels=False, alpha =0.25, node_size = 1500)
 
+        labelslist ={}
+        for key, item in pos.items():
+            labelslist[key]=', '.join(str(x) for x in list(key))
+
+        nx.draw_networkx_labels(self, pos, labels = labelslist, font_size= 16)
+
+        # edgelabellist  = {}
+        # for key, item in pos.items():
+        #     edgelabellist[key] = ','.join()
+
+        
 def is_junction_tree(tree):
     """ Checks the junction tree property of a graph.
 

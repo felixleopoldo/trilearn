@@ -3,14 +3,14 @@
 A class for handling Markov chains produced from e.g. MCMC.
 """
 import json
-
+import networkx as nx
 from networkx.readwrite import json_graph
 import pandas as pd
 import numpy as np
 
 import trilearn.graph.empirical_graph_distribution as gdist
 from trilearn.distributions import sequential_junction_tree_distributions as sd
-
+import trilearn.graph.junction_tree as jtlib
 
 class Trajectory:
     """
@@ -61,8 +61,12 @@ class Trajectory:
     def empirical_distribution(self, from_index=0):
         length = len(self.trajectory) - from_index
         graph_dist = gdist.GraphDistribution()
-        for g in self.trajectory[from_index:]:
-            graph_dist.add_graph(g, 1./length)
+        if nx.is_tree(self.trajectory[0]):
+            for g in self.trajectory[from_index:]:
+                graph_dist.add_graph(jtlib.graph(g), 1./length)
+        else:
+            for g in self.trajectory[from_index:]:
+                graph_dist.add_graph(g, 1./length)
         return graph_dist
 
     def log_likelihood(self, from_index=0):
