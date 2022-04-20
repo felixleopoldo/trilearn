@@ -1,4 +1,3 @@
-
 """
 A class for handling Markov chains produced from e.g. MCMC.
 """
@@ -7,8 +6,9 @@ import json
 from networkx.readwrite import json_graph
 import pandas as pd
 import numpy as np
-
+import networkx as nx
 import trilearn.graph.empirical_graph_distribution as gdist
+from trilearn.graph import graph as glib
 from trilearn.distributions import sequential_junction_tree_distributions as sd
 
 
@@ -99,6 +99,74 @@ class Trajectory:
             with open(filename, 'w') as outfile:
                 json.dump(self.to_json(optional=optional), outfile, default=default)
 
+    def get_adjvec_trajectory(self):
+        mats = []
+        for graph in self.trajectory:
+            m = nx.to_numpy_array(graph, dtype=int)
+            mats.append(m.flatten().tolist())
+        return mats
+
+    def graph_diff_trajectory_df(self):
+
+        def list_to_string(edge_list):
+            s = "["
+            for i, e in enumerate(edge_list):  
+                s += str(e[0]) + "-" + str(e[1]) 
+                if i!= len(edge_list)-1:
+                    s +=";"
+            return s + "]"
+            
+        added = [] 
+        removed = []
+
+        for i in range(1, self.trajectory[0].order()):
+            added += [(0, i)]
+        
+        df = pd.DataFrame({"index": [-2],
+                            "added" : [list_to_string(added)],
+                            "removed" : [list_to_string([])],
+                            "score" : [0]})
+
+        
+
+        df2 = pd.DataFrame({"index": [-1],
+                            "added" : [list_to_string([])],
+                            "removed" : [list_to_string(added)],
+                            "score" : [0]})
+
+        df = df.append(df2)
+
+        added = self.trajectory[0].edges()
+        removed = []
+
+        df2 = pd.DataFrame({"index": [0],
+                            "added" : [list_to_string(added)],
+                            "removed" : [list_to_string([])],
+                            "score" : [ self.log_likelihood()[0]]})
+        df = df.append(df2)
+
+        for i in range(1, len(self.trajectory[1:-1])):
+            g_cur = self.trajectory[i]
+            g_prev = self.trajectory[i-1]
+
+            if glib.hash_graph(g_cur) != glib.hash_graph(g_prev):
+                added = list(set(g_cur.edges()) - set(g_prev.edges()))
+                removed = list(set(g_prev.edges()) - set(g_cur.edges()))
+            
+                df2 = pd.DataFrame({"index": [i],
+                                    "added" : [list_to_string(added)],
+                                    "removed" : [list_to_string(removed)],
+                                    "score" : [self.log_likelihood()[i]]})
+                df = df.append(df2)
+
+        return df
+
+    def write_adjvec_trajectory(self, filename):
+        """ Writes the trajectory of adjacency matrices to file.
+        """
+        mats = self.get_adjvec_trajectory()
+        with open(filename, 'w') as outfile:
+                json.dump(mats, outfile)
 
     def to_json(self, optional={}):
         js_graphs = [json_graph.node_link_data(graph) for

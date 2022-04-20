@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 import networkx as nx
 import numpy as np
 
@@ -145,17 +147,22 @@ def subtree_cond_pdf(tree1, tree2, tree2_subtree_nodes, new):
                             S[c] == neig & c}) > 0 or gamma == 1
 
         N[c] = 1.0
+        #N[c] = Fraction(1,1)
         if sepCondition is False:
             # Every internal node in c belongs to a separator
             P[c] = np.power(2.0, - len(RM))
+            #P[c] = Fraction(1, 2 ** len(RM))
             if not len(c) + 1 == len(c_tree2):
                 N[c] = np.power(2.0, -len(neigs))
+                #N[c] = Fraction(1, 2**len(neigs))
         else:
             P[c] = 1.0
             if len(RM) > 1:
                 P[c] = (1.0 / len(RM)) * np.power(2.0, -(len(RM) - 1.0)) * len(M[c])
+                #P[c] = Fraction(1, len(RM)) * Fraction(len(M[c]), 2 ** (len(RM) - 1.0)) 
                 if not len(c) + 1 == len(c_tree2):
                     N[c] = np.power(2.0, -len(neigs))
+                    #N[c] = Fraction(1, 2**len(neigs))
     return (P, N)
 
 
@@ -289,29 +296,31 @@ def sample_cond_on_subtree_nodes(new, tree, subtree_nodes, subtree_edges, subtre
     # Compute probabilities
     N = {}
     for c in subtree_nodes:
-        #sepCondition = len({neig for neig in subtree_adjlist[c] if
-        #                    S[c] == neig & c}) > 0 or len(subtree_adjlist) == 1
-
         if sepCondition[c] is False:
             # Every internal node in c belongs to a separator
             P[c] = np.power(2.0, - len(RM[c]))
+            #P[c] = Fraction(1, 2 ** len(RM[c]))
             if not len(c) + 1 == len(C[c]):
                 N[c] = np.power(2.0, - len(N_S[c]))
+                #N[c] = Fraction(1, 2 ** len(N_S[c]))
             else:
                 N[c] = 1.0
+                #N[c] = Fraction(1,1)
         else:
             P[c] = 1.0
+            #P[c] = Fraction(1, 1)
             N[c] = 1.0
+            #N[c] = Fraction(1, 1)
             if len(RM[c]) > 1:
                 P[c] = 1.0 / len(RM[c])
+                #P[c] = Fraction(1, len(RM[c]))
                 P[c] *= np.power(2.0, - (len(RM[c]) - 1.0)) * len(M[c])
+                #P[c] *= Fraction(len(M[c]), 2 ** (len(RM[c]) - 1.0)) 
                 if not len(c) + 1 == len(C[c]): # c not swallowed by C[c]
-                    N[c] = np.power(2.0, - len(N_S[c]))
+                    #N[c] = np.power(2.0, - len(N_S[c]))
+                    N[c] = Fraction(1, 2 ** len(N_S[c]))
 
     # Remove the edges in tree
-    #print(list(tree.nodes()))
-    #print(list(tree.edges()))
-    #print(subtree_edges)
     tree.remove_edges_from(subtree_edges)
     # Todo: This will introduce a bug if we instead replace a node.
     return (old_cliques, new_cliques, new_separators, P, N)

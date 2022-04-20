@@ -7,18 +7,19 @@ from trilearn.distributions import matrix_multivariate_normal
 
 
 def sample(G, dof, scale):
-    """
-    Sample from G-inverse Wishart distribution.
-
-    C. M. Carvalho, H. Massam, and M. West. Simulation of hyper-inverse
-    wishart distributions in graphical models. Biometrika, 94(3):647-659, 2007.
+    """ Sample from G-inverse Wishart distribution [2]_.
 
     Args:
-        G (networkx graph): A decomposable graph
+        G (networkx graph): A decomposable graph.
         scale (numpy matrix): Scale parameter, a positive definite matrix.
-        delta (float): Degrees o freedom, a positive real number
+        delta (float): Degrees o freedom, a positive real number.
+
     Returns:
-        A sample from the G-inverse wishart distribution
+        numpy matrix: A sample from the G-inverse wishart distribution.
+
+    References:
+        .. [2] C. M. Carvalho, H. Massam, and M. West. Simulation of hyper-inverse wishart distributions in graphical models. Biometrika, 94(3):647-659, 2007.
+
     """
     (C, S, H, A, R) = trilearn.graph.decomposable.peo(G)
     p = len(G.nodes())

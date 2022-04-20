@@ -1,0 +1,18 @@
+version: "3.3"
+services:
+  pygraphviz:
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    image: onceltuca/pygraphviz
+    volumes: 
+        - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      DISPLAY: $DISPLAY
+      MPLBACKEND: Agg
+  trilearn:
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    image: onceltuca/trilearn
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      DISPLAY: $DISPLAY
+      MPLBACKEND: Agg

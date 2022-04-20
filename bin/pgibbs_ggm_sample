@@ -7,19 +7,21 @@ import trilearn.pgibbs
 
 
 def main(trajectory_length, n_particles, alphas, betas, radii, seed, parallel,
-         data_filename, output_directory, reset_cache, reps, **args):
+         data_filename, output_directory, reset_cache, reps, output_filename, **args):
     if seed is not None:
         np.random.seed(seed)
-    df = pd.read_csv(data_filename, sep=',', header=None)
+    df = pd.read_csv(data_filename, sep=',')
 
     if parallel is True:
         trilearn.pgibbs.sample_trajectories_ggm_parallel(df, n_particles, trajectory_length, alphas=alphas, betas=betas,
                                                          radii=radii, reps=reps, reset_cache=reset_cache,
-                                                         output_directory=output_directory)
+                                                         output_directory=output_directory,
+                                                         output_filename=output_filename)
     else:
         trilearn.pgibbs.sample_trajectories_ggm_to_file(df, n_particles, trajectory_length, alphas=alphas, betas=betas,
                                                         radii=radii, reps=reps, reset_cache=reset_cache,
-                                                        output_directory=output_directory)
+                                                        output_directory=output_directory,
+                                                        output_filename=output_filename)
 
 if __name__ == "__main__":
     import argparse
@@ -35,6 +37,11 @@ if __name__ == "__main__":
         required=True,
         help="Filename of dataset stored as row vectors och floats. "
     )
+    parser.add_argument(
+        '-F', '--output_filename',
+        required=False,
+        help="Output filename"
+    ) 
     parser.add_argument(
         '-N', '--n_particles',
         type=int, required=True, nargs='+',

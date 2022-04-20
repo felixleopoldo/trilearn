@@ -29,10 +29,11 @@ class SequentialJTDistribution(object):
 
 
 class UniformJTDistribution(SequentialJTDistribution):
-    """ A sequential formulation of P(T) = P(T|G)P(G), where
-        P(G)=1/(#decomopsable graphs)
-        and
-        P(T|G) = 1/(#junction trees for G).
+    """ A sequential formulation of 
+        
+        .. math::
+            P(T)= \\frac{1}{\\text{# junction trees}}
+
     """
     def __init__(self, p):
         self.p = p
@@ -48,10 +49,19 @@ class UniformJTDistribution(SequentialJTDistribution):
 
 
 class CondUniformJTDistribution(SequentialJTDistribution):
-    """ A sequential formulation of P(T) = P(T, G) = P(T|G)P(G), where
-        P(G)=1/(#decomopsable graphs)
+    """ A sequential formulation of 
+          .. math::
+            P(T) = P(T|G)P(G), 
+        where
+        
+        .. math::
+            P(G)= \\frac{1}{\\text{# decomposable graphs}}
+        
         and
-        P(T|G) = 1/(#junction trees for G).
+
+        .. math::
+            P(T|G) = \\frac{1}{\\text{#junction trees for G}}.
+
     """
     def __init__(self, p):
         self.p = p
@@ -70,16 +80,30 @@ class CondUniformJTDistribution(SequentialJTDistribution):
                                                                                old_JT, new_JT)
 
 class CondUniformGivenSizeJTDistribution(SequentialJTDistribution):
-    """ A sequential formulation of P(T) = P(T, G) = P(T|G)P(G), where
-        P(G)=1/(#decomopsable graphs) * I(size of G = k)
+    """ A sequential formulation of 
+    
+        .. math::
+            P(T) = P(T, G) = P(T|G)P(G)
+        , where
+        
+        
+        .. math::
+            P(G)=1/(\\text{#decomopsable graphs}) * I(\\text{size of } G = k)
         and
-        P(T|G) = 1/(#junction trees for G).
+
+        .. math::
+            P(T|G) = 1/(\\text{#junction trees for G}).
     """
     def __init__(self, p, size):
         self.p = p
         self.size = size
 
     def ll(self, graph):
+        """Log-lokelihood.
+
+        Args:
+            graph (Networkx graph): A graph.
+        """
         pass
 
     def log_ratio(self,
@@ -89,6 +113,19 @@ class CondUniformGivenSizeJTDistribution(SequentialJTDistribution):
                   new_separators,
                   old_JT,
                   new_JT):
+        """Log-likelihood ratio of new_JT and old_JT.
+
+        Args:
+            old_cliques ([type]): [description]
+            old_separators ([type]): [description]
+            new_cliques ([type]): [description]
+            new_separators ([type]): [description]
+            old_JT ([type]): [description]
+            new_JT ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         graph = new_JT.to_graph()
         #print("order: " + str(graph.order()) + " size: " + str(graph.size()))
         if graph.size() <= self.size:

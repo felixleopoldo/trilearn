@@ -4,7 +4,7 @@
 import os
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages 
 
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
@@ -33,9 +33,10 @@ classifiers = [
 setup(
     name='trilearn',
     python_requires='<3.0',
-    version=0.199,
+    version=1.23,
     description='Bayesian predictive classification and structure learning in decomposable graphical models using particle Gibbs.',
     long_description=readme,
+    long_description_content_type="text/markdown",
     packages=packages,
     package_data=package_data,
     install_requires=requirements,
@@ -58,7 +59,7 @@ setup(
     author="Felix Rios",
     author_email='felix.leopoldo.rios@gmail.com',
     url='https://github.com/felixleopoldo/trilearn',
-    download_url = 'https://github.com/felixleopoldo/trilearn/archive/0.199'
+    download_url = 'https://github.com/felixleopoldo/trilearn/archive/1.23'
                    '.tar.gz',
     license='Apache 2.0',
     classifiers=classifiers,
