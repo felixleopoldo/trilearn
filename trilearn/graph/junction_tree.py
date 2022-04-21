@@ -483,7 +483,7 @@ def log_n_junction_trees_update_ratio(new_separators, from_tree, to_tree):
     return new_partial_mu - old_partial_mu
 
 
-def sample(internal_nodes, alpha=0.5, beta=0.5):
+def sample(internal_nodes, alpha=0.5, beta=0.5, only_tree=False):
     """ Generates a junction tree with order internal nodes with the junction tree expander.
 
     Args:
@@ -502,7 +502,6 @@ def sample(internal_nodes, alpha=0.5, beta=0.5):
     else:
         nodes = internal_nodes
 
-
     tree = JunctionTree()
 
     #from trilearn.graph.junction_tree_gt import JunctionTreeGT
@@ -517,7 +516,10 @@ def sample(internal_nodes, alpha=0.5, beta=0.5):
     #     tree.node[n] = {"color": "black", "label": lab}
 
     for j in nodes[1:]:
-        (tree, _, _, _, _, _) = jte.sample(tree, j, alpha, beta, only_tree=False)
+        if only_tree:
+            jte.sample(tree, j, alpha, beta, only_tree=only_tree)
+        else:
+            (tree, _, _, _, _, _) = jte.sample(tree, j, alpha, beta, only_tree=only_tree)
 
         #print("vert dict: " + str(tree.gp.vert_dict))
         #print("nodes: " + str(list(tree.vp.nodes)))

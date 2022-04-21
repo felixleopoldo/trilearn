@@ -28,10 +28,13 @@ def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
     #     tree.node[n] = {"color": "black", "label": lab}
     # print tree.nodes()
 
-    #tree_new = tree.subgraph(tree.nodes()) # nx < 2.0
-    tree_new = tree.copy() # nx < 2.0
+    if only_tree is True:
+        tree_new = tree # Alter the input tree
+    else:
+        #tree_new = tree.subgraph(tree.nodes()) # nx < 2.0
+        tree_new = tree.copy() # nx < 2.0
 
-
+    #print(nocopy)
     #old_G = trilearn.graph.junction_tree.get_graph(tree)
     #(subtree, old_separators, probtree) = glib.random_subtree(tree, alpha, beta)
 
@@ -46,6 +49,7 @@ def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
 
     (_, subtree_nodes, subtree_edges, subtree_adjlist,
     old_separators, prob_subtree) = ss.random_subtree(tree, alpha, beta, i)
+
     (old_cliques,
      new_cliques,
      new_separators,

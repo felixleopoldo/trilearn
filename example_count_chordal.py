@@ -12,8 +12,17 @@ from tqdm import tqdm
 from decimal import Decimal
 from scipy.special import comb
 import trilearn.distributions.sequential_junction_tree_distributions as seqdist
+import seaborn as sns
 
-p = 50
+sns.axes_style("whitegrid")
+sns.set_style("whitegrid")
+
+p = 10 # number of nodes
+alpha = 0.5 # CTA parameter
+beta = 0.5 # CTA parameter
+N = 1000 # number of particles
+T = 10 # number of replicates (estimates)
+np.random.seed(1)
 
 n_chordal_true = np.array([0, 1, 2, 8, 61, 822, 18154, 617675, 30888596, 
                           2192816760, 215488096587, 28791414081916, 
@@ -36,16 +45,14 @@ for pp in range(1, p+1):
 print("Asymptotic number of chordal graphs")
 print(sn)
 
-N = 10000
-T = 10
 chordal_df = pd.DataFrame(columns=["order", "n_chordal_est", "seed"])
 n_chordal_est = np.zeros((p+1) * T).reshape(T, (p+1))
 for t in tqdm(range(T)):
-    filename = Path("n_chordal_est_N={N}_p={p}_seed={seed}.csv".format(seed=t,N=N,p=p))
+    filename = Path("n_chordal_est_N={N}_p={p}_alpha={alpha}_beta={beta}_seed={seed}.csv".format(seed=t,N=N,p=p, alpha=alpha,beta=beta))
     if not filename.is_file():
         df = pd.DataFrame(columns=["order", "n_chordal_est", "seed"])
         np.random.seed(t)
-        n_chordal_est[t,1:] = smc.est_n_dec_graphs(p, N, debug=False)
+        n_chordal_est[t,1:] = smc.est_n_dec_graphs(p, N, debug=False, alpha=alpha, beta=beta)
         df["n_chordal_est"] = n_chordal_est[t,1:]
         df["seed"] = t
         df["order"] = range(1,p+1)
@@ -73,6 +80,9 @@ plt.semilogy(range(1, p+1), n_chordal_est_means[1:p+1], '-*', label="SMC", alpha
 plt.semilogy(range(1, p+1), sn[1:p+1], '-.', label="Asymptotic")
 plt.semilogy(range(1, min(14, p+1)), n_chordal_true[1: min(14, p+1)], '-+', label="Exact")
 plt.legend(shadow=False, fancybox=True)
+plt.xlabel("Number of vertices")
+plt.ylabel("Number of decomposable graphs")
+plt.savefig("n_chordal_est_p="+str(p)+"_N_"+str(N)+"_T_"+str(T)+"_alpha_"+str(alpha)+"_beta_"+str(beta)+".eps", format="eps")
 
 
 ## Print latex table
@@ -168,7 +178,8 @@ for row in range(1, p+1):
 
 plt.clf()
 plt.semilogy(range(1,p+1), frac_tree_graph_est_means[1:], ".-")
-
+plt.xlabel("Number of vertices")
+plt.ylabel("Junction trees per decomposable graph")
 # plt.savefig("tree_graph_frac.eps",format="eps")
 
 plt.savefig("frac_tree_graph_p"+str(p)+"_N_"+str(N)+"_T_"+str(T)+".eps", format="eps")
