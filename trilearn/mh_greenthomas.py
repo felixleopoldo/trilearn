@@ -289,7 +289,7 @@ def trajectory_to_file(n_samples, randomize, seqdist, dir=".", reseed=False):
         filename_prefix (string): prefix to the filename
 
     Returns:
-        mcmctraj.Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
+        Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
 
     """
     if reseed is True:
@@ -315,7 +315,7 @@ def trajectory_to_queue(n_samples, randomize, seqdist, queue, reseed=False):
         filename_prefix (string): prefix to the filename
 
     Returns:
-        mcmctraj.Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
+        Trajectory: Markov chain of underlying graphs of the junction trees sampled by pgibbs.
 
     """
     if reseed is True:

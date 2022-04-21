@@ -10,14 +10,14 @@ from networkx.readwrite import json_graph
 import trilearn.auxiliary_functions
 import trilearn.graph.graph as libg
 import trilearn.distributions.g_intra_class as gic
-from trilearn.graph.decomposable import gen_AR2_graph
+from trilearn.graph.decomposable import gen_AR_graph
 
 np.set_printoptions(precision=1)
 # G-Intra class (AR(2))
 
 
 def main(s2, rho, n_samples, n_dim, graph_dir, data_dir, precmat_dir, **args):
-    graph = gen_AR2_graph(n_dim)
+    graph = gen_AR_graph(n_dim, width=2)
     X = gic.sample(graph, rho, s2, n_samples).T
     c = gic.cov_matrix(graph, rho, s2)
 

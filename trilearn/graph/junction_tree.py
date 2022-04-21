@@ -71,19 +71,37 @@ class JunctionTree(nx.Graph):
         return nx.connected_components(self)
 
     def log_n_junction_trees(self, seps):
+        """Log of the number of junction tree obtained by cutting at seps.
+
+        Args:
+            seps (list): List of separators
+
+        Returns:
+            float: Log number of junction trees obtained by cutting at seps.
+        """
         lm = 0.0
         for sep in seps:
             lm += self.log_nu(sep)
         return lm
 
     def to_graph(self):
-        """ Returns the graph underlying the junction tree tree.
-
-        Args:
-            tree (NetworkX graph): A junction tree
+        """ Returns the graph underlying this junction tree.
 
         Returns:
-            NetworkX graph
+            NetworkX graph: The underlying graph.
+
+        Example:
+            >>> np.random.seed(1)
+            >>> t = jtlib.sample(5)
+            >>> t.edges
+            EdgeView([(frozenset([1, 2]), frozenset([4])), (frozenset([1, 2]), frozenset([0, 2])), (frozenset([0, 2]), frozenset([3]))])
+            >>> t.nodes
+            NodeView((frozenset([1, 2]), frozenset([4]), frozenset([0, 2]), frozenset([3])))
+            >>> g = t.to_graph()
+            >>> g.nodes
+            NodeView((0, 1, 2, 3, 4))
+            >>> g.edges
+            EdgeView([(0, 2), (1, 2)])           
         """
 
         G = nx.Graph()
@@ -99,17 +117,22 @@ class JunctionTree(nx.Graph):
         return(frozenset(self.nodes()), frozenset([frozenset(e) for e in self.edges()]))
 
     def __hash__(self):
+        """Returns the hash value of this junction tree.
+
+        Returns:
+            integer: A unique hash value.
+        """
         return hash(self.tuple())
 
 
 def is_junction_tree(tree):
-    """ Checks the junction tree property of a graph.
+    """ Checks the junction tree property of tree.
 
     Args:
-        tree (NetworkX graph): A junction tree
+        tree (NetworkX graph): A junction tree.
 
     Returns:
-        bool: True if tree is a junction tree
+        bool: True if tree is a junction tree.
     """
     for n1 in tree.nodes():
         for n2 in tree.nodes():
@@ -148,11 +171,23 @@ def n_junction_trees(p):
 
 
 def subtree_induced_by_subset(tree, s):
-    """ Returns the subtree induced by the set s.
+    """ Returns the subtree of tree induced by the nodes containing the set s.
 
     Args:
        tree (NetworkX graph): A junction tree.
        s (set): Subset of the node in the underlying graph of T.
+
+    Example:
+        >>> t = jtlib.sample(5)  
+        >>> t.nodes
+        NodeView((frozenset([0, 4]), frozenset([3]), frozenset([1, 2, 4])))
+        >>> t.edges
+        EdgeView([(frozenset([0, 4]), frozenset([1, 2, 4])), (frozenset([3]), frozenset([1, 2, 4]))])
+        >>> subt = jtlib.subtree_induced_by_subset(t, frozenset([1]))
+        >>> subt.nodes
+        NodeView((frozenset([1, 2, 4]),))
+        >>> t.edges
+        EdgeView([(frozenset([0, 4]), frozenset([1, 2, 4])), (frozenset([3]), frozenset([1, 2, 4]))])
     """
     if len(s) == 0:
         return tree.copy()
@@ -172,8 +207,8 @@ def induced_subtree_nodes(tree, node, visited, sep):
 
 def forest_induced_by_sep(tree, s):
     """ Returns the forest created from the subtree induced by s
-    and cut at the separator that equals s.
-    This is the forest named F in
+        and cut at the separator that equals s.
+        This is the forest named F in
 
     Args:
         tree (NetworkX graph): A junction tree
@@ -181,7 +216,7 @@ def forest_induced_by_sep(tree, s):
 
     Returns:
         NetworkX graph: The forest created from the subtree induced by s
-    and cut at the separator that equals s.
+        and cut at the separator that equals s.
     """
     F = subtree_induced_by_subset(tree, s)
     edges_to_remove = []
@@ -194,7 +229,7 @@ def forest_induced_by_sep(tree, s):
 
 def separators(tree):
     """ Returns a dictionary of separators and corresponding
-    edges in the junction tree tree.
+        edges in the junction tree tree.
 
     Args:
         tree (NetworkX graph): A junction tree

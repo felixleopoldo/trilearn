@@ -127,13 +127,10 @@ class CondUniformGivenSizeJTDistribution(SequentialJTDistribution):
             [type]: [description]
         """
         graph = new_JT.to_graph()
-        #print("order: " + str(graph.order()) + " size: " + str(graph.size()))
         if graph.size() <= self.size:
-            #print("ok")
             return -trilearn.graph.junction_tree.log_n_junction_trees_update_ratio(new_separators,
                                                                                    old_JT, new_JT)
         else:
-            #print("bad size")
             return -np.inf
 
 

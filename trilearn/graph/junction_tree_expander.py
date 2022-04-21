@@ -9,17 +9,50 @@ from trilearn import auxiliary_functions as aux
 
 
 def sample(tree, i, alpha=0.5, beta=0.5, only_tree=True):
-    """ Expands the junciton tree tree with the internal node i
+    """ Expands the junciton tree tree with the internal node i.
 
     Args:
         tree (NetworkX graph): a junction tree
         i (int): new node to be added to the underlying graph of tree
         alpha (float): parameter for the subtree kernel
         beta (float): parameter for the subtree kernel
-
+        only_tree (bool): Return only the new tree if true.
     Returns:
-        NetworkX graph: a junction tree
+        (JunctionTree, float, dict, dict, dict, dict): 
+        A tuple having the following entries:
 
+        *   tree_new - A junction tree based on tree with the extra internal node i.
+        *   K_st - Transition probability from tree to tree_new
+        *   old_cliques - Dict with the cliques in the subtree used in the transition.
+        *   old_separators - Dict with the cliques in the subtree used in the transition.
+        *   new_cliques, 
+        *   new_separators
+
+        If only_tree is True, only tree_new is returned.
+
+    Example:
+        >>> import numpy as np
+        >>> np.random.seed(1)
+        >>> t = jtlib.sample(5)
+        >>> t2 = jtelib.sample(t, 5)
+        >>> t2.nodes
+        NodeView((frozenset([1, 2]), frozenset([4]), frozenset([5]), frozenset([0, 2]), frozenset([3])))
+        >>> t2.edges
+        EdgeView([(frozenset([1, 2]), frozenset([4])), (frozenset([1, 2]), frozenset([0, 2])), 
+        (frozenset([4]), frozenset([3])), (frozenset([5]), frozenset([3]))])
+        >>> (tree_new, K_st, old_cliques, old_separators, new_cliques, new_separators) = jtelib.sample(t, 5, only_tree=False)
+        >>> tree_new
+        <trilearn.graph.junction_tree.JunctionTree object at 0x7fc479893b50>
+        >>> K_st
+        0.01
+        >>> old_cliques
+        set([])
+        >>> old_separators
+        {}
+        >>> new_cliques
+        set([frozenset([5])])
+        >>> new_separators
+        {frozenset([]): [(frozenset([5]), frozenset([1, 2]))]}
     """
     # for n in tree.nodes():
     #     lab = tuple(n)
