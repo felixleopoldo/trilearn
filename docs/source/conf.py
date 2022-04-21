@@ -12,21 +12,22 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = u'Trilearn'
-copyright = u'2020, Felix L. Rios'
+copyright = u'2022, Felix L. Rios'
 author = u'Felix L. Rios'
 
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u'1.01'
+release = u'1.23'
 
 
 # -- General configuration ---------------------------------------------------
