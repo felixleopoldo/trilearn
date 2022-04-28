@@ -262,9 +262,10 @@ def est_parameters(graph, data, levels, const_alpha):
 
     return parameters
 
-
-#def joint_prob_table(dist, levels, cliques, separators):
 def locals_to_joint_prob_table(graph, parameters, levels):
+    """
+    This is way too slow.
+    """
     (cliques, separators, _, _, _) = trilearn.graph.decomposable.peo(graph)
 
     if len(cliques) == 1:
@@ -292,6 +293,10 @@ def sample_joint_prob_table(graph, levels, total_counts):
 
 
 def sample(table, n=1):
+    """
+    This is not optimized. Should sample one clique at a time. Instead of one node at a time.
+    """
+
     p = len(table.shape)
     data = []
     for _ in range(n):

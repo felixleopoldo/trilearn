@@ -35,7 +35,7 @@ def mh(alpha, beta, traj_length, seq_dist,
         seq_dist (SequentialJTDistributions): the distribution to be sampled from
 
     Returns:
-        mcmctraj.Trajectory: Markov chain of teh underlying graphs of the junction trees sampled by M-H.
+        Trajectory: Markov chain of teh underlying graphs of the junction trees sampled by M-H.
     """
     graph_traj = mcmctraj.Trajectory()
     graph_traj.set_sequential_distribution(seq_dist)
