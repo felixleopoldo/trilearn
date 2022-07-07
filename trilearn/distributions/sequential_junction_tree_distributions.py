@@ -288,3 +288,32 @@ class GGMJTPosterior(SequentialJTDistribution):
     def __str__(self):
         return "ggm_posterior_n_" + str(self.n) + "_p_" + str(self.p) + "_prior_scale_" + str(
             self.parameters["delta"]) + "_shape_x"
+
+    
+class UniformJTDistribution(SequentialJTDistribution):
+    """ A sequential formulation of P(T) = P(T|G)P(G), where
+        P(G)=1/(#decomopsable graphs)
+        and
+        P(T|G) = 1/(#junction trees for G).
+    """
+    def __init__(self, p):
+        self.p = p
+
+    def log_ratio(self,
+                  old_cliques,
+                  old_separators,
+                  new_cliques,
+                  new_separators,
+                  old_JT,
+                  new_JT):
+        return 0.0
+
+    def log_likelihood_partial(self, cliques, separators):
+        return 0.0
+
+    def log_likelihood(self, jt):
+        return 0.0
+
+
+
+

@@ -63,6 +63,10 @@ def sample_trajectory(n_samples, randomize, sd):
             seps_prop = jtlib.separators(jt)
             log_p2 = sd.log_likelihood(jtlib.graph(jt)) - jtlib.log_n_junction_trees(jt, seps_prop)
 
+            if not conn:
+                log_prob_traj[i] = log_prob_traj[i-1]
+                graphs[i] = graphs[i-1]
+                continue
             C_disconn = conn[2] | conn[3] | conn[4]
             if conn[0] == "a":
                 (case, log_q12, X, Y, S, CX_disconn, CY_disconn, XSneig, YSneig) = conn
@@ -219,6 +223,13 @@ def sample_trajectory(n_samples, randomize, sd):
     gtraj.set_trajectory(graphs)
     gtraj.logl = log_prob_traj
     return gtraj
+
+
+def sample_trajectory_uniform(n_samples, randomize=100, graph_size=5, cache={}, **args):
+    sd = seqdist.UniformJTDistribution(graph_size)
+    return sample_trajectory(n_samples=n_samples,
+                             randomize=randomize,
+                             sd=sd)
 
 
 def sample_trajectory_loglin(dataframe, n_samples, pseudo_obs=1.0, randomize=1000, cache={}, **args):
