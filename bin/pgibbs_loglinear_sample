@@ -17,8 +17,6 @@ def main(data_filename, n_particles, trajectory_lengths, pseudo_observations,
         np.random.seed(seed)
 
     df = pd.read_csv(data_filename, sep=',', header=[0, 1])
-    n_levels = [int(a[1]) for a in list(df.columns)]
-    levels = np.array([range(l) for l in n_levels])
 
     if parallel is True:
         trilearn.pgibbs.sample_trajectories_loglin_parallel(df, n_particles, trajectory_lengths, alphas=alphas,

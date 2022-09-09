@@ -106,19 +106,19 @@ class Trajectory:
             mats.append(m.flatten().tolist())
         return mats
 
-    def graph_diff_trajectory_df(self):
+    def graph_diff_trajectory_df(self, labels):
 
-        def list_to_string(edge_list):
+        def list_to_string(edge_list):            
             s = "["
             for i, e in enumerate(edge_list):  
-                s += str(e[0]) + "-" + str(e[1]) 
+                s += str(labels[e[0]]) + "-" + str(labels[e[1]]) 
                 if i!= len(edge_list)-1:
                     s +=";"
             return s + "]"
             
         added = [] 
         removed = []
-
+        
         for i in range(1, self.trajectory[0].order()):
             added += [(0, i)]
         
@@ -182,6 +182,9 @@ class Trajectory:
 
 
     def from_json(self, mcmc_json):
+        print("mcmc_json")
+        print(mcmc_json)
+
         graphs = [json_graph.node_link_graph(js_graph)
                   for js_graph in mcmc_json["trajectory"]]
 
