@@ -312,10 +312,9 @@ def trajectory_to_file(n_samples, randomize, seqdist, dir=".", reseed=False):
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    filename = dir + "/" + str(graph_trajectory) +"_"+ date + ".json"
-    graph_trajectory.write_file(filename=filename)
-    print("wrote file: " + filename)
-
+    output_filename= 'trajectory.csv'
+    df = graph_trajectory.graph_diff_trajectory_df()
+    df.to_csv(dir +"/"+output_filename, sep=",", index=False)
     return graph_trajectory
 
 def trajectory_to_queue(n_samples, randomize, seqdist, queue, reseed=False):

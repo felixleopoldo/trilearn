@@ -18,10 +18,12 @@ def log_norm_constant(D, delta, cache={}):
 
     # This parametrization makes the requirement
     # delta > 0 instead of delta > p-1
+    # This is the Inverse-Wishart parametrization, with v = delta + p - 1
+    # See Wiki page
     K = 0.0
     p = len(D)
     t = (delta + p - 1.0) / 2.0
-    K = np.log(2) * (delta * p / 2.0)
+    K = np.log(2) * (p * (delta  + p - 1)/ 2.0)
     if (t, p) not in cache:
         cache[(t, p)] = scp.multigammaln(t, p)
     K += cache[(t, p)]
