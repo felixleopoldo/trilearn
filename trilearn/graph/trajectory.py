@@ -182,8 +182,6 @@ class Trajectory:
 
 
     def from_json(self, mcmc_json):
-        print("mcmc_json")
-        print(mcmc_json)
 
         graphs = [json_graph.node_link_graph(js_graph)
                   for js_graph in mcmc_json["trajectory"]]

@@ -47,7 +47,7 @@ print(sn)
 
 chordal_df = pd.DataFrame(columns=["order", "n_chordal_est", "seed"])
 n_chordal_est = np.zeros((p+1) * T).reshape(T, (p+1))
-for t in tqdm(range(T)):
+for t in tqdm(list(range(T))):
     filename = Path("n_chordal_est_N={N}_p={p}_alpha={alpha}_beta={beta}_seed={seed}.csv".format(seed=t,N=N,p=p, alpha=alpha,beta=beta))
     if not filename.is_file():
         df = pd.DataFrame(columns=["order", "n_chordal_est", "seed"])
@@ -55,17 +55,17 @@ for t in tqdm(range(T)):
         n_chordal_est[t,1:] = smc.est_n_dec_graphs(p, N, debug=False, alpha=alpha, beta=beta)
         df["n_chordal_est"] = n_chordal_est[t,1:]
         df["seed"] = t
-        df["order"] = range(1,p+1)
+        df["order"] = list(range(1,p+1))
 
         df.to_csv(filename, index=False)
     else:
         df = pd.read_csv(filename)
         n_chordal_est[t,1:] = df["n_chordal_est"].values
 
-    chordal_df = chordal_df.append(df)
+    chordal_df = chordal_df._append(df)
 
 
-#print(n_chordal_est)
+print(n_chordal_est)
 #print(chordal_df.groupby(["order"]).mean())
 #print(chordal_df.groupby(["order"]).std())
 frac_undirected_chordal_est = np.divide(n_chordal_est, n_undirected_graphs)
@@ -76,9 +76,9 @@ n_chordal_est_stds = n_chordal_est.std(axis=0)
 
 
 # Plot of the true, estimated, and asymptotic numbers.
-plt.semilogy(range(1, p+1), n_chordal_est_means[1:p+1], '-*', label="SMC", alpha=0.4)
-plt.semilogy(range(1, p+1), sn[1:p+1], '-.', label="Asymptotic")
-plt.semilogy(range(1, min(14, p+1)), n_chordal_true[1: min(14, p+1)], '-+', label="Exact")
+plt.semilogy(list(range(1, p+1)), n_chordal_est_means[1:p+1], '-*', label="SMC", alpha=0.4)
+plt.semilogy(list(range(1, p+1)), sn[1:p+1], '-.', label="Asymptotic")
+plt.semilogy(list(range(1, min(14, p+1))), n_chordal_true[1: min(14, p+1)], '-+', label="Exact")
 plt.legend(shadow=False, fancybox=True)
 plt.xlabel("Number of vertices")
 plt.ylabel("Number of decomposable graphs")
@@ -99,17 +99,17 @@ table_chordal.append(frac_undirected_chordal_est_stds[:p+1])
 
 print("Number of chordal graphs")
 for row in range(1, p+1):
-    print str(row) + "\t&\t" + \
-          str('%.2E' % Decimal(table_chordal[2][row])) + "\t&\t" + \
+    print(str(row) + "\t&\t" + \
+          str('%.2E' % table_chordal[2][row]) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[3][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_chordal[4][row])) + " & $\\times 10^{}$\\\\\n"
+          str('%.2E' % Decimal(table_chordal[4][row])) + " & $\\times 10^{}$\\\\\n")
           #str('%.2E' % Decimal(table_chordal[1][row])) + "\t&\t" + \
 print("Fraction of undirected graphs that are chordal")
 for row in range(1, p+1):
-    print str(row) + "\t&\t" + \
+    print(str(row) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[5][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_chordal[6][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_chordal[7][row])) + " & $\\times 10^{}$\\\\\n"
+          str('%.2E' % Decimal(table_chordal[7][row])) + " & $\\times 10^{}$\\\\\n")
 
 
 print("Counting junction trees")
@@ -120,13 +120,13 @@ n_trees_true_padded = np.array(n_trees_true + [0]*(p-5))
 sd = seqdist.UniformJTDistribution(p) 
 n_trees_est = np.zeros((p+1) * T).reshape(T, (p+1))
 n_trees_df = pd.DataFrame(columns=["order", "n_trees_est", "seed"])
-for t in tqdm(range(T)):
+for t in tqdm(list(range(T))):
     filename = Path("n_trees_est_N={N}_p={p}_seed={seed}.csv".format(seed=t,N=N,p=p))
     if not filename.is_file():
         np.random.seed(t)
         df = pd.DataFrame(columns=["order", "n_trees_est", "seed"])
         n_trees_est[t,1:] = np.exp(smc.est_log_norm_consts(p, N, sd, 0.5, 0.5, 1, False))
-        df["order"] = range(1,p+1)
+        df["order"] = list(range(1,p+1))
         df["n_trees_est"] = n_trees_est[t, 1:]
         df["seed"] = t
         #print(t)
@@ -135,7 +135,7 @@ for t in tqdm(range(T)):
         df = pd.read_csv(filename)
         n_trees_est[t,1:] = df["n_trees_est"].values
 
-    n_trees_df = n_trees_df.append(df)
+    n_trees_df = n_trees_df._append(df)
 
 #print(n_trees_df.groupby(["order"]).mean())
 #print(n_trees_df.groupby(["order"]).std())
@@ -162,22 +162,22 @@ table_tree.append(frac_tree_graph_est_sterr[:p+1]) # 6
 
 print("Number of junction trees")
 for row in range(1, p+1):
-    print str(row) + "\t&\t" + \
-          str('%.2E' % Decimal(table_tree[1][row])) + "\t&\t" + \
+    print(str(row) + "\t&\t" + \
+          str('%.2E' % table_tree[1][row]) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[2][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[3][row])) + "\t&\t$\\times 10^{}$" + \
-          " \\\\\n" 
+          " \\\\\n") 
           #str('%.2E' % Decimal(table_tree[4][row])) + " \\\\\n"
 
 print("Number of junction trees per chordal graph")
 for row in range(1, p+1):
-    print str(row) + "\t&\t" + \
+    print(str(row) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[4][row])) + "\t&\t" + \
           str('%.2E' % Decimal(table_tree[5][row])) + "\t&\t" + \
-          str('%.2E' % Decimal(table_tree[6][row])) + " &$\\times 10^{}$\\\\\n"
+          str('%.2E' % Decimal(table_tree[6][row])) + " &$\\times 10^{}$\\\\\n")
 
 plt.clf()
-plt.semilogy(range(1,p+1), frac_tree_graph_est_means[1:], ".-")
+plt.semilogy(list(range(1,p+1)), frac_tree_graph_est_means[1:], ".-")
 plt.xlabel("Number of vertices")
 plt.ylabel("Junction trees per decomposable graph")
 # plt.savefig("tree_graph_frac.eps",format="eps")

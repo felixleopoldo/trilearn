@@ -166,7 +166,7 @@ def n_junction_trees(p):
     for g in graphs:
         seps = dlib.separators(g)
         jt = dlib.junction_tree(g)
-        num += int(np.exp(log_n_junction_trees(jt, seps)))
+        num += int(round(np.exp(log_n_junction_trees(jt, seps))))
     return num
 
 

@@ -54,7 +54,7 @@ def approximate(N, alpha, beta, radius, seq_dist, debug=False, neig_set_cache={}
     log_w = np.matrix(np.zeros((N, p)))
     new_trees = [None for _ in range(N)]
     old_trees = [None for _ in range(N)]
-    ind_perms = np.matrix(np.zeros((N, p)), dtype=np.object)
+    ind_perms = np.matrix(np.zeros((N, p)), dtype=object)
     total = set(range(p))
 
     for n in range(p):

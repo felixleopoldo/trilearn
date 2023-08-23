@@ -102,7 +102,6 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, nod
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    print(graph_trajectory)
     if output_filename is None:
         # This is the format that can be analyzed by trilearn. (Should be changed to Benchpress format in the future)
         filename1 = dir + "/" + str(graph_trajectory) +"_"+ date + ".json"
