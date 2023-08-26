@@ -103,7 +103,6 @@ class JunctionTree(nx.Graph):
             >>> g.edges
             EdgeView([(0, 2), (1, 2)])           
         """
-
         G = nx.Graph()
         for c in self.nodes():
             for n1 in set(c):

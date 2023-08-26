@@ -74,7 +74,7 @@ def graph_to_tuple(graph):
 
     """
     p = graph.order()
-    mat = np.array(nx.to_numpy_matrix(graph), dtype=int).reshape(p*p)
+    mat = nx.to_numpy_array(graph, dtype=int).reshape(p*p)    
     return tuple(mat)
 
 

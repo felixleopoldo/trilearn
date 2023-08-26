@@ -37,7 +37,8 @@ class GraphDistribution(object):
         p = graphprobs[0][0].order()
         heatmap = np.matrix(np.zeros(p*p).reshape(p, p))
         for graph, prob in graphprobs:
-            heatmap += nx.to_numpy_matrix(graph) * prob
+            #heatmap += nx.to_numpy_matrix(graph) * prob
+            heatmap += nx.to_numpy_array(graph) * prob
         return heatmap
 
     def from_json(self, js_distribution):

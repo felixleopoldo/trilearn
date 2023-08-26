@@ -133,8 +133,10 @@ class Trajectory:
                             "added" : [list_to_string([])],
                             "removed" : [list_to_string(added)],
                             "score" : [0]})
-
-        df = df.append(df2)
+        print(df)
+        print(df2)
+        #df = df.append(df2)
+        df = pd.concat([df, df2], ignore_index=False)
 
         added = self.trajectory[0].edges()
         removed = []
@@ -143,7 +145,8 @@ class Trajectory:
                             "added" : [list_to_string(added)],
                             "removed" : [list_to_string([])],
                             "score" : [ self.log_likelihood()[0]]})
-        df = df.append(df2)
+        #df = df.append(df2)
+        df = pd.concat([df, df2], ignore_index=False)
 
         for i in range(1, len(self.trajectory[1:-1])):
             g_cur = self.trajectory[i]
@@ -157,8 +160,8 @@ class Trajectory:
                                     "added" : [list_to_string(added)],
                                     "removed" : [list_to_string(removed)],
                                     "score" : [self.log_likelihood()[i]]})
-                df = df.append(df2)
-
+                #df = df.append(df2)
+                df = pd.concat([df, df2], ignore_index=False)
         return df
 
     def write_adjvec_trajectory(self, filename):
