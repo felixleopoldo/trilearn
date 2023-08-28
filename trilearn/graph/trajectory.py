@@ -133,34 +133,32 @@ class Trajectory:
                             "added" : [list_to_string([])],
                             "removed" : [list_to_string(added)],
                             "score" : [0]})
-        print(df)
-        print(df2)
-        #df = df.append(df2)
+
         df = pd.concat([df, df2], ignore_index=False)
 
-        added = self.trajectory[0].edges()
+        added = list(self.trajectory[0].edges)
         removed = []
 
         df2 = pd.DataFrame({"index": [0],
                             "added" : [list_to_string(added)],
                             "removed" : [list_to_string([])],
                             "score" : [ self.log_likelihood()[0]]})
-        #df = df.append(df2)
+    
         df = pd.concat([df, df2], ignore_index=False)
 
         for i in range(1, len(self.trajectory[1:-1])):
             g_cur = self.trajectory[i]
             g_prev = self.trajectory[i-1]
-
             if glib.hash_graph(g_cur) != glib.hash_graph(g_prev):
-                added = list(set(g_cur.edges()) - set(g_prev.edges()))
-                removed = list(set(g_prev.edges()) - set(g_cur.edges()))
+
+                added = list(set(g_cur.edges) - set(g_prev.edges))
+                removed = list(set(g_prev.edges) - set(g_cur.edges))
             
                 df2 = pd.DataFrame({"index": [i],
                                     "added" : [list_to_string(added)],
                                     "removed" : [list_to_string(removed)],
                                     "score" : [self.log_likelihood()[i]]})
-                #df = df.append(df2)
+                
                 df = pd.concat([df, df2], ignore_index=False)
         return df
 
