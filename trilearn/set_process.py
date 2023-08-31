@@ -9,7 +9,7 @@ def backward_perm_traj_sample(p, radius):
     """
     maxradius = radius >= p
     ind_perms = [None for i in range(p)]
-    ind_perms[p-1] = range(p)
+    ind_perms[p-1] = list(range(p))
     n = p-2
     ind_perms[p-1]
     while n >= 0:

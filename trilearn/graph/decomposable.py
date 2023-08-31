@@ -307,6 +307,6 @@ def sample_random_AR_graph(n_dim, max_bandwidth):
             adjmat[i, i + j + 1] = 1
             adjmat[i + j + 1, i] = 1
 
-    graph = nx.from_numpy_matrix(adjmat)
+    graph = nx.from_numpy_array(adjmat)
 
     return graph

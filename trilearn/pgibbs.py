@@ -262,7 +262,6 @@ def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, 
 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
     levels = np.array([list(range(l)) for l in n_levels])
-
     sd = seqdist.LogLinearJTPosterior()
     sd.init_model(dataframe.values, pseudo_obs, levels, {})
     return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd, reset_cache=reset_cache)
