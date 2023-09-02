@@ -198,10 +198,11 @@ class LogLinearJTPosterior(SequentialJTDistribution):
                                             self.counts, self.data, self.levels, self.cache_complete_set_prob)
         new = loglin.log_likelihood_partial(new_cliques, new_separators, self.no_levels, self.cell_alpha,
                                             self.counts, self.data, self.levels, self.cache_complete_set_prob)
+
         return new - old
 
     def __str__(self):
-        return "loglin_posterior_n_"+str(self.data.shape[1])+"_p_"+str(self.p)+"_pseudo_obs_"+str(self.cell_alpha)
+        return "loglin_posterior_n_"+str(self.data.shape[0])+"_p_"+str(self.p)+"_pseudo_obs_"+str(self.cell_alpha)
 
 
 class GGMJTPosterior(SequentialJTDistribution):

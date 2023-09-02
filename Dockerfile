@@ -1,7 +1,6 @@
-FROM onceltuca/pygraphviz
+FROM python:3.11.5
 
-RUN pip install pyrsistent==0.16.0
-RUN pip install tabulate
-RUN pip install trilearn==1.25
-
+RUN apt update -y
+RUN apt install -y graphviz libgraphviz-dev
 RUN apt install time 
+RUN pip install trilearn==2.0.2

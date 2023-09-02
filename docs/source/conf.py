@@ -20,14 +20,14 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = u'Trilearn'
-copyright = u'2022, Felix L. Rios'
+project = u'trilearn'
+copyright = u'2023, Felix L. Rios'
 author = u'Felix L. Rios'
 
 # The short X.Y version
-version = u''
+version = '2.0.1'
 # The full version, including alpha/beta/rc tags
-release = u'1.23'
+release = '2.0.1'
 
 
 # -- General configuration ---------------------------------------------------

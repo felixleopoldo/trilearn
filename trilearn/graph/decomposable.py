@@ -273,7 +273,7 @@ def gen_AR_graph(n_dim, width=2):
     for i in range(1, width+1):
         m += np.eye(n_dim, k=i,dtype=int)
         m += np.eye(n_dim, k=-i,dtype=int)
-    graph = nx.from_numpy_matrix(m)
+    graph = nx.from_numpy_array(m)
 
     return graph
 
@@ -307,6 +307,6 @@ def sample_random_AR_graph(n_dim, max_bandwidth):
             adjmat[i, i + j + 1] = 1
             adjmat[i + j + 1, i] = 1
 
-    graph = nx.from_numpy_matrix(adjmat)
+    graph = nx.from_numpy_array(adjmat)
 
     return graph

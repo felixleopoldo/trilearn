@@ -74,7 +74,7 @@ def graph_to_tuple(graph):
 
     """
     p = graph.order()
-    mat = np.array(nx.to_numpy_matrix(graph), dtype=int).reshape(p*p)
+    mat = nx.to_numpy_array(graph, dtype=int, nodelist=range(p)).reshape(p*p)    
     return tuple(mat)
 
 
@@ -90,10 +90,9 @@ def tuple_to_graph(vecmat):
     """
     p = int(np.sqrt(len(vecmat)))
 
-    mat = np.array(vecmat).reshape(p, p)
+    mat = np.array(vecmat).reshape(p, p)    
     mat += mat.T
-    mat = np.matrix(mat)
-    return nx.from_numpy_matrix(mat)
+    return nx.from_numpy_array(mat)
 
 
 def hash_graph(graph):

@@ -23,7 +23,7 @@ def main(data_filename, n_particles, alpha, beta, radius, output_directory, seed
     cache = {}
     radius = None
     if radius is None:
-        radius = [p]
+        radius = p
     else:
         radius = radius
 
@@ -35,13 +35,13 @@ def main(data_filename, n_particles, alpha, beta, radius, output_directory, seed
 
     graphs_filename = output_directory +"/"+ filename_base+'_smc_N_'+str(n_particles)+'_alpha_'+str(alpha)+'_beta_'+str(beta)+'.txt'
     with open(graphs_filename, 'w') as outfile:
-        json.dump(js_graphs, outfile)
+        json.dump(js_graphs, outfile, default=int)
     weights_filename = output_directory +"/"+ filename_base+'_smc_N_'+str(n_particles)+'_alpha_'+str(alpha)+'_beta_'+str(beta)+'_weights.txt'
     np.savetxt(weights_filename, w, delimiter=',')
 
-    print "wrote"
-    print graphs_filename
-    print weights_filename
+    print("wrote")
+    print(graphs_filename)
+    print(weights_filename)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Sequential Monte Carlo "

@@ -9,7 +9,7 @@ def backward_perm_traj_sample(p, radius):
     """
     maxradius = radius >= p
     ind_perms = [None for i in range(p)]
-    ind_perms[p-1] = range(p)
+    ind_perms[p-1] = list(range(p))
     n = p-2
     ind_perms[p-1]
     while n >= 0:
@@ -70,6 +70,8 @@ def gen_order_neigh(from_order, radius, total_set):
     Returns:
         numpy array
     """
+    
+    
     neigs = order_neigh_set(from_order, radius, total_set)
     new = aux.random_element_from_coll(neigs)
     return from_order + [new]

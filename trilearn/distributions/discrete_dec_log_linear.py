@@ -57,7 +57,8 @@ def log_likelihood_partial(cliques, separators, no_levels, cell_alpha, counts, d
                                     i not in s])
         alpha = cell_alpha * no_cells_outside / tot_no_cells
         seps_constants += nu * ll_complete_set_ratio(s, alpha, counts, data, levels, cache)
-
+    #print("cliques: " + str(cliques_constants))
+    #print("seps: " + str(seps_constants))
     return cliques_constants - seps_constants
 
 
@@ -141,7 +142,9 @@ def hyperconsistent_cliques(clique1, clique1_dist, clique2,
         clique2 (set): A clique
         levels (np.array of lists): levels for all nodes in the full graph
     """
-
+    import pp
+    
+    #pp(clique1_dist)
     sep_list = sorted(list(clique1 & clique2))  # TODO: Bug, does not work if sorting this for some reason
     clique1_list = sorted(list(clique1))
     clique2_list = sorted(list(clique2))
@@ -179,16 +182,16 @@ def hyperconsistent_cliques(clique1, clique1_dist, clique2,
 
         # Calculate marginal distribution for the spe setting sepcells in clique1
         # this should then be the same in clique2.
-        sep_marg = np.sum(clique1_dist[indexing_clique1])
+        sep_marg = np.sum(clique1_dist[*indexing_clique1])
         sep_dist[sepcells] = sep_marg
 
         # Set the shape of clique2 dist
-        shape_clique2_dist = clique2_dist[indexing_clique2].shape
+        shape_clique2_dist = clique2_dist[*indexing_clique2].shape
         alphas = [constant_alpha / np.prod(shape_clique2_dist)] * np.prod(shape_clique2_dist)
         # alphas = [constant_alpha] * np.prod(shape)  # TODO
         # Generate distribution of clique1 for the sep setting sepcell
         d = np.random.dirichlet(alphas).reshape(shape_clique2_dist)
-        clique2_dist[indexing_clique2] = d * sep_marg
+        clique2_dist[*indexing_clique2] = d * sep_marg
     return (clique2_dist, sep_dist)
     # return clique2_dist
 
@@ -305,7 +308,7 @@ def sample(table, n=1):
             dist = [None] * table.shape[i]
             for level in range(table.shape[i]):
                 index = x + [level] + [Ellipsis]
-                dist[level] = np.sum(table[index])
+                dist[level] = np.sum(table[*index])
             dist /= sum(dist)
             val_bin = np.random.multinomial(1, dist)
             val = list(val_bin).index(1)
@@ -319,9 +322,9 @@ def read_local_hyper_consistent_parameters_from_json_file(filename):
         json_parameters = json.load(data_file)
 
     no_levels = np.array(json_parameters["no_levels"])
-    levels = [range(l) for l in no_levels]
+    levels = [list(range(l)) for l in no_levels]
     parameters = {}
-    for clique_string, props in json_parameters.iteritems():
+    for clique_string, props in json_parameters.items():
         if clique_string == "no_levels":
             continue
         clique = frozenset(props["clique_nodes"])

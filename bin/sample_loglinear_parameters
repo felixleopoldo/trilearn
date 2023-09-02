@@ -29,14 +29,17 @@ def main(graph_filename, n_levels, pseudo_obs, output_directory, seed, **args):
 
     graph = json_graph.node_link_graph(json_G)
 
-    levels = np.array([range(l) for l in n_levels])
+    levels = np.array([list(range(l)) for l in n_levels])
 
     parameters = loglin.sample_hyper_consistent_parameters(graph, pseudo_obs,
                                                            levels)
 
     parameters_flattened = {}
     parameters_flattened["no_levels"] = n_levels
-    for key, val in parameters.iteritems():
+    for key, val in parameters.items():
+        if len(key) == 0:
+            # WARNING: Is this a bug? Added when transitioning to python3
+            continue
         props = {}
         props["parameters"] = list(val.reshape(np.prod(val.shape)))
         props["clique_nodes"] = list(key)
@@ -48,8 +51,8 @@ def main(graph_filename, n_levels, pseudo_obs, output_directory, seed, **args):
     with open(parameters_filename, 'w') as outfile:
         json.dump(parameters_flattened, outfile)
 
-    print "wrote"
-    print parameters_filename
+    print("wrote")
+    print(parameters_filename)
 
 
 if __name__ == '__main__':

@@ -26,25 +26,26 @@ def main(graph_filename, parameters_filename, data_samples, output_directory, **
 
     graph = json_graph.node_link_graph(json_G)
 
+    # read the paramets to dict
     parameters = loglin.read_local_hyper_consistent_parameters_from_json_file(param_filename)
 
-    with open(filename) as data_file:
+    # this seems to be just to get the cardinality of the levels
+    with open(param_filename) as data_file:
         json_parameters = json.load(data_file)
 
     no_levels = np.array(json_parameters["no_levels"])
-    levels = [range(l) for l in no_levels]
+    levels = [list(range(l)) for l in no_levels]
 
     table = loglin.locals_to_joint_prob_table(graph, parameters, levels)
     data = loglin.sample(table, data_samples)
 
-    print data.shape
     np.savetxt(output_directory+"/"+param_basename +
                "_n_"+str(data_samples)+".csv",
                data, delimiter=',', fmt="%i")
 
-    print "wrote"
-    print output_directory+"/"+param_basename +"_n_" + \
-        str(data_samples)+".csv"
+    print("wrote")
+    print(output_directory+"/"+param_basename +"_n_" + \
+        str(data_samples)+".csv")
 
 
 if __name__ == '__main__':
@@ -63,6 +64,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-n', '--data_samples',
+        type=int,
         required=True
     )
     parser.add_argument(

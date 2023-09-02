@@ -41,7 +41,7 @@ def sample_trajectory(smc_N, alpha, beta, radius, n_samples, seq_dist,
     neig_set_cache = {}
     (trees, log_w) = (None, None)
     prev_tree = None
-    for i in tqdm(range(n_samples), desc="Particle Gibbs samples"):
+    for i in tqdm(list(range(n_samples)), desc="Particle Gibbs samples"):
 
         if reset_cache is True:
             seq_dist.cache = {}
@@ -102,12 +102,11 @@ def trajectory_to_file(n_particles, n_samples, alpha, beta, radius, seqdist, nod
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    print(graph_trajectory)
     if output_filename is None:
         # This is the format that can be analyzed by trilearn. (Should be changed to Benchpress format in the future)
         filename1 = dir + "/" + str(graph_trajectory) +"_"+ date + ".json"
         graph_trajectory.write_file(filename=filename1)
-        print("wrote file: " + filename1)
+        print(("wrote file: " + filename1))
     else:
         # This is for the Benchpress format
         df = graph_trajectory.graph_diff_trajectory_df(node_labels)         
@@ -236,8 +235,8 @@ def sample_trajectories_ggm_parallel(dataframe, n_particles, n_samples, D=None, 
                             sd = seqdist.GGMJTPosterior()
                             sd.init_model(np.asmatrix(dataframe), D, delta, {})
 
-                            print("Starting: " + str((N, T, alpha, beta, rad,
-                                  str(sd), reset_cache, True)))
+                            print(("Starting: " + str((N, T, alpha, beta, rad,
+                                  str(sd), reset_cache, True))))
 
                             proc = Process(target=trajectory_to_queue,
                                            args=(N, T, alpha, beta, rad,
@@ -262,10 +261,9 @@ def sample_trajectory_loglin(dataframe, n_particles, n_samples, pseudo_obs=1.0, 
         radius = p
 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
-    levels = np.array([range(l) for l in n_levels])
-
+    levels = np.array([list(range(l)) for l in n_levels])
     sd = seqdist.LogLinearJTPosterior()
-    sd.init_model(dataframe.get_values(), pseudo_obs, levels, {})
+    sd.init_model(dataframe.values, pseudo_obs, levels, {})
     return sample_trajectory(n_particles, alpha, beta, radius, n_samples, sd, reset_cache=reset_cache)
 
 
@@ -296,7 +294,7 @@ def sample_trajectories_loglin_to_file(dataframe, n_particles, n_samples, pseudo
         radii = [p]
 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
-    levels = np.array([range(l) for l in n_levels])
+    levels = np.array([list(range(l)) for l in n_levels])
     node_labels = np.array(dataframe.columns.get_level_values(0))
 
     graph_trajectories = []
@@ -309,7 +307,7 @@ def sample_trajectories_loglin_to_file(dataframe, n_particles, n_samples, pseudo
                         for beta in betas:
                             for pseudo_obs in pseudo_observations:
                                 sd = seqdist.LogLinearJTPosterior()
-                                sd.init_model(dataframe.get_values(), pseudo_obs, levels, cache_complete_set_prob=cache)
+                                sd.init_model(dataframe.values, pseudo_obs, levels, cache_complete_set_prob=cache)
                                 graph_trajectory = trajectory_to_file(N, T, alpha, beta, rad, sd, node_labels,
                                                                       reset_cache=reset_cache, 
                                                                       output_filename=output_filename,
@@ -326,7 +324,7 @@ def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseud
         radii = [p]
 
     n_levels = np.array(dataframe.columns.get_level_values(1), dtype=int)
-    levels = np.array([range(l) for l in n_levels])
+    levels = np.array([list(range(l)) for l in n_levels])
     node_labels = np.array(dataframe.columns.get_level_values(0))
 
     queue = multiprocessing.Queue()
@@ -342,9 +340,9 @@ def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseud
                         for beta in betas:
                             for pseudo_obs in pseudo_observations:
                                 sd = seqdist.LogLinearJTPosterior()
-                                sd.init_model(dataframe.get_values(), pseudo_obs, levels, cache_complete_set_prob=cache)
-                                print("Starting: " + str((N, T, alpha, beta, rad,
-                                      str(sd), reset_cache, output_directory, True)))
+                                sd.init_model(dataframe.values, pseudo_obs, levels, cache_complete_set_prob=cache)
+                                print(("Starting: " + str((N, T, alpha, beta, rad,
+                                      str(sd), reset_cache, output_directory, True))))
 
                                 proc = Process(target=trajectory_to_queue,
                                                args=(N, T, alpha, beta, rad,

@@ -13,8 +13,9 @@ if sys.argv[-1] == 'publish':
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     readme = f.read()
 
+version = open('VERSION').read().strip()
+
 packages = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
-print("packages: {}".format(packages))
 
 package_data = {
 }
@@ -27,13 +28,13 @@ classifiers = [
         'Intended Audience :: Science/Research',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.11',
 ]
 
 setup(
     name='trilearn',
-    python_requires='<3.0',
-    version=1.25,
+    python_requires='>3.0',
+    version=version,
     description='Bayesian predictive classification and structure learning in decomposable graphical models using particle Gibbs.',
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -59,7 +60,7 @@ setup(
     author="Felix Rios",
     author_email='felix.leopoldo.rios@gmail.com',
     url='https://github.com/felixleopoldo/trilearn',
-    download_url = 'https://github.com/felixleopoldo/trilearn/archive/1.25'
+    download_url = 'https://github.com/felixleopoldo/trilearn/archive/'+version+
                    '.tar.gz',
     license='Apache 2.0',
     classifiers=classifiers,

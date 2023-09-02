@@ -14,7 +14,7 @@ import trilearn.distributions.g_intra_class as gic
 from trilearn.graph.decomposable import sample_random_AR_graph
 
 matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['text.latex.unicode'] = True
+#matplotlib.rcParams['text.latex.unicode'] = True
 matplotlib.rc('xtick', labelsize=8)
 matplotlib.rc('ytick', labelsize=8)
 
@@ -28,7 +28,7 @@ def main(n_dim, n_samples, correlation, variance, max_bandwidth,
     rho = correlation
 
     graph = sample_random_AR_graph(n_dim, max_bandwidth)
-    adjmat = nx.to_numpy_matrix(graph)
+    adjmat = nx.to_numpy_array(graph)
     graph_filename_json = directory+"/AR1-"+str(max_bandwidth)+"_p_"+str(n_dim)+".json"
 
     with open(graph_filename_json, 'w') as outfile:
@@ -43,7 +43,7 @@ def main(n_dim, n_samples, correlation, variance, max_bandwidth,
     glib.plot(graph, graph_filename_plot,
               layout="fdp")
 
-    graph_filename_adjmat_plot = directory+"/AR1-"+str(max_bandwidth)+"_p_"+str(n_dim)+"_adjmat.eps"
+    graph_filename_adjmat_plot = directory+"/AR1-"+str(max_bandwidth)+"_p_"+str(n_dim)+"_adjmat.png"
 
     plt.clf()
     mask = np.zeros_like(adjmat)
@@ -51,14 +51,14 @@ def main(n_dim, n_samples, correlation, variance, max_bandwidth,
     with sns.axes_style("white"):
         sns.heatmap(adjmat, mask=mask, annot=False,
                     cmap="Blues",
-                    xticklabels=range(1, n_dim+1),
-                    yticklabels=range(1, n_dim+1),
+                    xticklabels=list(range(1, n_dim+1)),
+                    yticklabels=list(range(1, n_dim+1)),
                     vmin=0.0, vmax=1.0, square=True,
                     cbar=False)
         plt.xticks(rotation=90)
         plt.yticks(rotation=0)
         plt.savefig(graph_filename_adjmat_plot,
-                    format="eps", bbox_inches='tight', dpi=300)
+                    format="png", bbox_inches='tight', dpi=300)
 
     c = gic.cov_matrix(graph, rho, s2)
     X = np.random.multivariate_normal(np.zeros(n_dim), c, n_samples)
@@ -74,29 +74,30 @@ def main(n_dim, n_samples, correlation, variance, max_bandwidth,
 
     precmat_filename_plot = directory+"/AR1-"+str(max_bandwidth)+"_p_"+str(n_dim) + \
                             "_sigma2_"+str(s2) + \
-                            "_rho_"+str(rho)+"_omega.eps"
+                            "_rho_"+str(rho)+"_omega.png"
     plt.clf()
     mask = np.zeros_like(c.I)
     mask[np.triu_indices_from(mask)] = True
     with sns.axes_style("white"):
         sns.heatmap(c.I, mask=mask, annot=False,
                     cmap="Blues",
-                    xticklabels=range(1, n_dim+1),
-                    yticklabels=range(1, n_dim+1),
-                    vmin=0.0, vmax=1.0, square=True,
+                    xticklabels=list(range(1, n_dim+1)),
+                    yticklabels=list(range(1, n_dim+1)),
+                    #vmin=-10.0, vmax=1.0, 
+                    square=True,
                     cbar=False)
         plt.xticks(rotation=90)
         plt.yticks(rotation=0)
         plt.savefig(precmat_filename_plot,
-                    format="eps", bbox_inches='tight', dpi=300)
+                    format="png", bbox_inches='tight', dpi=300)
 
-    print "wrote files"
-    print graph_filename_json + "\n" + \
+    print("wrote files")
+    print(graph_filename_json + "\n" + \
           graph_filename_plot + "\n" + \
           graph_filename_adjmat_plot + "\n" + \
           data_filename + "\n" +\
           precmat_filename + "\n" + \
-          precmat_filename_plot
+          precmat_filename_plot)
 
 
 if __name__ == '__main__':

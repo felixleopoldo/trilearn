@@ -41,7 +41,7 @@ def sample(tree, node):
         Ncp = possible_origins(tree, node)
 
         #for c, neigs in Ncp.iteritems():
-        for c, neigs in Ncp.items():
+        for c, neigs in list(Ncp.items()):
             # take origin depending on if it was connected to all
             # in a clique or not
             # this is used when replicating the structure
@@ -74,8 +74,8 @@ def sample(tree, node):
 
 def support_subtree_nodes(tree, node):
     Ncp = possible_origins(tree, node)
-    cps = Ncp.keys()
-    subtree_nodes = itertools.product(*Ncp.values())
+    cps = list(Ncp.keys())
+    subtree_nodes = itertools.product(*list(Ncp.values()))
 
     return cps, subtree_nodes
 
@@ -116,8 +116,8 @@ def sample_new(tree, node):
     else:
 
         Ncp = possible_origins(tree, node)
-        cp_list = Ncp.keys()  # [frozenset([1, 2]), ...
-        c_list = Ncp.values()  # [[frozenset([1, 2]), frozenset([2, 3])], [..], ]
+        cp_list = list(Ncp.keys())  # [frozenset([1, 2]), ...
+        c_list = list(Ncp.values())  # [[frozenset([1, 2]), frozenset([2, 3])], [..], ]
 
         subtree_nodes = itertools.product(*c_list)  # TODO: could be slow. Possible fix: replace sets by indices.
         random_neigh_inds = np.random.multinomial(1, np.ones(len(subtree_nodes)) / len(subtree_nodes))
@@ -157,8 +157,8 @@ def support(tree, node):
     else:
 
         Ncp = possible_origins(tree, node)
-        cp_list = Ncp.keys()  # [frozenset([1, 2]), ...
-        c_list = Ncp.values()  # [[frozenset([1, 2]), frozenset([2, 3])], [..], ]
+        cp_list = list(Ncp.keys())  # [frozenset([1, 2]), ...
+        c_list = list(Ncp.values())  # [[frozenset([1, 2]), frozenset([2, 3])], [..], ]
 
         subtree_nodes = itertools.product(*c_list)  # TODO: could be slow. Fix: replace sets by indices.
 
