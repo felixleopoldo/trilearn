@@ -60,7 +60,7 @@ setup(
     author="Felix Rios",
     author_email='felix.leopoldo.rios@gmail.com',
     url='https://github.com/felixleopoldo/trilearn',
-    download_url = 'https://github.com/felixleopoldo/trilearn/archive/'+version
+    download_url = 'https://github.com/felixleopoldo/trilearn/archive/'+version+
                    '.tar.gz',
     license='Apache 2.0',
     classifiers=classifiers,

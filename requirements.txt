@@ -1,10 +1,10 @@
-seaborn>=0.7.0
-pandas>=0.20.3
+seaborn>=0.12.2
+pandas>=2.0.0
 numpy>=1.13.0
-matplotlib>=2.0.0
+matplotlib>=3.0.0
 ipywidgets>=7.0.0
-scipy>=0.18.0
-networkx>=2.0
+scipy>=1.0.0
+networkx>=3.1
 scikit_learn>=0.18.0
 tqdm>=4.18.0
 pygraphviz>=1.2.0
