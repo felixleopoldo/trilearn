@@ -307,7 +307,7 @@ def sample_trajectories_loglin_to_file(dataframe, n_particles, n_samples, pseudo
                         for beta in betas:
                             for pseudo_obs in pseudo_observations:
                                 sd = seqdist.LogLinearJTPosterior()
-                                sd.init_model(dataframe.get_values(), pseudo_obs, levels, cache_complete_set_prob=cache)
+                                sd.init_model(dataframe.values, pseudo_obs, levels, cache_complete_set_prob=cache)
                                 graph_trajectory = trajectory_to_file(N, T, alpha, beta, rad, sd, node_labels,
                                                                       reset_cache=reset_cache, 
                                                                       output_filename=output_filename,
@@ -340,7 +340,7 @@ def sample_trajectories_loglin_parallel(dataframe, n_particles, n_samples, pseud
                         for beta in betas:
                             for pseudo_obs in pseudo_observations:
                                 sd = seqdist.LogLinearJTPosterior()
-                                sd.init_model(dataframe.get_values(), pseudo_obs, levels, cache_complete_set_prob=cache)
+                                sd.init_model(dataframe.values, pseudo_obs, levels, cache_complete_set_prob=cache)
                                 print(("Starting: " + str((N, T, alpha, beta, rad,
                                       str(sd), reset_cache, output_directory, True))))
 

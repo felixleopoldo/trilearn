@@ -70,6 +70,8 @@ def gen_order_neigh(from_order, radius, total_set):
     Returns:
         numpy array
     """
+    
+    
     neigs = order_neigh_set(from_order, radius, total_set)
     new = aux.random_element_from_coll(neigs)
     return from_order + [new]

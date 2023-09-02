@@ -116,7 +116,7 @@ def test_logmu_monte_carlo():
     for adjmatvec in itertools.product(*matspace):
         adjmat = np.matrix(adjmatvec).reshape(p, p)
         if np.diag(adjmat).sum() == 0:
-            g = nx.from_numpy_matrix(adjmat)
+            g = nx.from_numpy_array(adjmat)
             if nx.is_chordal(g):
                 if check_symmetric(adjmat):
                     # print libg.mu(g)
@@ -140,4 +140,4 @@ def test_logmu_monte_carlo():
         sum += len(val["jts"])
         assert np.abs(val["mu"] - len(val["jts"]) < 0.0000001)
 
-    print(sum)
+    #print(sum)

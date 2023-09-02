@@ -40,9 +40,9 @@ def main(graph_filename, output_directory, seed):
     np.savetxt(output_directory+"/G-invwish_G_" +
                basename + "_b_"+str(b)+"_D_I.txt",
                sigma, delimiter=',', fmt="%f")
-    print "Generated files:"
-    print output_directory+"/G-invwish_G_"+basename+"_b_"+str(b)+"_D_I.txt"
-    print output_directory+"/G-invwish_G_"+basename+"_b_"+str(b)+"_D_I.eps"
+    print("Generated files:")
+    print(output_directory+"/G-invwish_G_"+basename+"_b_"+str(b)+"_D_I.txt")
+    print(output_directory+"/G-invwish_G_"+basename+"_b_"+str(b)+"_D_I.eps")
 
 
 if __name__ == '__main__':
@@ -53,5 +53,4 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--seed', type=int, required=False, default=None)
     args = parser.parse_args()
 
-    args = parser.parse_args()
     main(**args.__dict__)

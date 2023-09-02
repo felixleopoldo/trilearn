@@ -14,3 +14,4 @@ env/
 testing_stuff.ipynb
 sandbox/
 *.csv
+*.bak
