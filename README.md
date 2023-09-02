@@ -16,7 +16,6 @@ given number of nodes.
 - Random generation of junction trees (the Christmas tree algorithm).
 
 ### Installation
-This package currently requires Python 2.7.
 If graphviz is not installed, you can install it from brew / aptitude / pacman for example
 ```
 $ brew install graphviz
