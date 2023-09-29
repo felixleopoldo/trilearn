@@ -208,7 +208,7 @@ def sample(order, alpha=0.5, beta=0.5):
     """
 
     if type(order) is int:
-        nodes = range(order)  # OBS. Python 2.7
+        nodes = list(range(order))
         random.shuffle(nodes)
         tree = libj.sample(nodes, alpha, beta)
         return jtlib.graph(tree)
