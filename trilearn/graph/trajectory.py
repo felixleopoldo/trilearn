@@ -149,11 +149,16 @@ class Trajectory:
         for i in range(1, len(self.trajectory[1:-1])):
             g_cur = self.trajectory[i]
             g_prev = self.trajectory[i-1]
-            if glib.hash_graph(g_cur) != glib.hash_graph(g_prev):
 
-                added = list(set(g_cur.edges) - set(g_prev.edges))
-                removed = list(set(g_prev.edges) - set(g_cur.edges))
-            
+            if glib.hash_graph(g_cur) != glib.hash_graph(g_prev):
+                
+                # To avoid duplicates like (1,2) and (2,1)
+                cur_edges = {frozenset(e) for e in g_cur.edges}
+                prev_edges = {frozenset(e) for e in g_prev.edges}
+
+                added = [tuple(e) for e in cur_edges - prev_edges]
+                removed = [tuple(e) for e in prev_edges - cur_edges]
+                
                 df2 = pd.DataFrame({"index": [i],
                                     "added" : [list_to_string(added)],
                                     "removed" : [list_to_string(removed)],
