@@ -93,8 +93,8 @@ $ count_chordal_graphs -p 15 -N 20000
 ## References
 * [J. Olsson, T. Pavlenko, and F. L. Rios. Bayesian learning of weakly structural Markov graph laws using sequential Monte Carlo methods. *Electron. J. Statist.*, 13(2):2865–2897, 2019.](https://projecteuclid.org/euclid.ejs/1567065622)
 * [J. Olsson, T. Pavlenko, F. L. Rios, Sequential sampling of junction trees for decomposable graphs,
- Statistics and Computing, (to appear) 2022](https://arxiv.org/abs/1806.00584)
-* [T. Pavlenko, F. L. Rios, Graphical posterior predictive classifier: Bayesian model averaging with particle Gibbs, ArXiv 2018](https://arxiv.org/abs/1707.06792)
+ *Statistics and Computing* 32, 80, 2022]( https://doi.org/10.1007/s11222-022-10113-2)
+* [T. Pavlenko, F. L. Rios, Graphical posterior predictive classifier: Bayesian model averaging with particle Gibbs, Theor. Probability and Math. Statist. 109: 81-99, 2023](https://www.ams.org/journals/tpms/2023-109-00/S0094-9000-2023-01198-0/)
 
 ## License
 
