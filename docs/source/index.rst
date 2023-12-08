@@ -6,11 +6,14 @@
 Welcome to trilearn's documentation!
 ====================================
 
-This is the documentation for trilearn.
+.. note::
+
+   This site is under development.
 
 .. toctree::
    :maxdepth: 4
-   :caption: Documentation
+   :hidden:
+   :caption: trilearn
 
    trilearn
 

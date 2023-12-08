@@ -1,4 +1,4 @@
-Trilearn
+trilearn
 ========
 
 .. toctree::

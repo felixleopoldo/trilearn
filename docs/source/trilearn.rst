@@ -1,5 +1,3 @@
-Trilearn package
-================
 
 Subpackages
 -----------
@@ -9,6 +7,13 @@ Subpackages
     trilearn.distributions
     trilearn.graph
 
+Distributions
+------------------------------------
+
+.. automodule:: trilearn.distributions
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 Auxiliary functions
@@ -35,13 +40,13 @@ P. Green & A. Thomas MH-sampler
     :undoc-members:
     :show-inheritance:
 
-Node-drive MH-sampler
-------------------------------
+.. Node-drive MH-sampler
+.. ------------------------------
 
-.. automodule:: trilearn.mh_nodedriven
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. .. automodule:: trilearn.mh_nodedriven
+..     :members:
+..     :undoc-members:
+..     :show-inheritance:
 
 Particle Gibbs
 ----------------------
