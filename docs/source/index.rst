@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Trilearn's documentation!
+Welcome to trilearn's documentation!
 ====================================
 
-This is the documentation for Trilearn.
+This is the documentation for trilearn.
 
 .. toctree::
    :maxdepth: 4
