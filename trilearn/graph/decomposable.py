@@ -98,7 +98,7 @@ def all_dec_graphs(p):
     for val in itertools.product(*([[0, 1]] * p**2)):
         mat = np.array(val).reshape(p, p)
         if np.all(mat == mat.T) and np.all(mat.diagonal() == np.zeros(p)):
-            graph = nx.from_numpy_matrix(mat)
+            graph = nx.from_numpy_array(mat)
             if nx.is_chordal(graph):
                 graphs.add(graph)
     return graphs
