@@ -23,7 +23,8 @@ def log_norm_constant(D, delta, cache={}):
     K = 0.0
     p = len(D)
     t = (delta + p - 1.0) / 2.0
-    K = np.log(2) * (p * (delta  + p - 1)/ 2.0)
+    K = - t * p * np.log(np.pi)
+
     if (t, p) not in cache:
         cache[(t, p)] = scp.multigammaln(t, p)
     K += cache[(t, p)]
