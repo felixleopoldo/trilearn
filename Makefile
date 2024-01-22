@@ -5,7 +5,7 @@ test:
 	nosetests tests
 
 distr:
-	rm -r dist build
+	rm -rf dist build
 	python setup.py bdist_wheel
 	twine upload dist/*
 
